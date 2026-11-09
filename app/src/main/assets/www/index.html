@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#c00d0d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Дневник</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f8f5ef; --card:#ffffff; --ink:#1b1b1b; --muted:#7a726a;
+    --line:#ece3d3; --accent:#c00d0d; --accent-soft:#fdefcc; --red:#e09200; --navy:#1b1b1b;
+    --gold:#f9b000; --grad1:#d01414; --grad2:#8c0808;
+    --shadow:0 2px 10px rgba(60,20,0,.08);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif}
+  body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);min-height:100vh}
+  .app{max-width:520px;margin:0 auto;padding:18px 16px 40px}
+  header{display:flex;align-items:center;gap:10px;margin:6px 0 18px;min-height:44px}
+  h1{font-family:'Montserrat',sans-serif;font-weight:800;font-size:24px;color:var(--navy);letter-spacing:-.2px;margin:0;flex:1;line-height:1.15}
+  .sub{color:var(--muted);font-size:14px;margin-top:2px;font-family:'Inter',sans-serif;font-weight:600}
+  .icon-btn{width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--card);
+    font-size:22px;color:var(--ink);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow);flex:none}
+  .icon-btn:active{transform:scale(.95)}
+  button{font-family:inherit}
+
+  /* Page 1: months */
+  .months{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .month{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 6px 10px;cursor:pointer;
+    box-shadow:var(--shadow);text-align:center;color:var(--ink)}
+  .month:active{transform:scale(.97)}
+  .month .name{font-family:'Montserrat',sans-serif;font-weight:600;font-size:16px;margin-bottom:6px}
+  .mini{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:8.5px;color:var(--muted);line-height:1.6}
+  .mini span.t{background:var(--accent);color:#fff;border-radius:50%}
+  .month.current{border-color:var(--accent);background:linear-gradient(#ffffff,#fff4d9)}
+  .month.current .name{color:var(--accent)}
+  .today-btn{margin:18px auto 0;display:block;background:var(--accent);color:#fff;border:0;border-radius:14px;
+    padding:13px 22px;font-weight:700;font-size:15px;cursor:pointer;box-shadow:var(--shadow)}
+
+  /* Page 2: weeks */
+  .wd{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:12px;font-weight:700;color:var(--muted);
+    padding:0 12px 8px}
+  .wd span:nth-child(n+6){color:var(--red)}
+  .weeks{display:flex;flex-direction:column;gap:10px}
+  .week{display:block;width:100%;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px 12px 12px;
+    cursor:pointer;box-shadow:var(--shadow);color:var(--ink);text-align:left}
+  .week:active{transform:scale(.985)}
+  .week .label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:6px}
+  .week .label b{color:var(--accent)}
+  .week .days{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:17px;font-weight:600}
+  .week .days span{padding:4px 0;border-radius:10px}
+  .week .days span.out{color:#c3ccd8}
+  .week .days span.t{background:var(--accent);color:#fff}
+  .week.current{border-color:var(--accent)}
+
+  /* Page 3: days */
+  .daylist{display:flex;flex-direction:column;gap:10px}
+  .day{display:flex;align-items:center;gap:14px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:12px 14px;cursor:pointer;box-shadow:var(--shadow);color:var(--ink);text-align:left}
+  .day:active{transform:scale(.985)}
+  .day .num{width:50px;height:50px;border-radius:14px;background:var(--accent-soft);display:grid;place-items:center;
+    font-family:'Montserrat',sans-serif;font-weight:700;font-size:22px;color:var(--accent);flex:none}
+  .day .info{flex:1}
+  .day .dn{font-weight:700;font-size:17px}
+  .day .dm{font-size:13px;color:var(--muted);margin-top:2px}
+  .day .arrow{color:var(--muted);font-size:20px}
+  .day.weekend .dn{color:var(--red)}
+  .day.today{border-color:var(--accent)}
+  .day.today .num{background:var(--accent);color:#fff}
+  .tag{font-size:11px;font-weight:700;background:var(--gold);color:#1b1b1b !important;color:#fff;border-radius:8px;padding:2px 7px;margin-left:6px;vertical-align:2px}
+
+  /* Plan pages */
+  .menu{display:flex;flex-direction:column;gap:12px}
+  .mbtn{display:flex;align-items:center;gap:14px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:16px;cursor:pointer;box-shadow:var(--shadow);color:var(--ink);text-align:left;font-size:18px;font-weight:700}
+  .mbtn:active{transform:scale(.985)}
+  .mbtn .ic{width:46px;height:46px;border-radius:14px;background:var(--accent-soft);display:grid;place-items:center;font-size:22px;flex:none}
+  .mbtn .t{flex:1}
+  .mbtn .s{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-top:2px}
+  .mbtn .arrow{color:var(--muted);font-size:20px}
+  .sys{margin:4px 2px 10px;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:700}
+  .grp{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;box-shadow:var(--shadow);margin-bottom:12px}
+  .grp.now{border-color:var(--accent);border-width:2px}
+  .grp h3{margin:0 0 8px;font-size:15px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .grp h3 small{font-weight:700;font-size:11px;background:var(--accent);color:#fff;border-radius:8px;padding:3px 8px;white-space:nowrap}
+  .grp ul{margin:0;padding-left:18px;line-height:1.55;font-size:15px}
+  .grp .note{font-size:13px;color:var(--muted);margin:2px 0 6px}
+  .pills{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+  .pills span{font-size:11px;font-weight:700;padding:3px 6px;border-radius:7px;background:#e9eef5;color:#9aa6b6}
+  .pills span.on{background:var(--accent-soft);color:var(--accent)}
+  .pills span.cur{background:var(--accent);color:#fff}
+  .empty{background:var(--card);border:1px dashed var(--line);border-radius:18px;padding:22px;text-align:center;color:var(--muted);line-height:1.5}
+  .seg{display:flex;background:#e1e8f1;border-radius:14px;padding:4px;margin-bottom:14px}
+  .seg button{flex:1;border:0;background:none;padding:9px;border-radius:11px;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer}
+  .seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+  .foot{font-size:12px;color:var(--muted);line-height:1.5;margin-top:16px}
+
+  .chk{display:flex;align-items:flex-start;gap:12px;width:100%;background:none;border:0;border-top:1px solid #edf1f6;padding:11px 2px;
+    text-align:left;font-size:15px;color:var(--ink);cursor:pointer;line-height:1.4}
+  .chk:first-of-type{border-top:0}
+  .chk .box{width:24px;height:24px;border-radius:8px;border:2px solid #b9c5d6;flex:none;display:grid;place-items:center;transition:.15s;margin-top:-1px}
+  .chk.done .box{background:#3f9a5c;border-color:#3f9a5c}
+  .chk.done .box::after{content:'';width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+  .chk.done .txt{color:var(--muted);text-decoration:line-through}
+  .grp h3 small.cnt{background:#e9eef5;color:var(--muted)}
+  .grp h3 small.cnt.full{background:#3f9a5c;color:#fff}
+  .export-btn{display:block;width:100%;margin-top:18px;background:var(--card);border:1.5px dashed var(--accent);color:var(--accent);
+    border-radius:16px;padding:14px;font-weight:700;font-size:15px;cursor:pointer}
+  .report-banner{display:block;width:100%;text-align:left;background:var(--accent);color:#fff;border:0;border-radius:18px;padding:14px 16px;
+    margin-bottom:14px;cursor:pointer;box-shadow:var(--shadow);font-size:16px}
+  .report-banner span{display:block;font-size:13px;opacity:.9;margin-top:3px}
+  .summ{margin-top:8px;display:flex;flex-direction:column;gap:5px}
+  .sl{font-size:12.5px;line-height:1.35;background:#faf4e8;border-radius:10px;padding:6px 9px}
+  .sl b{display:block;font-size:12px;color:var(--ink)}
+  .sl span{color:var(--muted)}
+  .sl span u{color:var(--ink);font-weight:700;text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underline-offset:2px}
+  .day{align-items:flex-start}
+  .day .arrow{align-self:center}
+  .chk small{display:inline-block;width:100%;font-size:11.5px;color:var(--accent);margin-top:2px;text-decoration:none}
+  .chk small.regdone{color:#2f8a4e;font-weight:700}
+  .chk.locked{opacity:.75}
+  .chk.locked .box{background:#9bb8a4;border-color:#9bb8a4}
+  .chk.done .txt small{text-decoration:none}
+  #splash{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at 50% 42%,#ffffff 0%,#fbf6ec 60%,#f3e8d2 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;transition:opacity .5s ease, visibility .5s}
+  #splash.hide{opacity:0;visibility:hidden}
+  #splash .stage{perspective:900px;width:280px;height:160px;display:grid;place-items:center}
+  #splash .spin{animation:spin 2s cubic-bezier(.45,.05,.3,1) infinite;transform-style:preserve-3d;display:grid;place-items:center}
+  #splash .spin img{max-width:260px;max-height:140px;object-fit:contain;filter:drop-shadow(0 10px 16px rgba(120,40,0,.18))}
+  #splash .spin .ph{width:110px;height:110px;border-radius:50%;background:conic-gradient(var(--gold) 0 50%,var(--accent) 50% 100%);
+    box-shadow:0 10px 24px rgba(120,40,0,.25)}
+  @keyframes spin{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
+  #splash .bar{width:150px;height:4px;border-radius:4px;background:rgba(192,13,13,.12);overflow:hidden}
+  #splash .bar i{display:block;height:100%;width:40%;background:linear-gradient(90deg,var(--gold),var(--accent));border-radius:4px;animation:load 1.1s ease-in-out infinite}
+  @keyframes load{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
+  .brand{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;background:linear-gradient(135deg,var(--grad1),var(--grad2));
+    border-bottom:4px solid var(--gold);border-radius:20px;padding:18px 12px 14px;margin-bottom:16px;box-shadow:0 6px 18px rgba(0,0,0,.15);color:#fff}
+  .blogo{height:76px;min-width:76px;max-width:240px;border-radius:16px;background:#fff;display:grid;place-items:center;overflow:hidden;padding:8px 14px}
+  .blogo img{max-width:100%;max-height:60px;object-fit:contain}
+  .blogo.icon{font-size:34px}
+  .btxt{font-family:'Montserrat',sans-serif;font-weight:800;font-size:22px;letter-spacing:.5px}
+  .gear{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:12px;border:0;background:rgba(255,255,255,.18);font-size:19px;cursor:pointer}
+  .wk-export{margin-top:16px}
+  .wk-export button{display:block;width:100%;border:0;border-radius:16px;padding:15px;font-weight:700;font-size:15px;cursor:pointer;
+    background:linear-gradient(135deg,var(--grad1),var(--grad2));color:#fff;box-shadow:var(--shadow)}
+  .wk-export .prog{background:var(--card);border:1px dashed var(--line);border-radius:16px;padding:12px 14px;font-size:13.5px;color:var(--muted)}
+  .wk-export .prog b{color:var(--ink)}
+  .wk-export .bar2{height:6px;border-radius:4px;background:var(--accent-soft);margin-top:8px;overflow:hidden}
+  .wk-export .bar2 i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--accent));border-radius:4px}
+  .wk-export .small{display:block;text-align:center;margin-top:8px;font-size:13px;color:var(--accent);background:none;box-shadow:none;padding:6px;font-weight:600}
+  #splash .face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:grid;place-items:center}
+  #splash .face.b{transform:rotateY(180deg)}
+  #bgLayer{position:fixed;inset:0;z-index:-1;background-size:cover;background-position:center;display:none}
+  #bgLayer::after{content:'';position:absolute;inset:0;background:var(--bg);opacity:var(--veil,.82)}
+  body.has-bg{background:transparent}
+  html{background:var(--bg)}
+  body.has-bg .month,body.has-bg .week,body.has-bg .day,body.has-bg .mbtn,body.has-bg .grp{background:rgba(255,255,255,.9);backdrop-filter:blur(2px)}
+  .range{width:100%;accent-color:var(--accent)}
+  #splash .sptitle{font-family:'Montserrat',sans-serif;font-weight:800;font-size:30px;color:#1b1b1b;letter-spacing:.5px;margin-top:-14px}
+  .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;
+    max-width:90vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .view{animation:in .22s ease}
+  @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div id="splash" aria-hidden="true">
+  <div class="stage"><div class="spin" id="spLogo"><div class="ph"></div></div></div>
+  <div class="sptitle">Ежедневник</div>
+  <div class="bar"><i></i></div>
+</div>
+<div id="bgLayer"></div>
+<div class="app" id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const MONTHS_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const WD_SHORT = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const WD_FULL = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
+
+const today = new Date(); today.setHours(0,0,0,0);
+const state = { year: today.getFullYear(), month: today.getMonth(), weekStart: null, day: null, sub: null, mode: null, allYear: false };
+const app = document.getElementById('app');
+
+const same = (a,b) => a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+const mondayOf = d => { const x = new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate() - ((x.getDay()+6)%7)); return x; };
+
+function weeksOfMonth(y,m){
+  const first = new Date(y,m,1), last = new Date(y,m+1,0);
+  const res = [];
+  for(let s = mondayOf(first); s <= last; s = addDays(s,7)) res.push(s);
+  return res;
+}
+function rangeText(s){
+  const e = addDays(s,6);
+  if(s.getMonth()===e.getMonth()) return `${s.getDate()}–${e.getDate()} ${MONTHS_GEN[e.getMonth()]}`;
+  return `${s.getDate()} ${MONTHS_GEN[s.getMonth()]} – ${e.getDate()} ${MONTHS_GEN[e.getMonth()]}`;
+}
+
+/* ---------- Страница 1: календарь (месяцы) ---------- */
+function renderYear(){
+  let html = `<div class="view">
+    <header>
+      <button class="icon-btn" onclick="changeYear(-1)" aria-label="Предыдущий год">‹</button>
+      <h1 style="text-align:center">${state.year}<div class="sub">Сегодня: ${today.getDate()} ${MONTHS_GEN[today.getMonth()]} ${today.getFullYear()}</div></h1>
+      <button class="icon-btn" onclick="changeYear(1)" aria-label="Следующий год">›</button>
+    </header>
+    <div class="months">`;
+  for(let m=0;m<12;m++){
+    const cur = state.year===today.getFullYear() && m===today.getMonth();
+    let mini = WD_SHORT.map(w=>`<span>${w[0]}</span>`).join('');
+    const offset = (new Date(state.year,m,1).getDay()+6)%7;
+    const days = new Date(state.year,m+1,0).getDate();
+    for(let i=0;i<offset;i++) mini += '<span></span>';
+    for(let d=1; d<=days; d++){
+      const t = same(new Date(state.year,m,d), today);
+      mini += `<span${t?' class="t"':''}>${d}</span>`;
+    }
+    html += `<button class="month${cur?' current':''}" onclick="openMonth(${m})">
+      <div class="name">${MONTHS[m]}</div><div class="mini">${mini}</div></button>`;
+  }
+  html += `</div>`;
+  if(today.getDate()<=7){
+    const pm = new Date(today.getFullYear(), today.getMonth()-1, 1);
+    html = html.replace('<div class="months">', `<button class="report-banner" onclick="exportMonth(${pm.getFullYear()},${pm.getMonth()})"><b>📊 ${MONTHS[pm.getMonth()]} закончился</b><span>Скачайте отчёт со всеми галочками в Excel</span></button><div class="months">`);
+  }
+  if(state.year!==today.getFullYear()) html += `<button class="today-btn" onclick="goToday()">Вернуться к ${today.getFullYear()} году</button>`;
+  html += `</div>`;
+  app.innerHTML = html;
+}
+
+/* ---------- Страница 2: недели месяца ---------- */
+function renderMonth(){
+  const {year:y, month:m} = state;
+  let html = `<div class="view">
+    <header>
+      <button class="icon-btn" onclick="history.back()" aria-label="Назад">←</button>
+      <h1>${MONTHS[m]}<div class="sub">${y} · выберите неделю</div></h1>
+    </header>
+    <div class="wd">${WD_SHORT.map(w=>`<span>${w}</span>`).join('')}</div>
+    <div class="weeks">`;
+  weeksOfMonth(y,m).forEach((s,i)=>{
+    let cells = '', isCur = false;
+    for(let k=0;k<7;k++){
+      const d = addDays(s,k);
+      const t = same(d,today); if(t) isCur = true;
+      const cls = [d.getMonth()!==m?'out':'', t?'t':''].join(' ').trim();
+      cells += `<span${cls?` class="${cls}"`:''}>${d.getDate()}</span>`;
+    }
+    html += `<button class="week${isCur?' current':''}" onclick="openWeek(${s.getTime()})">
+      <div class="label"><span>Неделя ${i+1}${isCur?' · <b>текущая</b>':''}</span><span>${rangeText(s)}</span></div>
+      <div class="days">${cells}</div></button>`;
+  });
+  html += `</div><button class="export-btn" onclick="exportMonth(${y},${m})">📊 Скачать отчёт за ${MONTHS[m].toLowerCase()} (Excel)</button></div>`;
+  app.innerHTML = html;
+}
+
+/* ---------- Страница 3: дни недели ---------- */
+function renderWeek(){
+  const s = new Date(state.weekStart);
+  let html = `<div class="view">
+    <header>
+      <button class="icon-btn" onclick="history.back()" aria-label="Назад">←</button>
+      <h1>${rangeText(s)}<div class="sub">${addDays(s,6).getFullYear()} · выберите день</div></h1>
+    </header>
+    <div class="daylist">`;
+  for(let k=0;k<7;k++){
+    const d = addDays(s,k), t = same(d,today);
+    html += `<button class="day${k>=5?' weekend':''}${t?' today':''}" onclick="openDay(${d.getTime()})">
+      <div class="num">${d.getDate()}</div>
+      <div class="info"><div class="dn">${WD_FULL[k]}${t?'<span class="tag">сегодня</span>':''}</div>
+      <div class="dm">${d.getDate()} ${MONTHS_GEN[d.getMonth()]} ${d.getFullYear()}</div>
+      ${daySummary(d)}</div>
+      <div class="arrow">›</div></button>`;
+  }
+  html += `</div>`;
+  let filled = 0;
+  for(let k=0;k<5;k++){ const d = addDays(s,k); if(checkSet(d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())).size) filled++; }
+  html += `<div class="wk-export">` + (filled===5
+    ? `<button onclick="exportWeek(${s.getTime()})">✅ Неделя заполнена — скачать Excel</button>`
+    : `<div class="prog">Заполнено <b>${filled} из 5</b> рабочих дней. Когда заполните все, появится кнопка скачивания отчёта.<div class="bar2"><i style="width:${filled*20}%"></i></div></div>
+       ${filled?`<button class="small" onclick="exportWeek(${s.getTime()})">Всё равно скачать Excel за неделю</button>`:''}`) + `</div></div>`;
+  app.innerHTML = html;
+}
+
+
+/* Краткая сводка дня на странице недели */
+function daySummary(d){
+  const k = d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+  const set = checkSet(k);
+  if(!set.size) return '';
+  const groups = [
+    {name:'Регламент', icon:'📋', pre:['reg']},
+    {name:'Заявки', icon:'📝', pre:['zay']},
+    {name:'Запланированные', icon:'📌', pre:['pn','on']}
+  ];
+  let out = '';
+  groups.forEach(g=>{
+    const items = [...set].filter(x=>g.pre.includes(x.split('|')[0]));
+    if(!items.length) return;
+    const bySys = {};
+    items.forEach(x=>{ const p = x.split('|'); const sys = p[1]==='video' ? 'Видео' : (REG[p[1]] ? REG[p[1]].title : p[1]);
+      (bySys[sys] = bySys[sys] || []).push(p[p.length-1].replace('Камера № ','кам. ')); });
+    const shown = Object.entries(bySys).map(([sys,list])=>`<u>${sys}</u>: ${list.slice(0,3).join(', ')}${list.length>3?` и ещё ${list.length-3}`:''}`).join('<br>');
+    const objs = items;
+    out += `<div class="sl"><b>${g.icon} ${g.name} · ${objs.length}</b><span>${shown}</span></div>`;
+  });
+  return `<div class="summ">${out}</div>`;
+}
+
+/* ---------- Навигация ---------- */
+function changeYear(n){ state.year += n; renderYear(); }
+function goToday(){ state.year = today.getFullYear(); renderYear(); }
+function openMonth(m){ state.month = m; location.hash = 'month'; }
+function openWeek(ts){ state.weekStart = ts; location.hash = 'week'; }
+function openDay(ts){ state.day = ts; location.hash = 'plan'; }
+function openMenu(mode){ state.mode = mode; location.hash = 'menu'; }
+function openNar(){ location.hash = 'nar'; }
+function openSub(key){ state.sub = key; state.allYear = false; location.hash = 'sub'; }
+
+/* ---------- Данные регламентов (графики ТО на 2025 г.) ---------- */
+const Q1 = [0,3,6,9], Q2 = [1,4,7,10], Q3 = [2,5,8,11], ALL = [0,1,2,3,4,5,6,7,8,9,10,11];
+const rng = (a,b) => Array.from({length:b-a+1},(_,i)=>a+i);
+const cams = nums => nums.map(n=>'Камера № '+n);
+const B = list => list.map(x=>'В-'+x);
+const HW_IN  = [25,26,28,29,30,31,32,33,34,41,42,53,...rng(75,98)];
+const HW_OUT = [...rng(1,24),27,...rng(35,40),...rng(43,56),...rng(63,74)];
+const HW_G1  = rng(57,62);
+const TP3 = ['14/1','14/3','15','20','11','17','2/2','2/1','25','22','21','28'].map(x=>'ТП-'+x);
+const REG = {
+  aps: { title:'АПС', icon:'🔥', sub:'Пожарная сигнализация · Болид', systems:[
+    { name:'АПС системы Болид', groups:[
+      { months:Q1, items:['АБК ЗЛ','ЗЛ-7000','Склад МЦ','Склад 806','ЗДУ-1','УЦК','АБК ГСО','Операторная ЛК-6у','Котельная ПВВС','АБК ПЧ','Склад ПЧ','АБК ОСВПТиПК','Склад ЗЛ','Мед. пункт','РПИ-завод'] },
+      { months:Q2, items:['АБК ПВВС','АКС','АБК ЛК-6у','АБК ТСЦ','ЗДУ-2','Склад ДИТ','КИПиА (22)','Прувер КИПиА','Склад 803','Склад 804','Склад 805','ЛМИС гараж','АБК БО'] },
+      { months:Q3, items:[...TP3,'КТП8','7ЩСУ2','БУТ','Операторная УВПМ','Висбрекинг','Пост 21','Центральная проходная','ПСГ','Склад электроцеха','Столовая','ЗДУ-3'] },
+      { months:ALL, items:['Склад 801','Склад 802','Склад 705','ТП-23','Газобаллонный','Конференц-зал'] }
+    ]}
+  ]},
+  aos: { title:'АОС', icon:'🛡️', sub:'Охранная сигнализация · Болид', systems:[
+    { name:'АОС системы Болид', groups:[
+      { months:Q1, items:['ЗДУ-1','ЗДУ-2','ЗДУ-3','ЗДУ-4'] },
+      { months:Q2, items:['ЗДУ-5','АБК БО','Установка 3500','Установка 3100','Охранный периметр БО','Охранный периметр ПСГ'] },
+      { months:Q3, items:['Охранный периметр территории ТОО «ПКОП»'] }
+    ]}
+  ]},
+  video: { title:'Видеонаблюдение', icon:'📹', sub:'Honeywell и Huawei', systems:[
+    { name:'Honeywell', groups:[
+      { months:Q1, note:'140 взрывозащ., 20 внутр.', items:B(['01','02','03','04','05']) },
+      { months:Q2, note:'102 взрывозащ., 49 внутр.', items:[...B(['06','07','08','09','10','80','81','82']),'ГПП',...B(['40','50'])] },
+      { months:Q3, note:'35 взрывозащ., 41 внутр.', items:['Изомеризация','ЦК-302',...B(['207','517','3050','3100','3500'])] }
+    ]},
+    { name:'Huawei', groups:[
+      { months:Q1, items:cams(HW_G1) },
+      { months:Q2, note:'Внутренние', items:cams(HW_IN) },
+      { months:Q3, note:'Наружные', items:cams(HW_OUT) }
+    ]}
+  ]},
+  ggs: { title:'ГГС', icon:'📢', sub:'Громкоговорящая связь', works:[
+      'Проверка работоспособности системы ГГС',
+      'Регламентная очистка от пыли процессоров, коммутаторов и пультов',
+      'Замена или восстановительный ремонт деталей, материалов, вышедших из строя',
+      'Настройка и коррекция (обновление) программного обеспечения системы ГГС',
+      'Документальное оформление выполненных работ (журнал ТО и ППР)'], systems:[
+    { name:'ГГС', groups:[
+      { months:Q1, items:B(['01','02','03','05','50']) },
+      { months:Q2, items:B(['06','07','700']) },
+      { months:Q3, items:B(['207','10','517','04']) }
+    ]}
+  ]},
+  skud: { title:'СКУД', icon:'🚪', sub:'Контроль доступа', systems:[] }
+};
+
+/* Заявки: раздел → подразделы → объекты */
+const ZAY = {
+  aps: [ { name:'АПС системы Болид', subs:[
+    { name:'АБК', icon:'🏢', items:['АБК ЗЛ','АБК ГСО','АБК ПЧ','АБК ОСВПТиПК','АБК ПВВС','АБК ЛК-6у','АБК ТСЦ','АБК БО'] },
+    { name:'Склады', icon:'📦', items:['Склад МЦ','Склад 806','Склад ПЧ','Склад ЗЛ','Склад ДИТ','Склад 801','Склад 802','Склад 803','Склад 804','Склад 805','Склад 705','Склад электроцеха'] },
+    { name:'ТП и КТП', icon:'⚡', items:[...TP3,'ТП-23','КТП8','7ЩСУ2'] },
+    { name:'ЗДУ', icon:'🏭', items:['ЗДУ-1','ЗДУ-2','ЗДУ-3'] },
+    { name:'Операторные и установки', icon:'🛠️', items:['Операторная ЛК-6у','Операторная УВПМ','Котельная ПВВС','Висбрекинг','ЗЛ-7000','БУТ','КИПиА (22)','Прувер КИПиА'] },
+    { name:'Прочие объекты', icon:'📍', items:['УЦК','Мед. пункт','РПИ-завод','АКС','ЛМИС гараж','Пост 21','Центральная проходная','ПСГ','Столовая','Газобаллонный','Конференц-зал'] }
+  ]}],
+  aos: [ { name:'АОС системы Болид', subs:[
+    { name:'ЗДУ', icon:'🏭', items:['ЗДУ-1','ЗДУ-2','ЗДУ-3','ЗДУ-4','ЗДУ-5'] },
+    { name:'Объекты и установки', icon:'🏢', items:['АБК БО','Установка 3500','Установка 3100'] },
+    { name:'Охранные периметры', icon:'🧱', items:['Охранный периметр БО','Охранный периметр ПСГ','Охранный периметр территории ТОО «ПКОП»'] }
+  ]}],
+  video: [
+    { name:'Honeywell', subs:[
+      { name:'Здания В-01 – В-05', icon:'📹', note:'140 взрывозащ., 20 внутр.', items:B(['01','02','03','04','05']) },
+      { name:'Здания В-06 – В-82, ГПП', icon:'📹', note:'102 взрывозащ., 49 внутр.', items:[...B(['06','07','08','09','10','80','81','82']),'ГПП',...B(['40','50'])] },
+      { name:'Изомеризация и установки', icon:'📹', note:'35 взрывозащ., 41 внутр.', items:['Изомеризация','ЦК-302',...B(['207','517','3050','3100','3500'])] }
+    ]},
+    { name:'Huawei', subs:[
+      { name:'Камеры № 57–62', icon:'🎥', items:cams(HW_G1) },
+      { name:'Внутренние камеры', icon:'🎥', items:cams(HW_IN) },
+      { name:'Наружные камеры', icon:'🎥', items:cams(HW_OUT) }
+    ]}
+  ],
+  skud: []
+};
+const M_SHORT = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+function dayTitle(){ const d = new Date(state.day); return `${d.getDate()} ${MONTHS_GEN[d.getMonth()]}`; }
+
+/* ---------- Галочки: сохраняются по дням ---------- */
+let DB = null, UID = null;
+/* Android-версия: данные хранятся в памяти телефона (localStorage приложения) */
+const dbReady = Promise.resolve();
+const CHECKS = {}, saveTimers = {};
+let KEYS = [];
+function dayKey(){ const d = new Date(state.day); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function checkSet(key){
+  const k = key || dayKey();
+  if(!CHECKS[k]){
+    let arr = []; try{ arr = JSON.parse(localStorage.getItem('chk-'+k) || '[]'); }catch(e){}
+    CHECKS[k] = new Set(arr); loadRemote(k);
+  }
+  return CHECKS[k];
+}
+async function loadRemote(k){
+  await dbReady; if(!DB) return;
+  try{
+    const snap = await DB.collection('data/users/'+UID).doc('day-'+k).get();
+    let data = snap && typeof snap.data === 'function' ? snap.data() : snap;
+    if(data && Array.isArray(data.done) && data.done.length){
+      data.done.forEach(x=>CHECKS[k].add(x));
+      const h = location.hash.slice(1); if((h==='week' && state.weekStart!==null) || (state.day && dayKey()===k && ['sub','zsub','menu','nar'].includes(h))){ { const y = window.scrollY; route(true); window.scrollTo(0,y); } }
+    }
+  }catch(e){}
+}
+function saveChecks(k){
+  const arr = [...CHECKS[k]];
+  try{ localStorage.setItem('chk-'+k, JSON.stringify(arr)); }catch(e){}
+  clearTimeout(saveTimers[k]);
+  saveTimers[k] = setTimeout(async()=>{
+    await dbReady; if(!DB) return;
+    try{ await DB.collection('data/users/'+UID).doc('day-'+k).set({done:[...CHECKS[k]]}); }catch(e){}
+  }, 600);
+}
+function toggle(i){
+  const set = checkSet(), key = KEYS[i];
+  if(set.has(key)) set.delete(key); else set.add(key);
+  saveChecks(dayKey());
+  const el = document.querySelector(`[data-i="${i}"]`);
+  if(el) el.classList.toggle('done', set.has(key));
+  updateCounters();
+}
+function updateCounters(){
+  const set = checkSet();
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const ids = el.dataset.count.split(',').filter(Boolean).map(Number);
+    const n = ids.filter(i=>set.has(KEYS[i]) || (KEYS[i].startsWith('reg|') && otherDays(KEYS[i]).length)).length;
+    el.textContent = `${n} из ${ids.length}`;
+    el.classList.toggle('full', ids.length>0 && n===ids.length);
+  });
+}
+/* Дни этого месяца (кроме выбранного), когда объект уже отмечен */
+const MONTH_LOADED = {};
+function otherDays(key){
+  const d = new Date(state.day), y = d.getFullYear(), m = d.getMonth(), cur = d.getDate(), out = [];
+  for(let n=1; n<=new Date(y,m+1,0).getDate(); n++){
+    if(n===cur) continue;
+    const set = CHECKS[`${y}-${pad2(m+1)}-${pad2(n)}`];
+    if(set && set.has(key)) out.push(n);
+  }
+  return out;
+}
+function ensureMonthLoaded(){
+  const d = new Date(state.day), y = d.getFullYear(), m = d.getMonth(), mk = y+'-'+m;
+  if(MONTH_LOADED[mk]) return;
+  MONTH_LOADED[mk] = 'loading';
+  loadMonthChecks(y,m).then(()=>{
+    MONTH_LOADED[mk] = true;
+    const h = location.hash.slice(1);
+    if(['sub','zsub'].includes(h)){ const sy = window.scrollY; route(true); window.scrollTo(0,sy); }
+  });
+}
+function itemRow(key, text){
+  const i = KEYS.push(key) - 1;
+  const mine = checkSet().has(key), other = otherDays(key);
+  const isReg = key.startsWith('reg|');
+  const dates = other.map(n=>`${n} ${MONTHS_GEN[new Date(state.day).getMonth()]}`).join(', ');
+  if(isReg && other.length && !mine){
+    return `<button class="chk done locked" data-i="${i}" onclick="toast('Уже выполнено ${dates}. Чтобы отменить, откройте тот день')"><span class="box"></span><span class="txt">${text}<small>выполнено ${dates}</small></span></button>`;
+  }
+  let hint = other.length ? `<small>${isReg?'также отмечено':'уже было'}: ${dates}</small>` : '';
+  const kp = key.split('|');
+  if((kp[0]==='pn' || kp[0]==='on') && kp.length===4){
+    const rk = 'reg|' + kp.slice(1).join('|'), d = new Date(state.day), y = d.getFullYear(), m = d.getMonth(), rd = [];
+    for(let n=1; n<=new Date(y,m+1,0).getDate(); n++){ const set = CHECKS[`${y}-${pad2(m+1)}-${pad2(n)}`]; if(set && set.has(rk)) rd.push(n); }
+    if(rd.length) hint += `<small class="regdone">✅ Проведён регламент: ${rd.map(n=>n+' '+MONTHS_GEN[m]).join(', ')}</small>`;
+  }
+  return `<button class="chk${mine?' done':''}" data-i="${i}" onclick="toggle(${i})"><span class="box"></span><span class="txt">${text}${hint}</span></button>`;
+}
+function listBlock(prefix, items){
+  const start = KEYS.length;
+  const rows = items.map(x=>itemRow(prefix+x, x)).join('');
+  const ids = []; for(let i=start;i<KEYS.length;i++) ids.push(i);
+  return {rows, ids};
+}
+
+/* ---------- Страница 4: План ---------- */
+function renderPlan(){
+  const d = new Date(state.day), weekend = (d.getDay()+6)%7 >= 5;
+  app.innerHTML = `<div class="view">
+    <header>
+      <button class="icon-btn" onclick="history.back()" aria-label="Назад">←</button>
+      <h1>План<div class="sub">${WD_FULL[(d.getDay()+6)%7]}, ${dayTitle()} ${d.getFullYear()}</div></h1>
+    </header>
+    <div class="menu">
+      ${weekend?'':`<button class="mbtn" onclick="openMenu('reg')"><span class="ic">📋</span><span class="t">Регламент<span class="s">ТО и ремонт систем по графику</span></span><span class="arrow">›</span></button>`}
+      <button class="mbtn" onclick="openMenu('zay')"><span class="ic">📝</span><span class="t">Заявки<span class="s">Все объекты по системам</span></span><span class="arrow">›</span></button>
+      ${weekend?'':`<button class="mbtn" onclick="openNar()"><span class="ic">📌</span><span class="t">Запланированные<span class="s">Простые и опасные наряды</span></span><span class="arrow">›</span></button>`}
+    </div>
+    ${weekend?'<div class="foot">Выходной день — доступны только заявки.</div>':''}</div>`;
+}
+
+
+/* ---------- Запланированные: выбор вида наряда ---------- */
+function renderNar(){
+  const set = checkSet();
+  const cnt = mode => [...set].filter(k=>k.startsWith(mode+'|')).length;
+  const btn = (mode, icon, title, hint) => {
+    const n = cnt(mode);
+    return `<button class="mbtn" onclick="openMenu('${mode}')"><span class="ic">${icon}</span><span class="t">${title}<span class="s">${hint}${n?` · ✓ ${n}`:''}</span></span><span class="arrow">›</span></button>`;
+  };
+  app.innerHTML = `<div class="view">
+    <header>
+      <button class="icon-btn" onclick="history.back()" aria-label="Назад">←</button>
+      <h1>Запланированные<div class="sub">${dayTitle()}</div></h1>
+    </header>
+    <div class="menu">
+      ${btn('pn','🟢','Простые наряды','Объекты по графику месяца')}
+      ${btn('on','⚠️','Опасные наряды','Объекты по графику месяца')}
+    </div></div>`;
+}
+
+/* ---------- Страница 5: список подразделов (Регламент / Заявки) ---------- */
+const MENU = { reg:{ title:'Регламент', keys:['aps','aos','video','ggs','skud'] },
+               pn:{ title:'Простые наряды', parent:'Запланированные', keys:['aps','aos','video','ggs','skud'] },
+               on:{ title:'Опасные наряды', parent:'Запланированные', keys:['aps','aos','video','ggs','skud'] },
+               zay:{ title:'Заявки',    keys:['aps','aos','video','skud'] } };
+function allItems(r, sys){
+  const seen = new Set(), out = [];
+  sys.groups.forEach(g=>g.items.forEach(x=>{ if(!seen.has(x)){ seen.add(x); out.push(x); } }));
+  return out;
+}
+function renderMenu(){
+  const mode = state.mode, cfg = MENU[mode];
+  const m = new Date(state.day).getMonth();
+  const set = checkSet();
+  let html = `<div class="view">
+    <header>
+      <button class="icon-btn" onclick="history.back()" aria-label="Назад">←</button>
+      <h1>${cfg.title}<div class="sub">${MONTHS[m]} · ${dayTitle()}</div></h1>
+    </header><div class="menu">`;
+  for(const key of cfg.keys){
+    const r = REG[key];
+    let s = r.sub;
+    if(mode==='zay' && ZAY[key].length){
+      let total = 0, done = 0;
+      ZAY[key].forEach(sec=>sec.subs.forEach(sb=>sb.items.forEach(x=>{ total++; if(set.has(zkey(key,sec,sb,x))) done++; })));
+      s += ` · объектов: ${total}`;
+      if(done) s += ` · ✓ ${done}`;
+    } else if(mode!=='zay' && r.systems.length){
+      let total = 0, done = 0;
+      r.systems.forEach(sys=>{
+        const items = sys.groups.filter(g=>g.months.includes(m)).flatMap(g=>g.items);
+        items.forEach(x=>{ total++; if(set.has(`${mode}|${key}|${sys.name}|${x}`)) done++; });
+      });
+      s += ` · в этом месяце: ${total}`;
+      if(done) s += ` · ✓ ${done}`;
+    }
+    html += `<button class="mbtn" onclick="openSub('${key}')"><span class="ic">${r.icon}</span><span class="t">${r.title}<span class="s">${s}</span></span><span class="arrow">›</span></button>`;
+  }
+  html += `</div></div>`;
+  app.innerHTML = html;
+}
+
+/* ---------- Страница 6: подраздел ---------- */
+function setAllYear(v){ state.allYear = v; renderSub(); }
+function renderSub(){
+  ensureMonthLoaded();
+  KEYS = [];
+  const mode = state.mode, r = REG[state.sub];
+  const m = new Date(state.day).getMonth();
+  let html = `<div class="view">
+    <header>
+      <button class="icon-btn" onclick="history.back()" aria-label="Назад">←</button>
+      <h1>${r.title}<div class="sub">${MENU[mode].title} · ${dayTitle()}</div></h1>
+    </header>`;
+  if(!r.systems.length){
+    html += `<div class="empty">Для СКУД список объектов пока не добавлен.<br>Пришлите фото графика или список — я внесу объекты.</div></div>`;
+    app.innerHTML = html; return;
+  }
+  if(mode==='zay'){
+    const set = checkSet();
+    ZAY[state.sub].forEach((sec,si)=>{
+      html += `<div class="sys">${sec.name}</div><div class="menu" style="margin-bottom:16px">`;
+      sec.subs.forEach((sb,bi)=>{
+        const done = sb.items.filter(x=>set.has(zkey(state.sub,sec,sb,x))).length;
+        const full = done===sb.items.length;
+        html += `<button class="mbtn" onclick="openZSub(${si},${bi})"><span class="ic">${sb.icon}</span>
+          <span class="t">${sb.name}<span class="s">${sb.note?sb.note+' · ':''}${sb.items.length} шт.${done?` · ${full?'✅ все отмечены':'✓ '+done}`:''}</span></span><span class="arrow">›</span></button>`;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+    app.innerHTML = html; return;
+  }
+  if(mode==='reg') html += `<div class="seg"><button class="${state.allYear?'':'on'}" onclick="setAllYear(false)">${MONTHS[m]}</button>
+    <button class="${state.allYear?'on':''}" onclick="setAllYear(true)">Весь год</button></div>`;
+  else html += `<div class="note" style="color:var(--muted);font-size:13px;margin:-8px 2px 12px">Объекты по графику на ${MONTHS[m].toLowerCase()}</div>`;
+  r.systems.forEach(sys=>{
+    const groups = sys.groups.map((g,i)=>({...g,n:i+1})).filter(g=>(mode==='reg' && state.allYear) || g.months.includes(m));
+    if(r.systems.length>1) html += `<div class="sys">${sys.name}</div>`;
+    if(!groups.length){ html += `<div class="empty">В этом месяце по графику работ нет</div>`; return; }
+    groups.forEach(g=>{
+      const now = g.months.includes(m);
+      const b = listBlock(`${mode}|${state.sub}|${sys.name}|`, g.items);
+      html += `<div class="grp${now && state.allYear?' now':''}">
+        <h3><span>Группа ${g.n}${g.months.length===12?' · каждый месяц':''}</span><small class="cnt" data-count="${b.ids.join(',')}"></small></h3>
+        ${g.note?`<div class="note">${g.note}</div>`:''}
+        ${b.rows}
+        <div class="pills">${M_SHORT.map((s,i)=>`<span class="${i===m&&g.months.includes(i)?'cur':(g.months.includes(i)?'on':'')}">${s}</span>`).join('')}</div>
+      </div>`;
+    });
+  });
+  if(mode!=='reg'){
+  } else if(r.works){
+    html += `<div class="grp"><h3><span>Состав работ</span></h3><ul>${r.works.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
+  } else {
+    html += `<div class="foot">После проведения ППР заполняется запись в журнале «Регламентных работ» лицом, кто непосредственно проводил работы, ставится роспись руководителя объекта.${state.sub==='aps'?' Для АПС также составляется АКТ.':''}</div>`;
+  }
+  html += `</div>`;
+  app.innerHTML = html; updateCounters();
+}
+
+/* ---------- Страница 7: подраздел заявок (объекты с галочками) ---------- */
+function zkey(key, sec, sb, x, mode){ return `${mode||state.mode}|${key}|${sec.name}|${sb.name}|${x}`; }
+function openZSub(si, bi){ state.zs = [si, bi]; location.hash = 'zsub'; }
+function zAll(v){
+  const [si,bi] = state.zs, sec = ZAY[state.sub][si], sb = sec.subs[bi], set = checkSet();
+  sb.items.forEach(x=>{ const k = zkey(state.sub,sec,sb,x); if(v) set.add(k); else set.delete(k); });
+  saveChecks(dayKey()); const y = window.scrollY; renderZSub(); window.scrollTo(0,y);
+}
+function renderZSub(){
+  ensureMonthLoaded();
+  KEYS = [];
+  const [si,bi] = state.zs, sec = ZAY[state.sub][si], sb = sec.subs[bi], r = REG[state.sub];
+  let rows = '', ids = [];
+  sb.items.forEach(x=>{ rows += itemRow(zkey(state.sub,sec,sb,x), x); ids.push(KEYS.length-1); });
+  app.innerHTML = `<div class="view">
+    <header>
+      <button class="icon-btn" onclick="history.back()" aria-label="Назад">←</button>
+      <h1>${sb.name}<div class="sub">${MENU[state.mode].title} · ${r.title}${ZAY[state.sub].length>1?' · '+sec.name:''} · ${dayTitle()}</div></h1>
+    </header>
+    ${sb.note?`<div class="note" style="color:var(--muted);font-size:13px;margin:-8px 2px 12px">${sb.note}</div>`:''}
+    <div class="grp"><h3><span>Объекты</span><small class="cnt" data-count="${ids.join(',')}"></small></h3>${rows}</div>
+    <div class="seg"><button onclick="zAll(true)">Отметить все</button><button onclick="zAll(false)">Снять все</button></div>
+  </div>`;
+  updateCounters();
+}
+/* ---------- Отчёт за месяц в Excel (.xlsx) ---------- */
+const pad2 = n => String(n).padStart(2,'0');
+let DL = null;
+const dlReady = Promise.resolve();
+if(window.Android){
+  DL = { save: async ({filename, data}) => {
+    const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
+    let bin = ''; for(let i=0;i<bytes.length;i+=0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i+0x8000));
+    const res = window.Android.saveFile(filename, btoa(bin));
+    if(res !== 'ok') throw {code:'unavailable', message:res};
+    return {status:'saved'};
+  }};
+}
+
+async function loadMonthChecks(y,m){
+  await dbReady;
+  const days = new Date(y,m+1,0).getDate(), out = {};
+  await Promise.all(rng(1,days).map(async d=>{
+    const k = `${y}-${pad2(m+1)}-${pad2(d)}`;
+    if(CHECKS[k]){ out[d] = new Set(CHECKS[k]); return; }
+    let arr = null;
+    if(DB){ try{
+      const snap = await DB.collection('data/users/'+UID).doc('day-'+k).get();
+      const data = snap && typeof snap.data === 'function' ? snap.data() : snap;
+      if(data && Array.isArray(data.done)) arr = data.done;
+    }catch(e){} }
+    if(!arr){ try{ arr = JSON.parse(localStorage.getItem('chk-'+k) || '[]'); }catch(e){ arr = []; } }
+    if(!CHECKS[k]) CHECKS[k] = new Set(arr);
+    out[d] = new Set(arr);
+  }));
+  return out;
+}
+const RAZDEL = { zay:'Заявки', pn:'Простые наряды', on:'Опасные наряды' };
+function parseKey(k){
+  const p = k.split('|');
+  if(RAZDEL[p[0]] && p.length===4) return {razdel:RAZDEL[p[0]], sys:REG[p[1]]?REG[p[1]].title:p[1], sub:(REG[p[1]]&&REG[p[1]].systems.length>1?p[2]:''), obj:p[3]};
+  if(RAZDEL[p[0]]) return {razdel:RAZDEL[p[0]], sys:REG[p[1]]?REG[p[1]].title:p[1], sub:(ZAY[p[1]]&&ZAY[p[1]].length>1?p[2]+' · ':'')+p[3], obj:p[4]};
+  return {razdel:'Регламент', sys:REG[p[1]]?REG[p[1]].title:p[1], sub:(REG[p[1]]&&REG[p[1]].systems.length>1?p[2]:''), obj:p[3]};
+}
+function monthObjects(m){
+  const list = [], seen = new Set();
+  const add = k => { if(!seen.has(k)){ seen.add(k); list.push(k); } };
+  ['aps','aos','video','skud'].forEach(key=>ZAY[key].forEach(sec=>sec.subs.forEach(sb=>sb.items.forEach(x=>add(zkey(key,sec,sb,x,'zay'))))));
+  ['aps','aos','video','ggs','skud'].forEach(key=>REG[key].systems.forEach(sys=>sys.groups.forEach(g=>{
+    if(g.months.includes(m)) g.items.forEach(x=>add(`reg|${key}|${sys.name}|${x}`));
+  })));
+  return list;
+}
+
+/* --- минимальный генератор xlsx (zip без сжатия) --- */
+const CRC_T = (()=>{ const t = new Uint32Array(256); for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c = c&1 ? 0xEDB88320^(c>>>1) : c>>>1; t[n]=c>>>0; } return t; })();
+function crc32(b){ let c = 0xFFFFFFFF; for(let i=0;i<b.length;i++) c = CRC_T[(c^b[i])&0xFF]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function zip(files){
+  const enc = new TextEncoder(), parts = [], cen = []; let off = 0;
+  for(const [name, text] of files){
+    const nb = enc.encode(name), db = enc.encode(text), crc = crc32(db);
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true); h.setUint16(4,20,true); h.setUint16(6,0x0800,true); h.setUint16(8,0,true);
+    h.setUint32(14,crc,true); h.setUint32(18,db.length,true); h.setUint32(22,db.length,true); h.setUint16(26,nb.length,true);
+    parts.push(new Uint8Array(h.buffer), nb, db);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0,0x02014b50,true); c.setUint16(4,20,true); c.setUint16(6,20,true); c.setUint16(8,0x0800,true);
+    c.setUint32(16,crc,true); c.setUint32(20,db.length,true); c.setUint32(24,db.length,true); c.setUint16(28,nb.length,true); c.setUint32(42,off,true);
+    cen.push(new Uint8Array(c.buffer), nb);
+    off += 30 + nb.length + db.length;
+  }
+  const cenLen = cen.reduce((s,a)=>s+a.length,0);
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true); e.setUint16(8,files.length,true); e.setUint16(10,files.length,true);
+  e.setUint32(12,cenLen,true); e.setUint32(16,off,true);
+  const all = [...parts, ...cen, new Uint8Array(e.buffer)];
+  const out = new Uint8Array(all.reduce((s,a)=>s+a.length,0)); let p = 0;
+  all.forEach(a=>{ out.set(a,p); p += a.length; });
+  return out;
+}
+const xesc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function colName(i){ let s=''; i++; while(i){ const r=(i-1)%26; s=String.fromCharCode(65+r)+s; i=Math.floor((i-1)/26); } return s; }
+/* rows: массив строк; ячейка = значение или {v, s} (s — номер стиля) */
+function sheetXml(rows, widths, freeze){
+  let x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">';
+  if(freeze) x += `<sheetViews><sheetView workbookViewId="0"><pane xSplit="${freeze[0]}" ySplit="${freeze[1]}" topLeftCell="${colName(freeze[0])}${freeze[1]+1}" activePane="bottomRight" state="frozen"/></sheetView></sheetViews>`;
+  x += '<cols>' + widths.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('') + '</cols><sheetData>';
+  rows.forEach((row,ri)=>{
+    x += `<row r="${ri+1}">`;
+    row.forEach((cell,ci)=>{
+      if(cell===null || cell===undefined || cell==='') return;
+      const o = typeof cell === 'object' ? cell : {v:cell};
+      const ref = colName(ci)+(ri+1), st = o.s ? ` s="${o.s}"` : '';
+      if(typeof o.v === 'number') x += `<c r="${ref}"${st}><v>${o.v}</v></c>`;
+      else if(o.v==='' ) x += `<c r="${ref}"${st}/>`;
+      else x += `<c r="${ref}"${st} t="inlineStr"><is><t>${xesc(o.v)}</t></is></c>`;
+    });
+    x += '</row>';
+  });
+  return x + '</sheetData></worksheet>';
+}
+function buildXlsx(sheets){
+  const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+   + '<fonts count="3"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FF1E7B3C"/><name val="Calibri"/></font></fonts>'
+   + '<fills count="5"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>'
+   + '<fill><patternFill patternType="solid"><fgColor rgb="FFF3DCCF"/></patternFill></fill>'
+   + '<fill><patternFill patternType="solid"><fgColor rgb="FFDDF2E3"/></patternFill></fill>'
+   + '<fill><patternFill patternType="solid"><fgColor rgb="FFEDEDED"/></patternFill></fill></fills>'
+   + '<borders count="2"><border/><border><left style="thin"><color rgb="FFCCCCCC"/></left><right style="thin"><color rgb="FFCCCCCC"/></right><top style="thin"><color rgb="FFCCCCCC"/></top><bottom style="thin"><color rgb="FFCCCCCC"/></bottom></border></borders>'
+   + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="6">'
+   + '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+   + '<xf numFmtId="0" xfId="0" fontId="1" fillId="2" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
+   + '<xf numFmtId="0" xfId="0" fontId="2" fillId="3" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center"/></xf>'
+   + '<xf numFmtId="0" xfId="0" fontId="0" fillId="0" borderId="1" applyBorder="1"/>'
+   + '<xf numFmtId="0" xfId="0" fontId="0" fillId="4" borderId="1" applyFill="1" applyBorder="1"/>'
+   + '<xf numFmtId="0" xfId="0" fontId="1" fillId="0" borderId="0" applyFont="1"/>'
+   + '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+  const files = [
+    ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
+      + sheets.map((s,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('') + '</Types>'],
+    ['_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+    ['xl/workbook.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'
+      + sheets.map((s,i)=>`<sheet name="${xesc(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('') + '</sheets></workbook>'],
+    ['xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+      + sheets.map((s,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')
+      + `<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`],
+    ['xl/styles.xml', styles],
+    ...sheets.map((s,i)=>[`xl/worksheets/sheet${i+1}.xml`, sheetXml(s.rows, s.widths, s.freeze)])
+  ];
+  return zip(files);
+}
+
+async function loadDayChecks(dates){
+  await dbReady;
+  return Promise.all(dates.map(async dt=>{
+    const k = `${dt.getFullYear()}-${pad2(dt.getMonth()+1)}-${pad2(dt.getDate())}`;
+    if(CHECKS[k]) return new Set(CHECKS[k]);
+    let arr = null;
+    if(DB){ try{
+      const snap = await DB.collection('data/users/'+UID).doc('day-'+k).get();
+      const data = snap && typeof snap.data === 'function' ? snap.data() : snap;
+      if(data && Array.isArray(data.done)) arr = data.done;
+    }catch(e){} }
+    if(!arr){ try{ arr = JSON.parse(localStorage.getItem('chk-'+k) || '[]'); }catch(e){ arr = []; } }
+    CHECKS[k] = new Set(arr);
+    return new Set(arr);
+  }));
+}
+/* Отчёт за любой период: dates — массив дат, title — «за ноябрь 2026 г.» */
+async function makeReportRange(dates, title){
+  const checks = await loadDayChecks(dates);
+  const wd = dt => (dt.getDay()+6)%7;
+  const multiMonth = dates[0].getMonth()!==dates[dates.length-1].getMonth() || dates.length<28;
+  const head = ['Раздел','Система','Подраздел','Объект',
+    ...dates.map(dt=> multiMonth ? `${pad2(dt.getDate())}.${pad2(dt.getMonth()+1)}\n${WD_SHORT[wd(dt)]}` : `${dt.getDate()}\n${WD_SHORT[wd(dt)]}`), 'Всего'].map(v=>({v, s:1}));
+  const objs = [];
+  [...new Set(dates.map(dt=>dt.getMonth()))].forEach(m=>monthObjects(m).forEach(k=>{ if(!objs.includes(k)) objs.push(k); }));
+  checks.forEach(set=>set.forEach(k=>{ if(!objs.includes(k)) objs.push(k); }));
+  const rows = [[{v:`Отчёт ${title} — отметки по дням`, s:5}], head];
+  let total = 0;
+  objs.forEach(k=>{
+    const o = parseKey(k); let n = 0;
+    const cells = dates.map((dt,i)=>{ if(checks[i].has(k)){ n++; return {v:'✓', s:2}; } return {v:'', s: wd(dt)>=5 ? 4 : 3}; });
+    total += n;
+    rows.push([{v:o.razdel,s:3},{v:o.sys,s:3},{v:o.sub,s:3},{v:o.obj,s:3}, ...cells, {v:n, s:3}]);
+  });
+  const log = [[{v:`Журнал отметок ${title}`, s:5}], ['Дата','День недели','Раздел','Система','Подраздел','Объект'].map(v=>({v,s:1}))];
+  dates.forEach((dt,i)=>{
+    [...checks[i]].sort().forEach(k=>{ const o = parseKey(k);
+      log.push([`${pad2(dt.getDate())}.${pad2(dt.getMonth()+1)}.${dt.getFullYear()}`, WD_FULL[wd(dt)], o.razdel, o.sys, o.sub, o.obj].map(v=>({v, s:3}))); });
+  });
+  if(log.length===2) log.push([{v:'За этот период отметок нет'}]);
+  return { bytes: buildXlsx([
+    { name:'Сводка', rows, widths:[12,18,28,30, ...dates.map(()=>multiMonth?7:5), 8], freeze:[4,2] },
+    { name:'Журнал', rows:log, widths:[12,14,14,18,28,34], freeze:[0,2] }
+  ]), total };
+}
+async function saveReport(dates, title, filename){
+  await dlReady;
+  if(!DL){ toast('Не удалось сохранить файл'); return; }
+  toast('Готовлю отчёт…');
+  try{
+    const r = await makeReportRange(dates, title);
+    await DL.save({ filename, data:r.bytes });
+    toast('Отчёт сохранён в Загрузки/Ежедневник');
+  }catch(e){
+    const c = e && e.code;
+    if(c==='declined') return;
+    toast(c==='rate_limited' ? 'Подождите и попробуйте ещё раз' : 'Не удалось сохранить отчёт');
+  }
+}
+function exportMonth(y,m){
+  const dates = rng(1,new Date(y,m+1,0).getDate()).map(d=>new Date(y,m,d));
+  return saveReport(dates, `за ${MONTHS[m].toLowerCase()} ${y} г.`, `Отчёт ${MONTHS[m]} ${y}.xlsx`);
+}
+function exportWeek(ts){
+  const s = new Date(ts), dates = rng(0,6).map(i=>addDays(s,i)), e = dates[6];
+  return saveReport(dates, `за неделю ${rangeText(s)} ${e.getFullYear()} г.`,
+    `Отчёт неделя ${pad2(s.getDate())}.${pad2(s.getMonth()+1)}-${pad2(e.getDate())}.${pad2(e.getMonth()+1)}.${e.getFullYear()}.xlsx`);
+}
+
+/* ---------- Логотип компании (добавляет сам пользователь) и цвета ---------- */
+let LOGO = null;
+LOGO = 'logo.png';
+function hexToRgb(h){ h=h.replace('#',''); return [0,2,4].map(i=>parseInt(h.substr(i,2),16)); }
+function rgbToHex(r,g,b){ return '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join(''); }
+function mix(a,b,t){ const A=hexToRgb(a),B=hexToRgb(b); return rgbToHex(A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t,A[2]+(B[2]-A[2])*t); }
+function applyTheme(accent){
+  const r = document.documentElement.style;
+  if(!accent){ ['--accent','--accent-soft','--navy','--bg','--line','--grad1','--grad2'].forEach(v=>r.removeProperty(v)); return; }
+  r.setProperty('--accent', accent);
+  r.setProperty('--accent-soft', mix(accent,'#ffffff',.86));
+  r.setProperty('--navy', mix(accent,'#000000',.55));
+  r.setProperty('--bg', mix(accent,'#ffffff',.94));
+  r.setProperty('--line', mix(accent,'#ffffff',.82));
+  r.setProperty('--grad1', accent);
+  r.setProperty('--grad2', mix(accent,'#000000',.45));
+  const m = document.querySelector('meta[name="theme-color"]'); if(m) m.content = mix(accent,'#000000',.45);
+}
+/* Главный цвет логотипа: самый частый насыщенный оттенок */
+function logoColor(img){
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const x = c.getContext('2d'); x.drawImage(img,0,0,64,64);
+  const d = x.getImageData(0,0,64,64).data, buckets = {}; let dark = null, darkL = 999;
+  for(let i=0;i<d.length;i+=4){
+    if(d[i+3]<128) continue;
+    const r=d[i],g=d[i+1],b=d[i+2], mx=Math.max(r,g,b), mn=Math.min(r,g,b), l=(mx+mn)/2, sat = mx===mn?0:(mx-mn)/(255-Math.abs(mx+mn-255));
+    if(l<darkL && l>20){ darkL=l; dark=[r,g,b]; }
+    if(sat<.3 || l<35 || l>225) continue;
+    const k = [r>>4,g>>4,b>>4].join(',');
+    (buckets[k] = buckets[k] || {n:0,r:0,g:0,b:0}); buckets[k].n++; buckets[k].r+=r; buckets[k].g+=g; buckets[k].b+=b;
+  }
+  const best = Object.values(buckets).sort((a,b)=>b.n-a.n)[0];
+  let col = best && best.n>8 ? rgbToHex(best.r/best.n,best.g/best.n,best.b/best.n) : (dark ? rgbToHex(...dark) : null);
+  if(col){ const [r,g,b] = hexToRgb(col); const l = (Math.max(r,g,b)+Math.min(r,g,b))/2; if(l>150) col = mix(col,'#000000',.35); }
+  return col;
+}
+function pickLogo(input){
+  const f = input.files && input.files[0]; input.value = ''; if(!f) return;
+  if(f.type && !f.type.startsWith('image/') && !/\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(f.name)){ toast('Это не картинка. Выберите PNG, JPG или SVG'); return; }
+  const rd = new FileReader();
+  rd.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 256/Math.max(img.width,img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      try{ LOGO = c.toDataURL('image/png'); }catch(e){ toast('Не удалось прочитать картинку'); return; }
+      const col = logoColor(img);
+      try{ localStorage.setItem('logo', LOGO); localStorage.setItem('accent', col||''); }catch(e){}
+      saveSettings({logo:LOGO, accent:''});
+      renderSettings(); toast('Логотип добавлен');
+    };
+    img.onerror = () => toast('Не удалось открыть картинку. Попробуйте PNG или JPG');
+    img.src = rd.result;
+  };
+  rd.readAsDataURL(f);
+}
+function removeLogo(){
+  LOGO = null; try{ localStorage.removeItem('logo'); localStorage.removeItem('accent'); }catch(e){}
+  saveSettings({logo:'', accent:''}); renderSettings();
+}
+async function saveSettings(obj){
+  await dbReady; if(!DB) return;
+  try{ await DB.collection('data/users/'+UID).doc('settings').set(obj); }catch(e){}
+}
+async function loadSettings(){
+  await dbReady; if(!DB) return;
+  try{
+    const snap = await DB.collection('data/users/'+UID).doc('settings').get();
+    const data = snap && typeof snap.data === 'function' ? snap.data() : snap;
+    if(data && typeof data.logo === 'string'){
+      LOGO = data.logo || null;
+      try{ if(LOGO){ localStorage.setItem('logo',LOGO); localStorage.setItem('accent',data.accent||''); } }catch(e){}
+      const h = location.hash.slice(1); if(!h || h==='settings') route(true);
+    }
+  }catch(e){}
+}
+try{ localStorage.removeItem('accent'); }catch(e){}
+loadSettings();
+(function(){ const b = document.getElementById('spLogo'); if(b && LOGO) b.innerHTML = `<div class="face"><img src="${LOGO}" alt=""></div><div class="face b"><img src="${LOGO}" alt=""></div>`; })();
+
+/* ---------- Фоновое фото ---------- */
+let BG = null, VEIL = .82;
+BG = (window.Android && window.Android.hasAsset && window.Android.hasAsset('www/bg.jpg')) ? 'bg.jpg' : null;
+function applyBg(){
+  const l = document.getElementById('bgLayer'); if(!l) return;
+  if(BG){ l.style.backgroundImage = `url(${BG})`; l.style.display = 'block'; document.body.classList.add('has-bg'); }
+  else { l.style.display = 'none'; document.body.classList.remove('has-bg'); }
+  document.documentElement.style.setProperty('--veil', VEIL);
+}
+function pickBg(input){
+  const f = input.files && input.files[0]; input.value = ''; if(!f) return;
+  if(f.type && !f.type.startsWith('image/') && !/\.(png|jpe?g|webp|gif|bmp|heic)$/i.test(f.name)){ toast('Это не картинка'); return; }
+  const rd = new FileReader();
+  rd.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 1200/Math.max(img.width,img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      try{ BG = c.toDataURL('image/jpeg', .72); }catch(e){ toast('Не удалось прочитать фото'); return; }
+      try{ localStorage.setItem('bgimg', BG); }catch(e){}
+      applyBg(); saveBg(); renderSettings(); toast('Фон установлен');
+    };
+    img.onerror = () => toast('Не удалось открыть фото. Попробуйте JPG или PNG');
+    img.src = rd.result;
+  };
+  rd.readAsDataURL(f);
+}
+function setVeil(v){ VEIL = 1 - v/100; document.documentElement.style.setProperty('--veil', VEIL); try{ localStorage.setItem('veil', VEIL); }catch(e){} clearTimeout(setVeil.t); setVeil.t = setTimeout(saveBg, 700); }
+function removeBg(){ BG = null; try{ localStorage.removeItem('bgimg'); }catch(e){} applyBg(); saveBg(); renderSettings(); }
+async function saveBg(){
+  await dbReady; if(!DB) return;
+  try{ await DB.collection('data/users/'+UID).doc('background').set({img: BG || '', veil: VEIL}); }catch(e){}
+}
+async function loadBg(){
+  await dbReady; if(!DB) return;
+  try{
+    const snap = await DB.collection('data/users/'+UID).doc('background').get();
+    const data = snap && typeof snap.data === 'function' ? snap.data() : snap;
+    if(data && typeof data.img === 'string'){
+      BG = data.img || null; if(typeof data.veil === 'number') VEIL = data.veil;
+      try{ if(BG) localStorage.setItem('bgimg', BG); else localStorage.removeItem('bgimg'); localStorage.setItem('veil', VEIL); }catch(e){}
+      applyBg(); if(location.hash.slice(1)==='settings') renderSettings();
+    }
+  }catch(e){}
+}
+applyBg(); loadBg();
+
+function logoImg(cls){ return LOGO ? `<img class="${cls}" src="${LOGO}" alt="">` : ''; }
+function openSettings(){ location.hash = 'settings'; }
+function renderSettings(){
+  app.innerHTML = `<div class="view">
+    <header>
+      <button class="icon-btn" onclick="history.back()" aria-label="Назад">←</button>
+      <h1>Оформление<div class="sub">Логотип и фон</div></h1>
+    </header>
+    <div class="grp" style="text-align:center;padding:22px 16px">
+      ${LOGO ? `<img src="${LOGO}" alt="" style="max-width:180px;max-height:110px;object-fit:contain">` : `<div class="empty" style="border:0;padding:6px">Логотип не добавлен</div>`}
+      <div style="display:flex;gap:6px;justify-content:center;margin-top:14px">
+        ${['--navy','--accent','--accent-soft','--bg'].map(v=>`<span style="width:30px;height:30px;border-radius:9px;background:var(${v});border:1px solid var(--line)"></span>`).join('')}
+      </div>
+    </div>
+    <input id="pickGallery" type="file" accept="image/*" style="display:none" onchange="pickLogo(this)">
+    <input id="pickFiles" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,.bmp,.svg,image/png,image/jpeg,image/webp,image/svg+xml,*/*" style="display:none" onchange="pickLogo(this)">
+    <div class="menu">
+      <button class="mbtn" onclick="document.getElementById('pickGallery').click()"><span class="ic">🖼️</span><span class="t">${LOGO?'Заменить из галереи':'Выбрать из галереи'}<span class="s">Фото и картинки на телефоне</span></span><span class="arrow">›</span></button>
+      <button class="mbtn" onclick="document.getElementById('pickFiles').click()"><span class="ic">📁</span><span class="t">${LOGO?'Заменить из файлов':'Выбрать из файлов'}<span class="s">Загрузки, папки, PNG / JPG / SVG</span></span><span class="arrow">›</span></button>
+    </div>
+    ${LOGO ? `<button class="mbtn" style="margin-top:12px" onclick="removeLogo()"><span class="ic">✖️</span><span class="t">Убрать логотип<span class="s">Вернуть стандартный значок</span></span></button>` : ''}
+    <div class="foot">Логотип показывается в шапке и вращается на заставке. Он хранится только в вашем аккаунте и виден только вам.</div>
+    <div class="sys" style="margin-top:22px">Фон календаря</div>
+    <div class="grp" style="padding:12px">
+      ${BG ? `<div style="height:140px;border-radius:12px;background:url(${BG}) center/cover;position:relative;overflow:hidden">
+        <div style="position:absolute;inset:0;background:var(--bg);opacity:var(--veil)"></div></div>
+        <div style="margin-top:12px;font-size:14px;font-weight:600">Насколько видно фото</div>
+        <input class="range" type="range" min="5" max="50" value="${Math.round((1-VEIL)*100)}" oninput="setVeil(this.value)">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)"><span>Чуть-чуть</span><span>Заметно</span></div>`
+      : `<div class="empty" style="border:0;padding:10px">Фото не выбрано</div>`}
+    </div>
+    <input id="bgGallery" type="file" accept="image/*" style="display:none" onchange="pickBg(this)">
+    <input id="bgFiles" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp,*/*" style="display:none" onchange="pickBg(this)">
+    <div class="menu">
+      <button class="mbtn" onclick="document.getElementById('bgGallery').click()"><span class="ic">🌄</span><span class="t">${BG?'Заменить фон из галереи':'Фон из галереи'}<span class="s">Фото будет светлым, полупрозрачным</span></span><span class="arrow">›</span></button>
+      <button class="mbtn" onclick="document.getElementById('bgFiles').click()"><span class="ic">📁</span><span class="t">${BG?'Заменить фон из файлов':'Фон из файлов'}<span class="s">Загрузки и папки</span></span><span class="arrow">›</span></button>
+      ${BG?`<button class="mbtn" onclick="removeBg()"><span class="ic">✖️</span><span class="t">Убрать фон</span></button>`:''}
+    </div>
+  </div>`;
+}
+
+let tt;
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(tt); tt = setTimeout(()=>el.classList.remove('show'), 2200);
+}
+function route(keep){
+  const h = location.hash.slice(1);
+  if(h==='zsub' && state.zs && state.day) renderZSub();
+  else if(h==='sub' && state.sub && state.day) renderSub();
+  else if(h==='menu' && state.day && state.mode) renderMenu();
+  else if(h==='nar' && state.day) renderNar();
+  else if(h==='plan' && state.day) renderPlan();
+  else if(h==='week' && state.weekStart!==null) renderWeek();
+  else if(h==='month') renderMonth();
+  else renderYear();
+  if(!keep) window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', route);
+if(location.hash && location.hash!=='#') { try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
+route();
+/* Автосохранение отчёта за прошлый месяц (один раз, в первые 7 дней нового месяца) */
+(function(){
+  if(!window.Android || today.getDate()>7) return;
+  const pm = new Date(today.getFullYear(), today.getMonth()-1, 1), key = 'auto-report-'+pm.getFullYear()+'-'+pm.getMonth();
+  try{ if(localStorage.getItem(key)) return; }catch(e){ return; }
+  setTimeout(async()=>{
+    try{
+      const dates = rng(1,new Date(pm.getFullYear(),pm.getMonth()+1,0).getDate()).map(d=>new Date(pm.getFullYear(),pm.getMonth(),d));
+      const r = await makeReportRange(dates, `за ${MONTHS[pm.getMonth()].toLowerCase()} ${pm.getFullYear()} г.`);
+      await DL.save({filename:`Отчёт ${MONTHS[pm.getMonth()]} ${pm.getFullYear()}.xlsx`, data:r.bytes});
+      localStorage.setItem(key,'1'); toast(`Отчёт за ${MONTHS[pm.getMonth()].toLowerCase()} сохранён в Загрузки/Ежедневник`);
+    }catch(e){}
+  }, 2600);
+})();
+setTimeout(()=>{ const sp = document.getElementById('splash'); if(sp){ sp.classList.add('hide'); setTimeout(()=>sp.remove(), 600); } }, 1800);
+</script>
+</body>
+</html>
