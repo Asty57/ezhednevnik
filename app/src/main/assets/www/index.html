@@ -99,9 +99,12 @@
   .seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
   .foot{font-size:12px;color:var(--muted);line-height:1.5;margin-top:16px}
 
-  .chk{display:flex;align-items:flex-start;gap:12px;width:100%;background:none;border:0;border-top:1px solid #edf1f6;padding:11px 2px;
-    text-align:left;font-size:15px;color:var(--ink);cursor:pointer;line-height:1.4}
+  .chk{display:flex;align-items:stretch;gap:0;width:100%;background:none;border:0;border-top:1px solid #edf1f6;padding:0;line-height:1.4;color:var(--ink);font-family:inherit}
   .chk:first-of-type{border-top:0}
+  .cbox{background:none;border:0;padding:11px 8px 11px 2px;cursor:pointer;flex:none;display:flex;align-items:flex-start}
+  .cbody{flex:1;background:none;border:0;text-align:left;padding:11px 2px;cursor:pointer;display:flex;align-items:flex-start;gap:8px;color:var(--ink);font-size:15px;font-family:inherit;line-height:1.4}
+  .cbody .txt{flex:1}
+  .chv{color:#c3ccd8;font-size:18px;align-self:center;flex:none}
   .chk .box{width:24px;height:24px;border-radius:8px;border:2px solid #b9c5d6;flex:none;display:grid;place-items:center;transition:.15s;margin-top:-1px}
   .chk.done .box{background:#3f9a5c;border-color:#3f9a5c}
   .chk.done .box::after{content:'';width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
@@ -122,6 +125,13 @@
   .day .arrow{align-self:center}
   .chk small{display:inline-block;width:100%;font-size:11.5px;color:var(--accent);margin-top:2px;text-decoration:none}
   .chk small.regdone{color:#2f8a4e;font-weight:700}
+  .bigdone{display:block;width:100%;border:1.5px solid var(--line);background:var(--card);border-radius:16px;padding:16px;font-weight:700;font-size:16px;cursor:pointer;color:var(--ink);box-shadow:var(--shadow)}
+  .bigdone.on{background:#2f8a4e;border-color:#2f8a4e;color:#fff}
+  .naryad{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;font-size:16px;font-family:inherit;color:var(--ink);background:var(--card);margin-top:4px}
+  .chk small.camloc{color:var(--muted);font-weight:600}
+  .grp .objhead{font-weight:700;font-size:13px;color:var(--accent);margin:10px 0 2px;padding-top:8px;border-top:1px solid #edf1f6}
+  .grp .objhead:first-of-type{border-top:0;padding-top:2px;margin-top:0}
+  .grp .objhead + .chk{border-top:0}
   .chk.locked{opacity:.75}
   .chk.locked .box{background:#9bb8a4;border-color:#9bb8a4}
   .chk.done .txt small{text-decoration:none}
@@ -161,6 +171,26 @@
   body.has-bg .month,body.has-bg .week,body.has-bg .day,body.has-bg .mbtn,body.has-bg .grp{background:rgba(255,255,255,.9);backdrop-filter:blur(2px)}
   .range{width:100%;accent-color:var(--accent)}
   #splash .sptitle{font-family:'Montserrat',sans-serif;font-weight:800;font-size:30px;color:#1b1b1b;letter-spacing:.5px;margin-top:-14px}
+  .topbar{display:flex;justify-content:flex-end;margin-bottom:6px}
+  .bell{width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-size:20px;cursor:pointer;box-shadow:var(--shadow)}
+  .bell.on{background:var(--accent);border-color:var(--accent)}
+  .switch{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);cursor:pointer;margin-bottom:12px;font-weight:700;font-size:15px}
+  .switch span:first-child{flex:1}
+  .switch input{position:absolute;opacity:0;width:0;height:0}
+  .switch .track{width:48px;height:28px;border-radius:16px;background:#cdd5e0;position:relative;transition:.2s;flex:none}
+  .switch .track::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}
+  .switch input:checked + .track{background:var(--accent)}
+  .switch input:checked + .track::after{transform:translateX(20px)}
+  .timeinput{font-size:28px;font-family:'Montserrat',sans-serif;font-weight:700;border:1.5px solid var(--line);border-radius:12px;padding:8px 14px;margin-top:8px;color:var(--ink);background:var(--bg)}
+  .staffrow{display:flex;align-items:center;gap:4px;border-top:1px solid #edf1f6}
+  .staffrow:first-child{border-top:0}
+  .staffrow .chk .txt{font-weight:700}
+  .staffrow .chk{cursor:pointer}
+  .delstaff{width:38px;height:38px;border:0;background:none;color:#c3ccd8;font-size:16px;cursor:pointer;flex:none}
+  .addrow{display:flex;gap:8px;margin-top:12px}
+  .addrow input{flex:1;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-family:inherit;color:var(--ink);background:var(--card)}
+  .addrow button{width:52px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--grad1),var(--grad2));color:#fff;font-size:24px;cursor:pointer}
+  .save-btn{display:block;width:100%;margin-top:16px;border:0;border-radius:16px;padding:16px;font-weight:700;font-size:16px;cursor:pointer;background:linear-gradient(135deg,var(--grad1),var(--grad2));color:#fff;box-shadow:var(--shadow)}
   .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
     background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;
     max-width:90vw;text-align:center}
@@ -208,6 +238,7 @@ function rangeText(s){
 /* ---------- Страница 1: календарь (месяцы) ---------- */
 function renderYear(){
   let html = `<div class="view">
+    <div class="topbar"><button class="bell${NOTIF.on?' on':''}" onclick="openNotif()" aria-label="Уведомления">🔔</button></div>
     <header>
       <button class="icon-btn" onclick="changeYear(-1)" aria-label="Предыдущий год">‹</button>
       <h1 style="text-align:center">${state.year}<div class="sub">Сегодня: ${today.getDate()} ${MONTHS_GEN[today.getMonth()]} ${today.getFullYear()}</div></h1>
@@ -334,6 +365,34 @@ const B = list => list.map(x=>'В-'+x);
 const HW_IN  = [25,26,28,29,30,31,32,33,34,41,42,53,...rng(75,98)];
 const HW_OUT = [...rng(1,24),27,...rng(35,40),...rng(43,56),...rng(63,74)];
 const HW_G1  = rng(57,62);
+const CAM_LABELS = {
+  25:'Центральный проход', 26:'Центральный проход', 53:'КПП-2, пост «стекляшка»',
+  28:'ЗДУ-5, проход', 29:'ЗДУ-1, проход', 30:'ЗДУ-2, проход', 31:'ЗДУ-3, проход', 32:'ЗДУ-4, проход',
+  33:'БО, пост 11', 34:'ПСГ, пост 14', 41:'Операторная СБ',
+  75:'Запасной выход ЗДУ-2, задняя сторона', 76:'Запасной выход ЗДУ-2, передняя сторона',
+  77:'Запасной выход ЗДУ-4, компьютерный класс', 78:'Запасной выход ЗДУ-3, 2 этаж', 79:'Запасной выход ЗДУ-3, 1 этаж',
+  80:'Запасной выход ЗДУ-1', 81:'Запасной выход ЗДУ-5',
+  82:'Задний выход, ЮГ Автотранс', 83:'Запасной выход ЮГ Авто, сектор ПКОП',
+  84:'Операторная ЛК №1', 85:'Операторная ЛК №2', 86:'Операторная УВПМ', 87:'Операторная ТЭЦ', 88:'Операторная ПВВС',
+  90:'Операторная БУТ', 91:'Операторная ПСГ №1', 92:'Операторная ПСГ №2',
+  93:'Вход вице-президента, ЗДУ-1', 94:'Вход вице-президента, ЗДУ-2-1',
+  96:'ЗДУ-5, коридор приёмной', 97:'ЗДУ-5, приёмная', 98:'ЗДУ-1-2, мост 2 этаж'
+};
+const HW_OBJ = [
+  { name:'Центральный проход и КПП', nums:[25,26,53] },
+  { name:'ЗДУ-1', nums:[29,80,93,98] },
+  { name:'ЗДУ-2', nums:[30,75,76,94] },
+  { name:'ЗДУ-3', nums:[31,78,79] },
+  { name:'ЗДУ-4', nums:[32,77] },
+  { name:'ЗДУ-5', nums:[28,81,96,97] },
+  { name:'Операторные', nums:[41,84,85,86,87,88,90,91,92] },
+  { name:'Посты БО и ПСГ', nums:[33,34] },
+  { name:'Выходы ЮГ Авто', nums:[82,83] }
+];
+const HW_ALL = [...new Set([...HW_G1,...HW_IN,...HW_OUT])].sort((a,b)=>a-b);
+const HW_LABELED = new Set(HW_OBJ.flatMap(o=>o.nums));
+const HW_ZAY_SUBS = HW_OBJ.map(o=>({ name:o.name, icon:'🎥', items:cams(o.nums) }))
+  .concat([{ name:'Прочие камеры', icon:'🎥', items:cams(HW_ALL.filter(n=>!HW_LABELED.has(n))) }]);
 const TP3 = ['14/1','14/3','15','20','11','17','2/2','2/1','25','22','21','28'].map(x=>'ТП-'+x);
 const REG = {
   aps: { title:'АПС', icon:'🔥', sub:'Пожарная сигнализация · Болид', systems:[
@@ -375,7 +434,14 @@ const REG = {
       { months:Q3, items:B(['207','10','517','04']) }
     ]}
   ]},
-  skud: { title:'СКУД', icon:'🚪', sub:'Контроль доступа', systems:[] }
+  skud: { title:'СКУД', icon:'🚪', sub:'Perco и Face-ID (Hikvision)', systems:[
+    { name:'СКУД (Perco) и Face-ID', groups:[
+      { months:Q1, items:['Центральная проходная','КПП-21','Центральная столовая','ЦК-302','ЛК','ТСЦ','Цех №2','Цех №3','Аварийные выходы ЗДУ-1, 2, 3, 4','Юг автосервис','Ворота при ЧС'] },
+      { months:Q2, items:['ЗДУ №1','ЗДУ №2','ЗДУ №3','ЗДУ №5','ЗДУ №4','Операторная ИСБ','БП'] },
+      { months:Q3, items:['Пост БО','Ж/Д','ПСГ пост 10','Шлагбаумы ЗДУ-2','Пост 17'] },
+      { months:ALL, items:['Терминалы Face-ID'] }
+    ]}
+  ]}
 };
 
 /* Заявки: раздел → подразделы → объекты */
@@ -399,20 +465,21 @@ const ZAY = {
       { name:'Здания В-06 – В-82, ГПП', icon:'📹', note:'102 взрывозащ., 49 внутр.', items:[...B(['06','07','08','09','10','80','81','82']),'ГПП',...B(['40','50'])] },
       { name:'Изомеризация и установки', icon:'📹', note:'35 взрывозащ., 41 внутр.', items:['Изомеризация','ЦК-302',...B(['207','517','3050','3100','3500'])] }
     ]},
-    { name:'Huawei', subs:[
-      { name:'Камеры № 57–62', icon:'🎥', items:cams(HW_G1) },
-      { name:'Внутренние камеры', icon:'🎥', items:cams(HW_IN) },
-      { name:'Наружные камеры', icon:'🎥', items:cams(HW_OUT) }
-    ]}
+    { name:'Huawei', subs:HW_ZAY_SUBS }
   ],
-  skud: []
+  skud: [ { name:'СКУД (Perco) и Face-ID', subs:[
+    { name:'Проходные, столовая, цеха', icon:'🚪', items:['Центральная проходная','КПП-21','Центральная столовая','ЦК-302','ЛК','ТСЦ','Цех №2','Цех №3','Юг автосервис','Ворота при ЧС'] },
+    { name:'ЗДУ и аварийные выходы', icon:'🚪', items:['ЗДУ №1','ЗДУ №2','ЗДУ №3','ЗДУ №4','ЗДУ №5','Аварийные выходы ЗДУ-1, 2, 3, 4','Операторная ИСБ','БП'] },
+    { name:'Посты и шлагбаумы', icon:'🚪', items:['Пост БО','Ж/Д','ПСГ пост 10','Шлагбаумы ЗДУ-2','Пост 17'] },
+    { name:'Терминалы Face-ID', icon:'🚪', items:['Терминалы Face-ID'] }
+  ]}]
 };
 const M_SHORT = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
 function dayTitle(){ const d = new Date(state.day); return `${d.getDate()} ${MONTHS_GEN[d.getMonth()]}`; }
 
 /* ---------- Галочки: сохраняются по дням ---------- */
 let DB = null, UID = null;
-/* Android-версия: данные хранятся в памяти телефона (localStorage приложения) */
+/* Android: данные в памяти телефона (localStorage) */
 const dbReady = Promise.resolve();
 const CHECKS = {}, saveTimers = {};
 let KEYS = [];
@@ -485,11 +552,15 @@ function ensureMonthLoaded(){
 }
 function itemRow(key, text){
   const i = KEYS.push(key) - 1;
+  const cm = text.match(/^Камера № (\d+)$/); const disp = (cm && CAM_LABELS[+cm[1]]) ? `${text}<small class="camloc">${CAM_LABELS[+cm[1]]}</small>` : text;
   const mine = checkSet().has(key), other = otherDays(key);
   const isReg = key.startsWith('reg|');
   const dates = other.map(n=>`${n} ${MONTHS_GEN[new Date(state.day).getMonth()]}`).join(', ');
   if(isReg && other.length && !mine){
-    return `<button class="chk done locked" data-i="${i}" onclick="toast('Уже выполнено ${dates}. Чтобы отменить, откройте тот день')"><span class="box"></span><span class="txt">${text}<small>выполнено ${dates}</small></span></button>`;
+    return `<div class="chk done locked" data-i="${i}">
+      <button class="cbox" onclick="toast('Уже выполнено ${dates}. Чтобы отменить, откройте тот день')"><span class="box"></span></button>
+      <button class="cbody" onclick="toast('Уже выполнено ${dates}. Чтобы отменить, откройте тот день')"><span class="txt">${disp}<small>выполнено ${dates}</small></span></button>
+    </div>`;
   }
   let hint = other.length ? `<small>${isReg?'также отмечено':'уже было'}: ${dates}</small>` : '';
   const kp = key.split('|');
@@ -498,12 +569,34 @@ function itemRow(key, text){
     for(let n=1; n<=new Date(y,m+1,0).getDate(); n++){ const set = CHECKS[`${y}-${pad2(m+1)}-${pad2(n)}`]; if(set && set.has(rk)) rd.push(n); }
     if(rd.length) hint += `<small class="regdone">✅ Проведён регламент: ${rd.map(n=>n+' '+MONTHS_GEN[m]).join(', ')}</small>`;
   }
-  return `<button class="chk${mine?' done':''}" data-i="${i}" onclick="toggle(${i})"><span class="box"></span><span class="txt">${text}${hint}</span></button>`;
+  return `<div class="chk${mine?' done':''}" data-i="${i}">
+    <button class="cbox" onclick="toggle(${i})" aria-label="Отметить"><span class="box"></span></button>
+    <button class="cbody" onclick="openItem(${i})"><span class="txt">${disp}${hint}</span><span class="chv">›</span></button>
+  </div>`;
 }
 function listBlock(prefix, items){
   const start = KEYS.length;
   const rows = items.map(x=>itemRow(prefix+x, x)).join('');
   const ids = []; for(let i=start;i<KEYS.length;i++) ids.push(i);
+  return {rows, ids};
+}
+function isCamList(items){ return items.length>0 && items.every(x=>/^Камера № \d+$/.test(x)); }
+function cameraBlock(prefix, items){
+  const nums = items.map(x=>+x.match(/\d+/)[0]);
+  const start = KEYS.length; let rows=''; const used=new Set();
+  HW_OBJ.forEach(o=>{
+    const inThis = o.nums.filter(n=>nums.includes(n));
+    if(!inThis.length) return;
+    inThis.forEach(n=>used.add(n));
+    rows += `<div class="objhead">${o.name}</div>`;
+    inThis.forEach(n=> rows += itemRow(prefix+'Камера № '+n, 'Камера № '+n));
+  });
+  const rest = nums.filter(n=>!used.has(n));
+  if(rest.length){
+    rows += `<div class="objhead">Прочие камеры</div>`;
+    rest.forEach(n=> rows += itemRow(prefix+'Камера № '+n, 'Камера № '+n));
+  }
+  const ids=[]; for(let i=start;i<KEYS.length;i++) ids.push(i);
   return {rows, ids};
 }
 
@@ -625,7 +718,8 @@ function renderSub(){
     if(!groups.length){ html += `<div class="empty">В этом месяце по графику работ нет</div>`; return; }
     groups.forEach(g=>{
       const now = g.months.includes(m);
-      const b = listBlock(`${mode}|${state.sub}|${sys.name}|`, g.items);
+      const pfx = `${mode}|${state.sub}|${sys.name}|`;
+      const b = (sys.name==='Huawei' && isCamList(g.items)) ? cameraBlock(pfx, g.items) : listBlock(pfx, g.items);
       html += `<div class="grp${now && state.allYear?' now':''}">
         <h3><span>Группа ${g.n}${g.months.length===12?' · каждый месяц':''}</span><small class="cnt" data-count="${b.ids.join(',')}"></small></h3>
         ${g.note?`<div class="note">${g.note}</div>`:''}
@@ -676,7 +770,7 @@ const dlReady = Promise.resolve();
 if(window.Android){
   DL = { save: async ({filename, data}) => {
     const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
-    let bin = ''; for(let i=0;i<bytes.length;i+=0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i+0x8000));
+    let bin=''; for(let i=0;i<bytes.length;i+=0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i,i+0x8000));
     const res = window.Android.saveFile(filename, btoa(bin));
     if(res !== 'ok') throw {code:'unavailable', message:res};
     return {status:'saved'};
@@ -759,7 +853,7 @@ function sheetXml(rows, widths, freeze){
       const ref = colName(ci)+(ri+1), st = o.s ? ` s="${o.s}"` : '';
       if(typeof o.v === 'number') x += `<c r="${ref}"${st}><v>${o.v}</v></c>`;
       else if(o.v==='' ) x += `<c r="${ref}"${st}/>`;
-      else x += `<c r="${ref}"${st} t="inlineStr"><is><t>${xesc(o.v)}</t></is></c>`;
+      else x += `<c r="${ref}"${st} t="inlineStr"><is><t xml:space="preserve">${xesc(o.v)}</t></is></c>`;
     });
     x += '</row>';
   });
@@ -773,13 +867,14 @@ function buildXlsx(sheets){
    + '<fill><patternFill patternType="solid"><fgColor rgb="FFDDF2E3"/></patternFill></fill>'
    + '<fill><patternFill patternType="solid"><fgColor rgb="FFEDEDED"/></patternFill></fill></fills>'
    + '<borders count="2"><border/><border><left style="thin"><color rgb="FFCCCCCC"/></left><right style="thin"><color rgb="FFCCCCCC"/></right><top style="thin"><color rgb="FFCCCCCC"/></top><bottom style="thin"><color rgb="FFCCCCCC"/></bottom></border></borders>'
-   + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="6">'
+   + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="7">'
    + '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
    + '<xf numFmtId="0" xfId="0" fontId="1" fillId="2" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
    + '<xf numFmtId="0" xfId="0" fontId="2" fillId="3" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center"/></xf>'
    + '<xf numFmtId="0" xfId="0" fontId="0" fillId="0" borderId="1" applyBorder="1"/>'
    + '<xf numFmtId="0" xfId="0" fontId="0" fillId="4" borderId="1" applyFill="1" applyBorder="1"/>'
    + '<xf numFmtId="0" xfId="0" fontId="1" fillId="0" borderId="0" applyFont="1"/>'
+   + '<xf numFmtId="0" xfId="0" fontId="0" fillId="0" borderId="1" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>'
    + '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
   const files = [
     ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
@@ -796,6 +891,19 @@ function buildXlsx(sheets){
   return zip(files);
 }
 
+async function loadDayMeta(dates){
+  await dbReady;
+  return Promise.all(dates.map(async dt=>{
+    const k = `${dt.getFullYear()}-${pad2(dt.getMonth()+1)}-${pad2(dt.getDate())}`;
+    if(META[k]) return META[k];
+    let o=null;
+    if(DB){ try{ const snap = await DB.collection('data/users/'+UID).doc('meta-'+k).get();
+      const data = snap && typeof snap.data==='function'?snap.data():snap;
+      if(data && data.items) o=data.items; }catch(e){} }
+    if(!o){ try{ o=JSON.parse(localStorage.getItem('meta-'+k)||'{}'); }catch(e){ o={}; } }
+    META[k]=o; return o;
+  }));
+}
 async function loadDayChecks(dates){
   await dbReady;
   return Promise.all(dates.map(async dt=>{
@@ -815,6 +923,7 @@ async function loadDayChecks(dates){
 /* Отчёт за любой период: dates — массив дат, title — «за ноябрь 2026 г.» */
 async function makeReportRange(dates, title){
   const checks = await loadDayChecks(dates);
+  const dayMeta = await loadDayMeta(dates);
   const wd = dt => (dt.getDay()+6)%7;
   const multiMonth = dates[0].getMonth()!==dates[dates.length-1].getMonth() || dates.length<28;
   const head = ['Раздел','Система','Подраздел','Объект',
@@ -830,15 +939,29 @@ async function makeReportRange(dates, title){
     total += n;
     rows.push([{v:o.razdel,s:3},{v:o.sys,s:3},{v:o.sub,s:3},{v:o.obj,s:3}, ...cells, {v:n, s:3}]);
   });
-  const log = [[{v:`Журнал отметок ${title}`, s:5}], ['Дата','День недели','Раздел','Система','Подраздел','Объект'].map(v=>({v,s:1}))];
+  const JHEAD = ['№ П/П','Дата','Наименование объекта','Система (АПС/СКУД/CCTV/АОС)','Выполненные работы (описать подробно)','Наряд (указать какой)','ФИО исполнителя работ','Время начала работ','Время завершения работ','Роспись сотрудника RichFit','Примечание'];
+  const SYS_SHORT = {'Видеонаблюдение':'CCTV'};
+  const ORD = {reg:0, zay:1, pn:2, on:3};
+  const camName = o => { const mm = o.obj.match(/^Камера № (\d+)$/); return (mm && CAM_LABELS[+mm[1]]) ? `${o.obj} (${CAM_LABELS[+mm[1]]})` : o.obj; };
+  const log = [ JHEAD.map(v=>({v,s:1})) ];
   dates.forEach((dt,i)=>{
-    [...checks[i]].sort().forEach(k=>{ const o = parseKey(k);
-      log.push([`${pad2(dt.getDate())}.${pad2(dt.getMonth()+1)}.${dt.getFullYear()}`, WD_FULL[wd(dt)], o.razdel, o.sys, o.sub, o.obj].map(v=>({v, s:3}))); });
+    const keys = [...checks[i]].sort((a,b)=> (ORD[a.split('|')[0]]-ORD[b.split('|')[0]]) || a.localeCompare(b));
+    let n = 0;
+    keys.forEach(k=>{
+      const o = parseKey(k); n++;
+      const dateStr = `${pad2(dt.getDate())}.${pad2(dt.getMonth()+1)}.${dt.getFullYear()}`;
+      const sysName = SYS_SHORT[o.sys] || o.sys;
+      const work = o.razdel==='Регламент' ? 'ТО' : '';
+      const rec = (dayMeta[i] && dayMeta[i][k]) || {};
+      const fio = (rec.w || []).join('\n');
+      const nar = rec.n || '';
+      log.push([ {v:n,s:3}, {v:dateStr,s:3}, {v:camName(o),s:6}, {v:sysName,s:3},
+        {v:work,s:3}, {v:nar,s:3},{v:fio,s:6},{v:'',s:3},{v:'',s:3},{v:'',s:3},{v:'',s:3} ]);
+    });
   });
-  if(log.length===2) log.push([{v:'За этот период отметок нет'}]);
+  if(log.length===1) log.push([{v:'За этот период отметок нет'}]);
   return { bytes: buildXlsx([
-    { name:'Сводка', rows, widths:[12,18,28,30, ...dates.map(()=>multiMonth?7:5), 8], freeze:[4,2] },
-    { name:'Журнал', rows:log, widths:[12,14,14,18,28,34], freeze:[0,2] }
+    { name:'Журнал', rows:log, widths:[6,12,38,16,30,14,24,12,14,20,16], freeze:[0,1] }
   ]), total };
 }
 async function saveReport(dates, title, filename){
@@ -994,6 +1117,158 @@ async function loadBg(){
 }
 applyBg(); loadBg();
 
+/* ---------- Уведомления ---------- */
+let NOTIF = { on:false, time:'08:00' };
+try{ const raw = localStorage.getItem('notif'); if(raw) NOTIF = {...NOTIF, ...JSON.parse(raw)}; }catch(e){}
+function openNotif(){ location.hash = 'notif'; }
+async function saveNotif(){
+  const on = document.getElementById('nfOn').checked;
+  const time = document.getElementById('nfTime').value || '08:00';
+  NOTIF = { on, time };
+  try{ localStorage.setItem('notif', JSON.stringify(NOTIF)); }catch(e){}
+  await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('notify').set(NOTIF); }catch(e){} }
+  toast('Сохранено');
+  setTimeout(()=>history.back(), 500);
+}
+async function loadNotif(){
+  await dbReady; if(!DB) return;
+  try{
+    const snap = await DB.collection('data/users/'+UID).doc('notify').get();
+    const data = snap && typeof snap.data === 'function' ? snap.data() : snap;
+    if(data && typeof data.on === 'boolean'){
+      NOTIF = { on:data.on, time:data.time || '08:00' };
+      try{ localStorage.setItem('notif', JSON.stringify(NOTIF)); }catch(e){}
+      if(location.hash.slice(1)==='notif' || !location.hash.slice(1)) route(true);
+    }
+  }catch(e){}
+}
+loadNotif();
+function renderNotif(){
+  app.innerHTML = `<div class="view">
+    <header>
+      <button class="icon-btn" onclick="history.back()" aria-label="Назад">←</button>
+      <h1>Уведомления<div class="sub">Напоминания о работах</div></h1>
+    </header>
+    <label class="switch">
+      <span>Присылать напоминания</span>
+      <input type="checkbox" id="nfOn" ${NOTIF.on?'checked':''} onchange="document.getElementById('nfTimeRow').style.opacity=this.checked?'1':'.45'">
+      <span class="track"></span>
+    </label>
+    <div class="grp" id="nfTimeRow" style="opacity:${NOTIF.on?'1':'.45'}">
+      <h3><span>Время напоминания</span></h3>
+      <div class="note">В это время каждый день будет приходить напоминание отметить работы.</div>
+      <input type="time" id="nfTime" class="timeinput" value="${NOTIF.time}">
+    </div>
+    <button class="save-btn" onclick="saveNotif()">Сохранить</button>
+    <div class="foot">Во временной версии уведомления ещё не приходят — заработают в приложении на телефоне. Время сохраняется.</div>
+  </div>`;
+}
+/* ---------- Сотрудники (общий список) ---------- */
+const STAFF_DEFAULT = ['Мырзабек Қ. Т.','Келдібай Б. Ө.','Исмаилов И.','Ерсін Ф. Д.','Сафиуллин Ф. Н.','Шерметов Р. А.','Вислогузов Е. А.','Кузь В.'];
+const STAFF_VER = 'v2';
+let STAFF = [];
+try{ STAFF = JSON.parse(localStorage.getItem('staff')||'[]'); }catch(e){}
+let _sv=''; try{ _sv=localStorage.getItem('staffVer')||''; }catch(e){}
+if(!STAFF.length || _sv!==STAFF_VER){
+  STAFF = [...STAFF_DEFAULT];
+  try{ localStorage.setItem('staff', JSON.stringify(STAFF)); localStorage.setItem('staffVer', STAFF_VER); }catch(e){}
+}
+async function saveStaff(){
+  try{ localStorage.setItem('staff', JSON.stringify(STAFF)); localStorage.setItem('staffVer', STAFF_VER); }catch(e){}
+  await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('staff').set({list:STAFF, ver:STAFF_VER}); }catch(e){} }
+}
+async function loadStaff(){
+  await dbReady; if(!DB) return;
+  try{
+    const snap = await DB.collection('data/users/'+UID).doc('staff').get();
+    const data = snap && typeof snap.data === 'function' ? snap.data() : snap;
+    if(data && Array.isArray(data.list) && data.list.length && data.ver===STAFF_VER){
+      STAFF = data.list; try{ localStorage.setItem('staff', JSON.stringify(STAFF)); }catch(e){}
+      if(location.hash.slice(1)==='item') route(true);
+    } else {
+      saveStaff();
+    }
+  }catch(e){}
+}
+loadStaff();
+
+/* ---------- Данные по объекту за день: исполнители + наряд ---------- */
+const META = {};
+function metaOf(k){
+  k = k || dayKey();
+  if(!META[k]){
+    let o={}; try{ o=JSON.parse(localStorage.getItem('meta-'+k)||'{}'); }catch(e){}
+    META[k]=o; loadMetaRemote(k);
+  }
+  return META[k];
+}
+async function loadMetaRemote(k){
+  await dbReady; if(!DB) return;
+  try{
+    const snap = await DB.collection('data/users/'+UID).doc('meta-'+k).get();
+    const data = snap && typeof snap.data === 'function' ? snap.data() : snap;
+    if(data && data.items && typeof data.items==='object'){
+      META[k] = {...data.items, ...META[k]};
+      try{ localStorage.setItem('meta-'+k, JSON.stringify(META[k])); }catch(e){}
+      if(dayKey()===k && location.hash.slice(1)==='item') route(true);
+    }
+  }catch(e){}
+}
+let mtTimer;
+function saveMeta(k){
+  try{ localStorage.setItem('meta-'+k, JSON.stringify(META[k])); }catch(e){}
+  clearTimeout(mtTimer); mtTimer=setTimeout(async()=>{
+    await dbReady; if(!DB) return;
+    try{ await DB.collection('data/users/'+UID).doc('meta-'+k).set({items:META[k]}); }catch(e){}
+  },500);
+}
+function itemRec(key){ const m=metaOf(); if(!m[key]) m[key]={w:[],n:''}; return m[key]; }
+
+/* ---------- Карточка объекта ---------- */
+function openItem(i){ state.itemKey = KEYS[i]; location.hash='item'; }
+function toggleItemDone(){
+  const key=state.itemKey, set=checkSet();
+  if(set.has(key)) set.delete(key); else set.add(key);
+  saveChecks(dayKey()); renderItem();
+}
+function toggleItemWorker(name){
+  const rec=itemRec(state.itemKey);
+  rec.w = rec.w.includes(name) ? rec.w.filter(x=>x!==name) : [...rec.w, name];
+  saveMeta(dayKey()); renderItem();
+}
+function setNaryad(v){ itemRec(state.itemKey).n = v; saveMeta(dayKey()); }
+function addStaff(){
+  const inp=document.getElementById('newStaff'); const v=(inp.value||'').trim();
+  if(!v) return; if(!STAFF.includes(v)) STAFF.push(v); saveStaff(); inp.value=''; renderItem();
+}
+function delStaff(name){
+  STAFF = STAFF.filter(x=>x!==name); saveStaff();
+  const rec=itemRec(state.itemKey); rec.w=rec.w.filter(x=>x!==name); saveMeta(dayKey()); renderItem();
+}
+function renderItem(){
+  const key=state.itemKey, o=parseKey(key), done=checkSet().has(key), rec=itemRec(key);
+  const mm = o.obj.match(/^Камера № (\d+)$/);
+  const name = (mm && CAM_LABELS[+mm[1]]) ? `${o.obj} (${CAM_LABELS[+mm[1]]})` : o.obj;
+  let rows = STAFF.map(n=>`<div class="staffrow">
+      <button class="chk${rec.w.includes(n)?' done':''}" style="flex:1" onclick="toggleItemWorker('${n.replace(/'/g,"\\'")}')"><span class="box"></span><span class="txt">${n}</span></button>
+    </div>`).join('');
+  app.innerHTML = `<div class="view">
+    <header>
+      <button class="icon-btn" onclick="history.back()" aria-label="Назад">←</button>
+      <h1>${name}<div class="sub">${o.sys} · ${MENU[state.mode].title} · ${dayTitle()}</div></h1>
+    </header>
+    <button class="bigdone${done?' on':''}" onclick="toggleItemDone()">${done?'✓ Выполнено — нажмите, чтобы снять':'Отметить выполненным'}</button>
+    <div class="sys" style="margin-top:16px">Наряд</div>
+    <input type="text" class="naryad" placeholder="Номер наряда (например N-53)" value="${(rec.n||'').replace(/"/g,'&quot;')}" oninput="setNaryad(this.value)">
+    <div class="sys" style="margin-top:16px">Исполнители работ</div>
+    <div class="grp" style="padding:6px 12px">${rows || '<div class="empty" style="border:0">Список пуст</div>'}</div>
+    <div class="addrow">
+      <input id="newStaff" type="text" placeholder="Добавить сотрудника (ФИО)" onkeydown="if(event.key==='Enter')addStaff()">
+      <button onclick="addStaff()">＋</button>
+    </div>
+    <div class="foot">Исполнители и наряд сохраняются для этого объекта в выбранный день и попадают в журнал Excel.</div>
+  </div>`;
+}
 function logoImg(cls){ return LOGO ? `<img class="${cls}" src="${LOGO}" alt="">` : ''; }
 function openSettings(){ location.hash = 'settings'; }
 function renderSettings(){
@@ -1048,6 +1323,8 @@ function route(keep){
   else if(h==='menu' && state.day && state.mode) renderMenu();
   else if(h==='nar' && state.day) renderNar();
   else if(h==='plan' && state.day) renderPlan();
+  else if(h==='notif') renderNotif();
+  else if(h==='item' && state.day && state.itemKey && state.mode) renderItem();
   else if(h==='week' && state.weekStart!==null) renderWeek();
   else if(h==='month') renderMonth();
   else renderYear();
@@ -1056,15 +1333,14 @@ function route(keep){
 window.addEventListener('hashchange', route);
 if(location.hash && location.hash!=='#') { try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
 route();
-/* Автосохранение отчёта за прошлый месяц (один раз, в первые 7 дней нового месяца) */
 (function(){
   if(!window.Android || today.getDate()>7) return;
-  const pm = new Date(today.getFullYear(), today.getMonth()-1, 1), key = 'auto-report-'+pm.getFullYear()+'-'+pm.getMonth();
+  const pm = new Date(today.getFullYear(), today.getMonth()-1, 1), key='auto-report-'+pm.getFullYear()+'-'+pm.getMonth();
   try{ if(localStorage.getItem(key)) return; }catch(e){ return; }
   setTimeout(async()=>{
     try{
       const dates = rng(1,new Date(pm.getFullYear(),pm.getMonth()+1,0).getDate()).map(d=>new Date(pm.getFullYear(),pm.getMonth(),d));
-      const r = await makeReportRange(dates, `за ${MONTHS[pm.getMonth()].toLowerCase()} ${pm.getFullYear()} г.`);
+      const r = await makeReportRange(dates, '');
       await DL.save({filename:`Отчёт ${MONTHS[pm.getMonth()]} ${pm.getFullYear()}.xlsx`, data:r.bytes});
       localStorage.setItem(key,'1'); toast(`Отчёт за ${MONTHS[pm.getMonth()].toLowerCase()} сохранён в Загрузки/Ежедневник`);
     }catch(e){}
