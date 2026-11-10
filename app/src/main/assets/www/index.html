@@ -238,7 +238,11 @@ function rangeText(s){
 /* ---------- Страница 1: календарь (месяцы) ---------- */
 function renderYear(){
   let html = `<div class="view">
-    <div class="topbar"><button class="bell${NOTIF.on?' on':''}" onclick="openNotif()" aria-label="Уведомления">🔔</button></div>
+    <div class="topbar">
+      ${IS_ADMIN ? `<button class="bell" onclick="if(window.Android)window.Android.openAdmin()" aria-label="Пользователи">👥</button>` : ''}
+      <button class="bell" onclick="openAccount()" aria-label="Аккаунт">👤</button>
+      <button class="bell${NOTIF.on?' on':''}" onclick="openNotif()" aria-label="Уведомления">🔔</button>
+    </div>
     <header>
       <button class="icon-btn" onclick="changeYear(-1)" aria-label="Предыдущий год">‹</button>
       <h1 style="text-align:center">${state.year}<div class="sub">Сегодня: ${today.getDate()} ${MONTHS_GEN[today.getMonth()]} ${today.getFullYear()}</div></h1>
@@ -478,8 +482,29 @@ const M_SHORT = ['Янв','Фев','Мар','Апр','Май','Июн','Июл',
 function dayTitle(){ const d = new Date(state.day); return `${d.getDate()} ${MONTHS_GEN[d.getMonth()]}`; }
 
 /* ---------- Галочки: сохраняются по дням ---------- */
-let DB = null, UID = null;
-/* Android: данные в памяти телефона (localStorage) */
+let DB = null, UID = 'team';
+let __fsSeq = 0; const __fsCbs = {};
+window.__fsResolve = (id, json) => { const cb = __fsCbs[id]; if(cb){ delete __fsCbs[id]; try{ cb.resolve(json ? JSON.parse(json) : null); }catch(e){ cb.resolve(null); } } };
+window.__fsReject = (id, msg) => { const cb = __fsCbs[id]; if(cb){ delete __fsCbs[id]; cb.reject(new Error(msg||'fs')); } };
+function __fs(op, path, data){
+  return new Promise((resolve,reject)=>{
+    if(!(window.Android && window.Android.fsCall)){ reject(new Error('no-fs')); return; }
+    const id = ++__fsSeq; __fsCbs[id] = {resolve,reject};
+    try{ window.Android.fsCall(id, op, path, data?JSON.stringify(data):''); }
+    catch(e){ delete __fsCbs[id]; reject(e); }
+  });
+}
+if(window.Android && window.Android.fsCall){
+  DB = { collection(path){ return { doc(id){ const dp = path + '/' + id; return {
+    async get(){ const d = await __fs('get', dp); return { exists: d!==null, data: ()=>d }; },
+    async set(obj){ await __fs('set', dp, obj||{}); return true; }
+  }; } }; } };
+}
+let ROLE='', LOGIN='', CAN_EDIT=true, IS_ADMIN=false;
+try{ if(window.Android && window.Android.getRole){ ROLE = window.Android.getRole()||''; LOGIN = window.Android.getLogin()||''; } }catch(e){}
+CAN_EDIT = ROLE !== 'Начальник';
+IS_ADMIN = ROLE === 'Администратор';
+function needEdit(){ if(!CAN_EDIT){ toast('Роль «Начальник» — только просмотр'); return false; } return true; }
 const dbReady = Promise.resolve();
 const CHECKS = {}, saveTimers = {};
 let KEYS = [];
@@ -513,6 +538,7 @@ function saveChecks(k){
   }, 600);
 }
 function toggle(i){
+  if(!needEdit()) return;
   const set = checkSet(), key = KEYS[i];
   if(set.has(key)) set.delete(key); else set.add(key);
   saveChecks(dayKey());
@@ -1228,17 +1254,20 @@ function itemRec(key){ const m=metaOf(); if(!m[key]) m[key]={w:[],n:''}; return 
 /* ---------- Карточка объекта ---------- */
 function openItem(i){ state.itemKey = KEYS[i]; location.hash='item'; }
 function toggleItemDone(){
+  if(!needEdit()) return;
   const key=state.itemKey, set=checkSet();
   if(set.has(key)) set.delete(key); else set.add(key);
   saveChecks(dayKey()); renderItem();
 }
 function toggleItemWorker(name){
+  if(!needEdit()) return;
   const rec=itemRec(state.itemKey);
   rec.w = rec.w.includes(name) ? rec.w.filter(x=>x!==name) : [...rec.w, name];
   saveMeta(dayKey()); renderItem();
 }
-function setNaryad(v){ itemRec(state.itemKey).n = v; saveMeta(dayKey()); }
+function setNaryad(v){ if(!CAN_EDIT) return; itemRec(state.itemKey).n = v; saveMeta(dayKey()); }
 function addStaff(){
+  if(!needEdit()) return;
   const inp=document.getElementById('newStaff'); const v=(inp.value||'').trim();
   if(!v) return; if(!STAFF.includes(v)) STAFF.push(v); saveStaff(); inp.value=''; renderItem();
 }
@@ -1268,6 +1297,21 @@ function renderItem(){
       <button onclick="addStaff()">＋</button>
     </div>
     <div class="foot">Исполнители и наряд сохраняются для этого объекта в выбранный день и попадают в журнал Excel.</div>
+  </div>`;
+}
+function openAccount(){ location.hash='account'; }
+function doLogout(){ if(window.Android && window.Android.logout) window.Android.logout(); }
+function renderAccount(){
+  app.innerHTML = `<div class="view">
+    <header>
+      <button class="icon-btn" onclick="history.back()" aria-label="Назад">←</button>
+      <h1>Аккаунт<div class="sub">${LOGIN||'—'}</div></h1>
+    </header>
+    <div class="grp"><h3><span>Логин</span></h3><div class="note">${LOGIN||'—'}</div>
+      <h3 style="margin-top:10px"><span>Роль</span></h3><div class="note">${ROLE||'—'}</div></div>
+    ${IS_ADMIN?`<button class="mbtn" onclick="if(window.Android)window.Android.openAdmin()"><span class="ic">👥</span><span class="t">Пользователи<span class="s">Создать аккаунты и назначить роли</span></span><span class="arrow">›</span></button>`:''}
+    <button class="save-btn" style="background:#8c0808;margin-top:16px" onclick="doLogout()">Выйти</button>
+    <div class="foot">Роль «Начальник» — только просмотр. Инженер и Сотрудник — отмечают работы. Администратор — управляет аккаунтами.</div>
   </div>`;
 }
 function logoImg(cls){ return LOGO ? `<img class="${cls}" src="${LOGO}" alt="">` : ''; }
@@ -1325,6 +1369,7 @@ function route(keep){
   else if(h==='nar' && state.day) renderNar();
   else if(h==='plan' && state.day) renderPlan();
   else if(h==='notif') renderNotif();
+  else if(h==='account') renderAccount();
   else if(h==='item' && state.day && state.itemKey && state.mode) renderItem();
   else if(h==='week' && state.weekStart!==null) renderWeek();
   else if(h==='month') renderMonth();

@@ -2,8 +2,9 @@ package kz.ezhednevnik.app;
 
 import android.app.Activity;
 import android.content.ContentResolver;
-import android.content.pm.PackageManager;
 import android.content.ContentValues;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,16 +17,40 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import java.io.InputStream;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends Activity {
 
     private WebView web;
+    private String role = "Сотрудник";
+    private String login = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
+        if (getIntent() != null) {
+            if (getIntent().getStringExtra("role") != null) role = getIntent().getStringExtra("role");
+            if (getIntent().getStringExtra("login") != null) login = getIntent().getStringExtra("login");
+        }
+
         web = new WebView(this);
         setContentView(web);
 
@@ -40,11 +65,8 @@ public class MainActivity extends Activity {
         web.setWebChromeClient(new WebChromeClient());
         web.addJavascriptInterface(new Bridge(), "Android");
 
-        if (savedInstanceState != null) {
-            web.restoreState(savedInstanceState);
-        } else {
-            web.loadUrl("file:///android_asset/www/index.html");
-        }
+        if (savedInstanceState != null) web.restoreState(savedInstanceState);
+        else web.loadUrl("file:///android_asset/www/index.html");
 
         ReminderScheduler.createChannel(this);
         ReminderScheduler.apply(this);
@@ -59,15 +81,102 @@ public class MainActivity extends Activity {
     @Override
     @SuppressWarnings("deprecation")
     public void onBackPressed() {
-        if (web != null && web.canGoBack()) {
-            web.goBack();
-        } else {
-            super.onBackPressed();
-        }
+        if (web != null && web.canGoBack()) web.goBack();
+        else super.onBackPressed();
     }
 
-    /** Мост между страницей и Android: сохранение отчётов в «Загрузки/Ежедневник». */
+    private void resolveJs(final int id, final String jsonText) {
+        web.post(() -> web.evaluateJavascript("window.__fsResolve(" + id + "," + JSONObject.quote(jsonText) + ")", null));
+    }
+    private void rejectJs(final int id, final String msg) {
+        web.post(() -> web.evaluateJavascript("window.__fsReject(" + id + "," + JSONObject.quote(msg == null ? "err" : msg) + ")", null));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Object jsonToJava(Object v) {
+        if (v instanceof JSONObject) {
+            JSONObject o = (JSONObject) v;
+            Map<String, Object> m = new HashMap<>();
+            Iterator<String> it = o.keys();
+            while (it.hasNext()) { String k = it.next(); m.put(k, jsonToJava(o.opt(k))); }
+            return m;
+        } else if (v instanceof JSONArray) {
+            JSONArray a = (JSONArray) v;
+            List<Object> l = new ArrayList<>();
+            for (int i = 0; i < a.length(); i++) l.add(jsonToJava(a.opt(i)));
+            return l;
+        }
+        return v;
+    }
+
     private class Bridge {
+
+        @JavascriptInterface
+        public String getRole() { return role; }
+
+        @JavascriptInterface
+        public String getLogin() { return login; }
+
+        @JavascriptInterface
+        public void openAdmin() {
+            runOnUiThread(() -> startActivity(new Intent(MainActivity.this, AdminActivity.class)));
+        }
+
+        @JavascriptInterface
+        public void logout() {
+            FirebaseAuth.getInstance().signOut();
+            runOnUiThread(() -> {
+                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                finish();
+            });
+        }
+
+        @JavascriptInterface
+        public void fsCall(final int id, final String op, final String path, final String json) {
+            try {
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                final DocumentReference ref = db.document(path);
+                if ("get".equals(op)) {
+                    ref.get().addOnSuccessListener(snap -> {
+                        if (snap.exists() && snap.getData() != null) {
+                            resolveJs(id, new JSONObject(snap.getData()).toString());
+                        } else resolveJs(id, "null");
+                    }).addOnFailureListener(e -> rejectJs(id, e.getMessage()));
+                } else if ("set".equals(op)) {
+                    Map<String, Object> m = new HashMap<>();
+                    if (json != null && !json.isEmpty()) {
+                        JSONObject o = new JSONObject(json);
+                        Iterator<String> it = o.keys();
+                        while (it.hasNext()) { String k = it.next(); m.put(k, jsonToJava(o.opt(k))); }
+                    }
+                    ref.set(m).addOnSuccessListener(x -> resolveJs(id, "null"))
+                            .addOnFailureListener(e -> rejectJs(id, e.getMessage()));
+                } else {
+                    rejectJs(id, "bad op");
+                }
+            } catch (Exception e) {
+                rejectJs(id, e.getMessage());
+            }
+        }
+
+        @JavascriptInterface
+        public void setReminder(final boolean on, final int h, final int m) {
+            ReminderScheduler.save(MainActivity.this, on, h, m);
+            runOnUiThread(() -> {
+                if (on && Build.VERSION.SDK_INT >= 33
+                        && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1);
+                }
+                ReminderScheduler.createChannel(MainActivity.this);
+                ReminderScheduler.apply(MainActivity.this);
+            });
+        }
+
+        @JavascriptInterface
+        public boolean hasAsset(String path) {
+            try (java.io.InputStream in = getAssets().open(path)) { return true; }
+            catch (Exception e) { return false; }
+        }
 
         @JavascriptInterface
         public String saveFile(String fileName, String base64) {
@@ -95,31 +204,6 @@ public class MainActivity extends Activity {
             } catch (Exception e) {
                 return "Ошибка: " + e.getMessage();
             }
-        }
-
-        @JavascriptInterface
-        public boolean hasAsset(String path) {
-            try (InputStream in = getAssets().open(path)) {
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
-        }
-
-        @JavascriptInterface
-        public void setReminder(final boolean on, final int h, final int m) {
-            ReminderScheduler.save(MainActivity.this, on, h, m);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (on && Build.VERSION.SDK_INT >= 33
-                            && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                        requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1);
-                    }
-                    ReminderScheduler.createChannel(MainActivity.this);
-                    ReminderScheduler.apply(MainActivity.this);
-                }
-            });
         }
     }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "900404093695",
+    "project_id": "ezhednevnik-e01fb",
+    "storage_bucket": "ezhednevnik-e01fb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:900404093695:android:63e0bcf6a9ca53374b62ca",
+        "android_client_info": {
+          "package_name": "kz.ezhednevnik.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8IlTprASlN9PMoh-WLEWLO1LJtINT8lI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
