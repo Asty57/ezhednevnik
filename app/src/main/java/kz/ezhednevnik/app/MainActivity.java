@@ -2,6 +2,7 @@ package kz.ezhednevnik.app;
 
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.pm.PackageManager;
 import android.content.ContentValues;
 import android.net.Uri;
 import android.os.Bundle;
@@ -43,6 +44,9 @@ public class MainActivity extends Activity {
         } else {
             web.loadUrl("file:///android_asset/www/index.html");
         }
+
+        ReminderScheduler.createChannel(this);
+        ReminderScheduler.apply(this);
     }
 
     @Override
@@ -99,6 +103,22 @@ public class MainActivity extends Activity {
             } catch (Exception e) {
                 return false;
             }
+        }
+
+        @JavascriptInterface
+        public void setReminder(final boolean on, final int h, final int m) {
+            ReminderScheduler.save(MainActivity.this, on, h, m);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (on && Build.VERSION.SDK_INT >= 33
+                            && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                        requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1);
+                    }
+                    ReminderScheduler.createChannel(MainActivity.this);
+                    ReminderScheduler.apply(MainActivity.this);
+                }
+            });
         }
     }
 }

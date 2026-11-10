@@ -1126,6 +1126,7 @@ async function saveNotif(){
   const time = document.getElementById('nfTime').value || '08:00';
   NOTIF = { on, time };
   try{ localStorage.setItem('notif', JSON.stringify(NOTIF)); }catch(e){}
+  if(window.Android && window.Android.setReminder){ try{ const pp=time.split(':'); window.Android.setReminder(on, parseInt(pp[0])||0, parseInt(pp[1])||0); }catch(e){} }
   await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('notify').set(NOTIF); }catch(e){} }
   toast('Сохранено');
   setTimeout(()=>history.back(), 500);
@@ -1160,7 +1161,7 @@ function renderNotif(){
       <input type="time" id="nfTime" class="timeinput" value="${NOTIF.time}">
     </div>
     <button class="save-btn" onclick="saveNotif()">Сохранить</button>
-    <div class="foot">Во временной версии уведомления ещё не приходят — заработают в приложении на телефоне. Время сохраняется.</div>
+    <div class="foot">Напоминание приходит каждый день в выбранное время. При первом включении разрешите уведомления.</div>
   </div>`;
 }
 /* ---------- Сотрудники (общий список) ---------- */
