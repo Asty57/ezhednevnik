@@ -109,6 +109,13 @@
   .chk.done .box{background:#3f9a5c;border-color:#3f9a5c}
   .chk.done .box::after{content:'';width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
   .chk.done .txt{color:var(--muted);text-decoration:line-through}
+  .chk.pick .txt{text-decoration:none!important;color:var(--ink)}
+  .chk.pick.on{background:#eafbf0;border-radius:10px}
+  .chk.pick.on .box{background:#3f9a5c;border-color:#3f9a5c}
+  .chk.pick.on .box::after{content:'';width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+  .chk.pick.on .txt{font-weight:700}
+  .nonar{display:flex;align-items:center;gap:10px;margin-top:10px;font-weight:600;color:var(--ink);cursor:pointer}
+  .nonar input{width:20px;height:20px;accent-color:var(--accent)}
   .grp h3 small.cnt{background:#e9eef5;color:var(--muted)}
   .grp h3 small.cnt.full{background:#3f9a5c;color:#fff}
   .export-btn{display:block;width:100%;margin-top:18px;background:var(--card);border:1.5px dashed var(--accent);color:var(--accent);
@@ -129,6 +136,7 @@
   .bigdone.on{background:#2f8a4e;border-color:#2f8a4e;color:#fff}
   .naryad{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;font-size:16px;font-family:inherit;color:var(--ink);background:var(--card);margin-top:4px}
   .chk small.camloc{color:var(--muted);font-weight:600}
+  .chk small.metahint{color:#2f8a4e;font-weight:600}
   .grp .objhead{font-weight:700;font-size:13px;color:var(--accent);margin:10px 0 2px;padding-top:8px;border-top:1px solid #edf1f6}
   .grp .objhead:first-of-type{border-top:0;padding-top:2px;margin-top:0}
   .grp .objhead + .chk{border-top:0}
@@ -191,6 +199,46 @@
   .addrow input{flex:1;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-family:inherit;color:var(--ink);background:var(--card)}
   .addrow button{width:52px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--grad1),var(--grad2));color:#fff;font-size:24px;cursor:pointer}
   .save-btn{display:block;width:100%;margin-top:16px;border:0;border-radius:16px;padding:16px;font-weight:700;font-size:16px;cursor:pointer;background:linear-gradient(135deg,var(--grad1),var(--grad2));color:#fff;box-shadow:var(--shadow)}
+  .app{padding-bottom:88px}
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;background:var(--card);border-top:1px solid var(--line);
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+  .tabbtn{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:var(--muted);font-size:11px;font-weight:700;font-family:inherit;cursor:pointer}
+  .tabbtn.on{color:var(--accent)}
+  .tabbtn .ti{font-size:22px;position:relative;line-height:1}
+  .tabbtn .badge{position:absolute;top:-5px;right:-11px;background:var(--red);color:#fff;font-size:9px;min-width:15px;height:15px;border-radius:8px;display:grid;place-items:center;padding:0 3px;font-style:normal}
+  .tabhead{margin:4px 2px 14px}
+  .tabhead h1{font-family:'Montserrat',sans-serif;font-weight:800;font-size:26px;color:var(--navy);margin:0}
+  .tabhead .sub{color:var(--muted);font-size:13px;font-weight:600;margin-top:2px}
+  .taskcard .tasktitle{font-weight:800;font-size:16px;margin-bottom:8px}
+  .taskmeta{font-size:14px;color:var(--ink);margin:3px 0;line-height:1.4}
+  .resp{margin-top:10px;border-top:1px solid #edf1f6;padding-top:8px}
+  .resphead{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:4px}
+  .respline{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:4px 0}
+  .st{font-weight:700;border-radius:8px;padding:3px 9px;font-size:12px}
+  .st-new{background:#e9eef5;color:#8a93a0}
+  .st-prog{background:#fdefcc;color:#9a6a00}
+  .st-done{background:#ddf2e3;color:#2f8a4e}
+  .taskseg{margin-top:12px}
+  .taskrow{display:flex;align-items:flex-start;gap:10px}
+  .taskinfo{flex:1;min-width:0}
+  .taskacts{display:flex;gap:8px;flex:none;align-items:center}
+  .emoji{width:46px;height:46px;border-radius:14px;border:1.5px solid var(--line);background:#f3f5f9;font-size:22px;cursor:pointer;opacity:.5;transition:.15s}
+  .emoji.on{opacity:1}
+  .emoji.on.done{background:#ddf2e3;border-color:#2f8a4e}
+  .emoji.on.prog{background:#fdefcc;border-color:#e0a000}
+  .closedtag{margin-top:10px;color:#2f8a4e;font-weight:700;font-size:14px}
+  .taskcard.closed{opacity:.8}
+  .taskbtns{display:flex;gap:8px;margin-top:10px}
+  .tbtn{flex:1;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px;font-weight:700;font-size:13px;cursor:pointer;color:var(--ink);font-family:inherit}
+  .tbtn.del{color:#c00d0d;border-color:#f0c9c9}
+  .respline button.st{border:1px dashed #c9d2de;cursor:pointer;font-family:inherit}
+  .diarytag{font-size:11px;font-weight:700;color:#1c5bb0;background:#e2ecfa;border-radius:8px;padding:3px 8px;display:inline-block;margin-bottom:6px}
+  .daterow{display:flex;align-items:center;gap:8px}
+  .daterow .naryad{flex:1}
+  .extrow{display:flex;gap:8px;margin-top:10px}
+  .extrow .naryad{flex:1;margin:0}
+  .extrow .tbtn{flex:none;padding:0 16px}
+  .chk small.taskhint{color:#1c5bb0;font-weight:700}
   .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
     background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;
     max-width:90vw;text-align:center}
@@ -207,6 +255,7 @@
 </div>
 <div id="bgLayer"></div>
 <div class="app" id="app"></div>
+<nav class="tabbar" id="tabbar"></nav>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -238,11 +287,7 @@ function rangeText(s){
 /* ---------- Страница 1: календарь (месяцы) ---------- */
 function renderYear(){
   let html = `<div class="view">
-    <div class="topbar">
-      ${IS_ADMIN ? `<button class="bell" onclick="if(window.Android)window.Android.openAdmin()" aria-label="Пользователи">👥</button>` : ''}
-      <button class="bell" onclick="openAccount()" aria-label="Аккаунт">👤</button>
-      <button class="bell${NOTIF.on?' on':''}" onclick="openNotif()" aria-label="Уведомления">🔔</button>
-    </div>
+    <div class="topbar">${isEmployeeOnly() ? '' : `<button class="bell${NOTIF.on?' on':''}" onclick="openNotif()" aria-label="Уведомления">🔔</button>`}</div>
     <header>
       <button class="icon-btn" onclick="changeYear(-1)" aria-label="Предыдущий год">‹</button>
       <h1 style="text-align:center">${state.year}<div class="sub">Сегодня: ${today.getDate()} ${MONTHS_GEN[today.getMonth()]} ${today.getFullYear()}</div></h1>
@@ -500,12 +545,12 @@ if(window.Android && window.Android.fsCall){
     async set(obj){ await __fs('set', dp, obj||{}); return true; }
   }; } }; } };
 }
-let ROLE='', LOGIN='', CAN_EDIT=true, IS_ADMIN=false;
-try{ if(window.Android && window.Android.getRole){ ROLE = window.Android.getRole()||''; LOGIN = window.Android.getLogin()||''; } }catch(e){}
-CAN_EDIT = ROLE !== 'Начальник';
-IS_ADMIN = ROLE === 'Администратор';
-function needEdit(){ if(!CAN_EDIT){ toast('Роль «Начальник» — только просмотр'); return false; } return true; }
+// Вход (логин/роль) из нативного приложения
+let NLOGIN='', NROLE='';
+try{ if(window.Android && window.Android.getRole){ NROLE = window.Android.getRole()||''; NLOGIN = window.Android.getLogin()||''; } }catch(e){}
 const dbReady = Promise.resolve();
+// Данные из artifact-DB приходят «замороженными» (не расширяемые) — делаем изменяемую копию
+function fresh(x){ try{ return JSON.parse(JSON.stringify(x)); }catch(e){ return Array.isArray(x)?x.slice():x; } }
 const CHECKS = {}, saveTimers = {};
 let KEYS = [];
 function dayKey(){ const d = new Date(state.day); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -538,7 +583,7 @@ function saveChecks(k){
   }, 600);
 }
 function toggle(i){
-  if(!needEdit()) return;
+  if(!needDiary()) return;
   const set = checkSet(), key = KEYS[i];
   if(set.has(key)) set.delete(key); else set.add(key);
   saveChecks(dayKey());
@@ -590,10 +635,22 @@ function itemRow(key, text){
   }
   let hint = other.length ? `<small>${isReg?'также отмечено':'уже было'}: ${dates}</small>` : '';
   const kp = key.split('|');
-  if((kp[0]==='pn' || kp[0]==='on') && kp.length===4){
+  if((kp[0]==='pn' || kp[0]==='on' || kp[0]==='zp') && kp.length===4){
     const rk = 'reg|' + kp.slice(1).join('|'), d = new Date(state.day), y = d.getFullYear(), m = d.getMonth(), rd = [];
     for(let n=1; n<=new Date(y,m+1,0).getDate(); n++){ const set = CHECKS[`${y}-${pad2(m+1)}-${pad2(n)}`]; if(set && set.has(rk)) rd.push(n); }
     if(rd.length) hint += `<small class="regdone">✅ Проведён регламент: ${rd.map(n=>n+' '+MONTHS_GEN[m]).join(', ')}</small>`;
+  }
+  if(typeof TASKS!=='undefined'){
+    const tk = TASKS.find(t=>t.object===text);
+    if(tk){ const resp=(tk.assignees||[]).map(a=>a.name+': '+stName((tk.status&&tk.status[a.login||a.name])||'new')).join(', ');
+      hint += `<small class="taskhint">📋 задача — ${resp}</small>`; }
+  }
+  const rc = metaOf()[key];
+  if(rc && ((rc.w && rc.w.length) || rc.n)){
+    const parts=[];
+    if(rc.w && rc.w.length) parts.push('👷 '+rc.w.join(', '));
+    if(rc.n) parts.push('наряд '+rc.n);
+    hint += `<small class="metahint">${parts.join(' · ')}</small>`;
   }
   return `<div class="chk${mine?' done':''}" data-i="${i}">
     <button class="cbox" onclick="toggle(${i})" aria-label="Отметить"><span class="box"></span></button>
@@ -659,11 +716,13 @@ function renderNar(){
     <div class="menu">
       ${btn('pn','🟢','Простые наряды','Объекты по графику месяца')}
       ${btn('on','⚠️','Опасные наряды','Объекты по графику месяца')}
+      ${btn('zp','📝','Заявка','Объекты по графику месяца')}
     </div></div>`;
 }
 
 /* ---------- Страница 5: список подразделов (Регламент / Заявки) ---------- */
 const MENU = { reg:{ title:'Регламент', keys:['aps','aos','video','ggs','skud'] },
+               zp:{ title:'Заявка', parent:'Запланированные', keys:['aps','aos','video','ggs','skud'] },
                pn:{ title:'Простые наряды', parent:'Запланированные', keys:['aps','aos','video','ggs','skud'] },
                on:{ title:'Опасные наряды', parent:'Запланированные', keys:['aps','aos','video','ggs','skud'] },
                zay:{ title:'Заявки',    keys:['aps','aos','video','skud'] } };
@@ -821,7 +880,7 @@ async function loadMonthChecks(y,m){
   }));
   return out;
 }
-const RAZDEL = { zay:'Заявки', pn:'Простые наряды', on:'Опасные наряды' };
+const RAZDEL = { zay:'Заявки', pn:'Простые наряды', on:'Опасные наряды', zp:'Заявка' };
 function parseKey(k){
   const p = k.split('|');
   if(RAZDEL[p[0]] && p.length===4) return {razdel:RAZDEL[p[0]], sys:REG[p[1]]?REG[p[1]].title:p[1], sub:(REG[p[1]]&&REG[p[1]].systems.length>1?p[2]:''), obj:p[3]};
@@ -967,7 +1026,7 @@ async function makeReportRange(dates, title){
   });
   const JHEAD = ['№ П/П','Дата','Наименование объекта','Система (АПС/СКУД/CCTV/АОС)','Выполненные работы (описать подробно)','Наряд (указать какой)','ФИО исполнителя работ','Время начала работ','Время завершения работ','Роспись сотрудника RichFit','Примечание'];
   const SYS_SHORT = {'Видеонаблюдение':'CCTV'};
-  const ORD = {reg:0, zay:1, pn:2, on:3};
+  const ORD = {reg:0, zay:1, zp:2, pn:3, on:4};
   const camName = o => { const mm = o.obj.match(/^Камера № (\d+)$/); return (mm && CAM_LABELS[+mm[1]]) ? `${o.obj} (${CAM_LABELS[+mm[1]]})` : o.obj; };
   const log = [ JHEAD.map(v=>({v,s:1})) ];
   dates.forEach((dt,i)=>{
@@ -981,8 +1040,9 @@ async function makeReportRange(dates, title){
       const rec = (dayMeta[i] && dayMeta[i][k]) || {};
       const fio = (rec.w || []).join('\n');
       const nar = rec.n || '';
+      const prim = rec.note || '';
       log.push([ {v:n,s:3}, {v:dateStr,s:3}, {v:camName(o),s:6}, {v:sysName,s:3},
-        {v:work,s:3}, {v:nar,s:3},{v:fio,s:6},{v:'',s:3},{v:'',s:3},{v:'',s:3},{v:'',s:3} ]);
+        {v:work,s:3}, {v:nar,s:3},{v:fio,s:6},{v:'',s:3},{v:'',s:3},{v:'',s:3},{v:prim,s:6} ]);
     });
   });
   if(log.length===1) log.push([{v:'За этот период отметок нет'}]);
@@ -992,12 +1052,12 @@ async function makeReportRange(dates, title){
 }
 async function saveReport(dates, title, filename){
   await dlReady;
-  if(!DL){ toast('Не удалось сохранить файл'); return; }
+  if(!DL){ toast('Скачивание недоступно здесь. Откройте дневник в приложении Claude или на claude.ai'); return; }
   toast('Готовлю отчёт…');
   try{
     const r = await makeReportRange(dates, title);
     await DL.save({ filename, data:r.bytes });
-    toast('Отчёт сохранён в Загрузки/Ежедневник');
+    toast('Отчёт сохранён');
   }catch(e){
     const c = e && e.code;
     if(c==='declined') return;
@@ -1015,8 +1075,8 @@ function exportWeek(ts){
 }
 
 /* ---------- Логотип компании (добавляет сам пользователь) и цвета ---------- */
-let LOGO = null;
-LOGO = 'logo.png';
+let LOGO = 'logo.png';
+try{ LOGO = localStorage.getItem('logo') || 'logo.png'; }catch(e){}
 function hexToRgb(h){ h=h.replace('#',''); return [0,2,4].map(i=>parseInt(h.substr(i,2),16)); }
 function rgbToHex(r,g,b){ return '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join(''); }
 function mix(a,b,t){ const A=hexToRgb(a),B=hexToRgb(b); return rgbToHex(A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t,A[2]+(B[2]-A[2])*t); }
@@ -1097,7 +1157,7 @@ loadSettings();
 
 /* ---------- Фоновое фото ---------- */
 let BG = null, VEIL = .82;
-BG = (window.Android && window.Android.hasAsset && window.Android.hasAsset('www/bg.jpg')) ? 'bg.jpg' : null;
+try{ BG = localStorage.getItem('bgimg') || null; const v = parseFloat(localStorage.getItem('veil')); if(!isNaN(v)) VEIL = v; }catch(e){}
 function applyBg(){
   const l = document.getElementById('bgLayer'); if(!l) return;
   if(BG){ l.style.backgroundImage = `url(${BG})`; l.style.display = 'block'; document.body.classList.add('has-bg'); }
@@ -1187,7 +1247,7 @@ function renderNotif(){
       <input type="time" id="nfTime" class="timeinput" value="${NOTIF.time}">
     </div>
     <button class="save-btn" onclick="saveNotif()">Сохранить</button>
-    <div class="foot">Напоминание приходит каждый день в выбранное время. При первом включении разрешите уведомления.</div>
+    <div class="foot">Во временной версии уведомления ещё не приходят — заработают в приложении на телефоне. Время сохраняется.</div>
   </div>`;
 }
 /* ---------- Сотрудники (общий список) ---------- */
@@ -1210,7 +1270,7 @@ async function loadStaff(){
     const snap = await DB.collection('data/users/'+UID).doc('staff').get();
     const data = snap && typeof snap.data === 'function' ? snap.data() : snap;
     if(data && Array.isArray(data.list) && data.list.length && data.ver===STAFF_VER){
-      STAFF = data.list; try{ localStorage.setItem('staff', JSON.stringify(STAFF)); }catch(e){}
+      STAFF = fresh(data.list); try{ localStorage.setItem('staff', JSON.stringify(STAFF)); }catch(e){}
       if(location.hash.slice(1)==='item') route(true);
     } else {
       saveStaff();
@@ -1254,20 +1314,20 @@ function itemRec(key){ const m=metaOf(); if(!m[key]) m[key]={w:[],n:''}; return 
 /* ---------- Карточка объекта ---------- */
 function openItem(i){ state.itemKey = KEYS[i]; location.hash='item'; }
 function toggleItemDone(){
-  if(!needEdit()) return;
+  if(!needDiary()) return;
   const key=state.itemKey, set=checkSet();
   if(set.has(key)) set.delete(key); else set.add(key);
-  saveChecks(dayKey()); renderItem();
+  saveChecks(dayKey()); syncDiaryToTask(key, dayKey()); renderItem();
 }
 function toggleItemWorker(name){
-  if(!needEdit()) return;
+  if(!needDiary()) return;
   const rec=itemRec(state.itemKey);
   rec.w = rec.w.includes(name) ? rec.w.filter(x=>x!==name) : [...rec.w, name];
-  saveMeta(dayKey()); renderItem();
+  saveMeta(dayKey()); syncDiaryToTask(state.itemKey, dayKey()); renderItem();
 }
-function setNaryad(v){ if(!CAN_EDIT) return; itemRec(state.itemKey).n = v; saveMeta(dayKey()); }
+function setNaryad(v){ if(!canEditDiary()) return; itemRec(state.itemKey).n = v; saveMeta(dayKey()); syncDiaryToTask(state.itemKey, dayKey()); }
 function addStaff(){
-  if(!needEdit()) return;
+  if(!needDiary()) return;
   const inp=document.getElementById('newStaff'); const v=(inp.value||'').trim();
   if(!v) return; if(!STAFF.includes(v)) STAFF.push(v); saveStaff(); inp.value=''; renderItem();
 }
@@ -1297,21 +1357,6 @@ function renderItem(){
       <button onclick="addStaff()">＋</button>
     </div>
     <div class="foot">Исполнители и наряд сохраняются для этого объекта в выбранный день и попадают в журнал Excel.</div>
-  </div>`;
-}
-function openAccount(){ location.hash='account'; }
-function doLogout(){ if(window.Android && window.Android.logout) window.Android.logout(); }
-function renderAccount(){
-  app.innerHTML = `<div class="view">
-    <header>
-      <button class="icon-btn" onclick="history.back()" aria-label="Назад">←</button>
-      <h1>Аккаунт<div class="sub">${LOGIN||'—'}</div></h1>
-    </header>
-    <div class="grp"><h3><span>Логин</span></h3><div class="note">${LOGIN||'—'}</div>
-      <h3 style="margin-top:10px"><span>Роль</span></h3><div class="note">${ROLE||'—'}</div></div>
-    ${IS_ADMIN?`<button class="mbtn" onclick="if(window.Android)window.Android.openAdmin()"><span class="ic">👥</span><span class="t">Пользователи<span class="s">Создать аккаунты и назначить роли</span></span><span class="arrow">›</span></button>`:''}
-    <button class="save-btn" style="background:#8c0808;margin-top:16px" onclick="doLogout()">Выйти</button>
-    <div class="foot">Роль «Начальник» — только просмотр. Инженер и Сотрудник — отмечают работы. Администратор — управляет аккаунтами.</div>
   </div>`;
 }
 function logoImg(cls){ return LOGO ? `<img class="${cls}" src="${LOGO}" alt="">` : ''; }
@@ -1355,6 +1400,364 @@ function renderSettings(){
   </div>`;
 }
 
+/* ================= Роли, аккаунты, вкладки, задачи (превью) ================= */
+const SYS_LIST = ['АПС','АОС','Видеонаблюдение','ГГС','СКУД'];
+const st_NAME = { new:'Ожидает', prog:'В процессе', done:'Закончено' };
+function stName(s){ return st_NAME[s]||'Ожидает'; }
+
+let ACCOUNTS = [];
+try{ ACCOUNTS = JSON.parse(localStorage.getItem('accounts')||'[]'); }catch(e){}
+const ROLE_MIG = {'Кузь В.':'Инженер', 'Мырзабек Қ. Т.':'Инженер'};
+function seedAccounts(){
+  ACCOUNTS = [{id:'admin', name:'Администратор', login:'admin', roles:['Администратор'], pass:''}];
+  (typeof STAFF!=='undefined'?STAFF:[]).forEach((n,i)=> ACCOUNTS.push({id:'u'+i, name:n, login:'', roles:[ROLE_MIG[n]||'Сотрудник'], pass:''}));
+}
+function applyRoleMig(){
+  try{ if(localStorage.getItem('accRoleMig')==='v2') return; }catch(e){}
+  let changed=false;
+  ACCOUNTS.forEach(a=>{ if(!Array.isArray(a.roles)){ a.roles = a.role?[a.role]:['Сотрудник']; delete a.role; changed=true; }
+    if(ROLE_MIG[a.name] && !a.roles.includes(ROLE_MIG[a.name])){ a.roles=[ROLE_MIG[a.name]]; changed=true; } });
+  try{ localStorage.setItem('accRoleMig','v2'); }catch(e){}
+  if(changed) saveAccounts();
+}
+if(!ACCOUNTS.length) seedAccounts();
+applyRoleMig();
+let PROFILE = null;
+// PROFILE = вошедший пользователь (логин/роль из нативного входа); сопоставляем с ростером по логину
+function resolveProfile(){
+  let a = NLOGIN ? ACCOUNTS.find(x=> x.login && x.login.toLowerCase()===NLOGIN.toLowerCase()) : null;
+  if(!a){ a = { id:'me', name:(NLOGIN||'Пользователь'), login:(NLOGIN||''), roles:[NROLE||'Сотрудник'], pass:'' }; }
+  else if(NROLE && (!a.roles||!a.roles.length)){ a.roles=[NROLE]; }
+  PROFILE = a;
+}
+resolveProfile();
+function rolesOf(a){ return (a&&Array.isArray(a.roles)&&a.roles.length)?a.roles:(a&&a.role?[a.role]:['Сотрудник']); }
+function myRoles(){ return rolesOf(PROFILE); }
+function hasRole(r){ return myRoles().includes(r); }
+function myRole(){ return myRoles()[0]; }
+function rolesText(a){ return rolesOf(a).join(', '); }
+function isAdmin(){ return hasRole('Администратор'); }
+function canAssign(){ return hasRole('Инженер')||hasRole('Администратор'); }
+function canEditDiary(){ return canAssign(); }
+function isEmployeeOnly(){ return hasRole('Сотрудник') && !canAssign() && !hasRole('Начальник'); }
+function needDiary(){ if(!canEditDiary()){ toast('Эта роль только просматривает ежедневник'); return false; } return true; }
+function acctKey(a){ return a.login || a.name; }
+function isMe(a){ return (a.login && a.login===PROFILE.login) || a.name===PROFILE.name; }
+
+async function saveAccounts(){
+  try{ localStorage.setItem('accounts', JSON.stringify(ACCOUNTS)); }catch(e){}
+  await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('accounts').set({list:ACCOUNTS}); }catch(e){} }
+}
+async function loadAccounts(){
+  await dbReady; if(!DB) return;
+  try{ const snap=await DB.collection('data/users/'+UID).doc('accounts').get();
+    const d=snap&&typeof snap.data==='function'?snap.data():snap;
+    if(d&&Array.isArray(d.list)&&d.list.length){ ACCOUNTS=fresh(d.list); applyRoleMig();
+      try{localStorage.setItem('accounts',JSON.stringify(ACCOUNTS));}catch(e){}
+      resolveProfile();
+      const h=location.hash.slice(1); if(h==='profile'||h==='tasks'||h.indexOf('profile-')===0) route(true);
+    } }catch(e){}
+}
+loadAccounts();
+
+const TASK_GEN = '2';
+let TASKS = [];
+try{ TASKS = JSON.parse(localStorage.getItem('tasks')||'[]'); }catch(e){}
+if(localStorage.getItem('tasksGen')!==TASK_GEN){ TASKS=[]; try{ localStorage.setItem('tasks','[]'); localStorage.setItem('tasksGen',TASK_GEN); }catch(e){} }
+async function saveTasks(){
+  try{ localStorage.setItem('tasks', JSON.stringify(TASKS)); }catch(e){}
+  await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('tasks').set({list:TASKS, gen:TASK_GEN}); }catch(e){} }
+}
+async function loadTasks(){
+  await dbReady; if(!DB) return;
+  try{ const snap=await DB.collection('data/users/'+UID).doc('tasks').get();
+    const d=snap&&typeof snap.data==='function'?snap.data():snap;
+    if(d){ if(d.gen!==TASK_GEN){ TASKS=[]; saveTasks(); }
+      else if(Array.isArray(d.list)){ TASKS=fresh(d.list); try{localStorage.setItem('tasks',JSON.stringify(TASKS));}catch(e){}
+        if(location.hash.slice(1)==='tasks') route(true); } } }catch(e){}
+}
+loadTasks();
+function statusOf(t, a){ return (t.status && t.status[acctKey(a)]) || 'new'; }
+
+/* ---------- Нижняя навигация ---------- */
+function tabOrder(){ return isEmployeeOnly() ? ['tasks','cal','profile'] : ['cal','tasks','profile']; }
+const TAB_META = { cal:{icon:'📅',label:'Календарь'}, tasks:{icon:'✅',label:'Задачи'}, profile:{icon:'👤',label:'Профиль'} };
+function curTab(){ const h=location.hash.slice(1); if(h==='tasks'||h==='newtask')return'tasks'; if(h==='profile'||h.indexOf('profile-')===0)return'profile'; return 'cal'; }
+function goTab(t){ if(t==='cal') location.hash=''; else location.hash=t; }
+function myTaskCount(){
+  if(!hasRole('Сотрудник')) return 0;
+  return TASKS.filter(t=>(t.assignees||[]).some(a=>isMe(a)) && (t.status&&t.status[PROFILE.login||PROFILE.name])!=='done').length;
+}
+function renderTabbar(){
+  const bar=document.getElementById('tabbar'); if(!bar) return;
+  const cur=curTab();
+  bar.innerHTML = tabOrder().map(t=>{ const m=TAB_META[t];
+    const n = t==='tasks' ? myTaskCount() : 0;
+    return `<button class="tabbtn${cur===t?' on':''}" onclick="goTab('${t}')"><span class="ti">${m.icon}${n?`<i class="badge">${n}</i>`:''}</span><span>${m.label}</span></button>`;
+  }).join('');
+}
+
+/* ---------- Вкладка: Задачи ---------- */
+function renderTasks(){
+  const role=myRole();
+  let html = `<div class="view"><div class="tabhead"><h1>Задачи</h1><div class="sub">${PROFILE.name} · ${role}</div></div>`;
+  if(canAssign()) html += `<button class="save-btn" style="margin-bottom:14px" onclick="openNewTask()">＋ Новая задача</button>`;
+  let list = TASKS.slice().sort((a,b)=>b.created-a.created);
+  if(!canAssign() && !hasRole('Начальник')) list = list.filter(t=>(t.assignees||[]).some(a=>isMe(a)));
+  if(!list.length) html += `<div class="empty">Задач пока нет</div>`;
+  list.forEach(t=> html += taskCard(t));
+  html += `</div>`;
+  app.innerHTML = html;
+}
+function taskTitle(t){ return (t.kind==='zay') ? '📝 Заявка' : '📋 Провести регламент'; }
+function fmtDate(iso){ if(!iso) return ''; const p=iso.split('-'); return p.length===3 ? `${p[2]}.${p[1]}.${p[0]}` : iso; }
+function taskNote(t){ let a=[]; if(t.from||t.to) a.push('Срок: '+(t.from?fmtDate(t.from):'…')+' — '+(t.to?fmtDate(t.to):'…')); if(t.extendedTo) a.push('продлено до '+fmtDate(t.extendedTo)); return a.join('; '); }
+function taskCard(t){
+  if(t.source==='diary'){
+    const resp=(t.assignees||[]).map(a=>`<div class="respline"><span>${a.name}</span><span class="st st-done">Выполнено</span></div>`).join('');
+    return `<div class="grp taskcard"><div class="diarytag">🗓 Из ежедневника · ${t.day?t.day.split('-').reverse().join('.'):''}</div>
+      <div class="tasktitle">${taskTitle(t)}</div>
+      <div class="taskmeta">Объект: <b>${t.object||'—'}</b></div>
+      <div class="taskmeta">Система: <b>${t.system}</b></div>
+      ${t.note?`<div class="taskmeta">Примечание: ${t.note}</div>`:''}
+      <div class="resp"><div class="resphead">Исполнители:</div>${resp||'—'}</div></div>`;
+  }
+  const period = (t.from||t.to) ? `<div class="taskmeta">Срок: <b>${t.from?fmtDate(t.from):'…'} — ${t.to?fmtDate(t.to):'…'}</b></div>` : '';
+  const ext = t.extendedTo ? `<div class="taskmeta" style="color:#9a6a00">Продлено до: <b>${fmtDate(t.extendedTo)}</b></div>` : '';
+  const narTxt = t.noNaryad ? 'без наряда' : (t.naryad||'');
+  const nar = narTxt ? `<div class="taskmeta">Наряд: <b>${narTxt}</b></div>` : '';
+  const info = `<div class="tasktitle">${taskTitle(t)}</div>
+    <div class="taskmeta">Объект: <b>${t.object||'—'}</b></div>
+    <div class="taskmeta">Система: <b>${t.system}</b></div>
+    ${nar}
+    ${period}
+    <div class="taskmeta">Исполнители: ${(t.assignees||[]).map(a=>a.name).join(', ')||'—'}</div>
+    <div class="taskmeta">Инженер: ${t.engineer}</div>
+    ${ext}`;
+  // Инженер/Админ — полный контроль
+  if(canAssign()){
+    const resp = (t.assignees||[]).map(a=>{ const key=a.login||a.name; const st=statusOf(t,a);
+      return `<div class="respline"><span>${a.name}</span><button class="st st-${st}" onclick="cycleStatus('${t.id}','${key.replace(/'/g,"\\'")}')">${stName(st)} ✎</button></div>`; }).join('');
+    let foot = t.closed ? '<div class="closedtag">✔ Внесено в ежедневник</div>'
+      : `<div class="extrow"><input type="date" id="ext_${t.id}" class="naryad" value="${t.extendedTo||''}"><button class="tbtn" onclick="extendTask('${t.id}')">⏱ Продлить</button></div>
+         <button class="save-btn" style="margin-top:8px" onclick="finishTask('${t.id}')">Завершить — внести в ежедневник</button>`;
+    return `<div class="grp taskcard${t.closed?' closed':''}">${info}
+      <div class="resp"><div class="resphead">Ответы (нажмите статус, чтобы изменить):</div>${resp||'—'}</div>
+      ${foot}
+      <div class="taskbtns"><button class="tbtn" onclick="editTask('${t.id}')">✎ Изменить</button><button class="tbtn del" onclick="deleteTask('${t.id}')">🗑 Удалить</button></div>
+    </div>`;
+  }
+  // Начальник — только просмотр
+  if(hasRole('Начальник')){
+    const resp = (t.assignees||[]).map(a=>{ const st=statusOf(t,a);
+      return `<div class="respline"><span>${a.name}</span><span class="st st-${st}">${stName(st)}</span></div>`; }).join('');
+    return `<div class="grp taskcard${t.closed?' closed':''}">${info}
+      <div class="resp"><div class="resphead">Ответы:</div>${resp||'—'}</div>
+      ${t.closed?'<div class="closedtag">✔ Внесено в ежедневник</div>':''}</div>`;
+  }
+  // Сотрудник — две эмодзи
+  const my = (t.status&&t.status[PROFILE.login||PROFILE.name]) || 'new';
+  return `<div class="grp taskcard${t.closed?' closed':''}">
+    <div class="taskrow"><div class="taskinfo">${info}</div>
+      <div class="taskacts">
+        <button class="emoji${my==='done'?' on done':''}" onclick="setTaskStatus('${t.id}','done')" aria-label="Выполнено">✅</button>
+        <button class="emoji${my==='prog'?' on prog':''}" onclick="setTaskStatus('${t.id}','prog')" aria-label="В процессе">🔄</button>
+      </div></div>
+    ${t.closed?'<div class="closedtag">✔ Внесено в ежедневник</div>':''}</div>`;
+}
+function cycleStatus(id, key){ const t=TASKS.find(x=>x.id===id); if(!t) return;
+  const order=['new','prog','done']; t.status=t.status||{}; const cur=t.status[key]||'new';
+  t.status[key]=order[(order.indexOf(cur)+1)%3]; saveTasks(); renderTasks(); }
+function editTask(id){ const t=TASKS.find(x=>x.id===id); if(!t) return;
+  newTask={ id:t.id, kind:t.kind||'reg', system:t.system, object:t.object, from:t.from||'', to:t.to||'', assignees:(t.assignees||[]).map(a=>({id:(ACCOUNTS.find(x=>x.name===a.name)||{}).id, name:a.name, login:a.login})) };
+  location.hash='newtask'; }
+function deleteTask(id){ TASKS=TASKS.filter(x=>x.id!==id); saveTasks(); renderTasks(); renderTabbar(); toast('Задача удалена'); }
+/* сопоставление системы и ключей */
+const SYS_KEY = {'АПС':'aps','АОС':'aos','Видеонаблюдение':'video','ГГС':'ggs','СКУД':'skud'};
+function objectsForTask(sysName, kind){
+  const key = SYS_KEY[sysName]; if(!key) return [];
+  if(kind==='zay'){ const out=[]; (ZAY[key]||[]).forEach(sec=>sec.subs.forEach(sb=>sb.items.forEach(x=>{ if(!out.includes(x)) out.push(x); }))); return out; }
+  const m = today.getMonth(); const out=[];
+  (REG[key]?REG[key].systems:[]).forEach(sys=>sys.groups.forEach(g=>{ if(g.months.includes(m)) g.items.forEach(x=>{ if(!out.includes(x)) out.push(x); }); }));
+  return out;
+}
+function findRegKey(sysKey, obj){ let r=null; (REG[sysKey]?REG[sysKey].systems:[]).forEach(sys=>sys.groups.forEach(g=>{ if(!r && g.items.includes(obj)) r=`reg|${sysKey}|${sys.name}|${obj}`; })); return r; }
+function findZayKey(sysKey, obj){ let r=null; (ZAY[sysKey]||[]).forEach(sec=>sec.subs.forEach(sb=>{ if(!r && sb.items.includes(obj)) r=`zay|${sysKey}|${sec.name}|${sb.name}|${obj}`; })); return r; }
+function dayKToTime(k){ const p=(k||'').split('-'); return p.length===3 ? new Date(+p[0],+p[1]-1,+p[2],12,0,0).getTime() : Date.now(); }
+function syncDiaryToTask(key, dayK){
+  if(typeof TASKS==='undefined') return;
+  const id = 'd|'+dayK+'|'+key;
+  const set = checkSet(dayK);
+  const idx = TASKS.findIndex(t=>t.id===id);
+  if(!set.has(key)){ if(idx>=0){ TASKS.splice(idx,1); saveTasks(); if(location.hash.slice(1)==='tasks') renderTasks(); } return; }
+  const o = parseKey(key);
+  const kind = key.indexOf('zay|')===0 ? 'zay' : 'reg';
+  const rec = metaOf(dayK)[key] || {};
+  const assignees = (rec.w||[]).map(n=>({name:n, login:(ACCOUNTS.find(a=>a.name===n)||{}).login||''}));
+  const status={}; assignees.forEach(a=>status[a.login||a.name]='done');
+  const t = { id, kind, system:o.sys, object:o.obj, assignees, engineer:(PROFILE&&PROFILE.name)||'', engineerLogin:(PROFILE&&PROFILE.login)||'', status, closed:true, source:'diary', day:dayK, note:(rec.note||''), created:dayKToTime(dayK) };
+  if(idx>=0) TASKS[idx]=t; else TASKS.push(t);
+  saveTasks(); if(location.hash.slice(1)==='tasks') renderTasks();
+}
+function finishTask(id){
+  const t=TASKS.find(x=>x.id===id); if(!t) return;
+  const sk=SYS_KEY[t.system];
+  const key = t.kind==='zay' ? findZayKey(sk, t.object) : findRegKey(sk, t.object);
+  if(!key){ toast('Не удалось сопоставить объект'); return; }
+  const d=new Date(), k=d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+  const set=checkSet(k); set.add(key); saveChecks(k);
+  const engNames = new Set(ACCOUNTS.filter(a=>rolesOf(a).includes('Инженер')||rolesOf(a).includes('Администратор')).map(a=>a.name));
+  const w=(t.assignees||[]).map(a=>a.name).filter(n=> n!==t.engineer && !engNames.has(n));
+  const note=taskNote(t); const meta=metaOf(k);
+  const nar = t.noNaryad ? 'без наряда' : (t.naryad||(meta[key]&&meta[key].n)||'');
+  meta[key]={ w:w, n:nar, note: note||((meta[key]&&meta[key].note)||'') }; saveMeta(k);
+  t.closed=true; saveTasks(); renderTasks(); renderTabbar();
+  toast('Внесено в ежедневник за сегодня');
+}
+function extendTask(id){
+  const el=document.getElementById('ext_'+id); const v=el?el.value:'';
+  if(!v){ toast('Выберите дату продления'); return; }
+  const t=TASKS.find(x=>x.id===id); if(!t) return;
+  t.extendedTo=v; t.closed=false; saveTasks(); renderTasks(); renderTabbar();
+  toast('Продлено до '+fmtDate(v));
+}
+function setTaskStatus(id, code){
+  const t=TASKS.find(x=>x.id===id); if(!t) return;
+  t.status = t.status||{}; t.status[PROFILE.login||PROFILE.name]=code;
+  saveTasks(); renderTasks(); renderTabbar();
+  toast(code==='done'?'Отмечено: закончено':'Отмечено: в процессе');
+}
+
+/* Новая задача (инженер) */
+let newTask = null;
+function openNewTask(){ newTask={kind:'reg', system:'АПС', object:'', assignees:[], from:'', to:'', naryad:'', noNaryad:false}; location.hash='newtask'; }
+function ntKind(v){ newTask.kind=v; newTask.object=''; renderNewTask(); }
+function ntSys(v){ newTask.system=v; newTask.object=''; renderNewTask(); }
+function ntObj(v){ newTask.object=v; }
+function ntFrom(v){ newTask.from=v; }
+function ntTo(v){ newTask.to=v; }
+function ntNaryad(v){ newTask.naryad=v; }
+function ntNoNaryad(c){ newTask.noNaryad=c; if(c) newTask.naryad=''; renderNewTask(); }
+function ntToggle(id){ const a=ACCOUNTS.find(x=>x.id===id); if(!a) return;
+  const i=newTask.assignees.findIndex(x=>x.id===id);
+  if(i>=0) newTask.assignees.splice(i,1); else newTask.assignees.push({id:a.id,name:a.name,login:a.login});
+  renderNewTask(); }
+function goTasks(){ location.hash='tasks'; try{ route(true); }catch(e){} }
+function ntSay(msg,ok){ const el=document.getElementById('ntMsg'); if(el){ el.textContent=msg; el.style.color = ok?'#2f8a4e':'var(--accent)'; } toast(msg); }
+function createTask(){
+  if(!newTask){ ntSay('Форма сброшена, откройте заново'); goTasks(); return; }
+  // подстраховка: берём объект прямо из списка, если состояние не успело записаться
+  if(!newTask.object){ const sel=document.getElementById('ntObjSel'); if(sel&&sel.value) newTask.object=sel.value; }
+  if(!newTask.object||!newTask.object.trim()){ ntSay('⚠️ Выберите объект из списка'); return; }
+  if(!newTask.assignees.length){ ntSay('⚠️ Отметьте хотя бы одного исполнителя'); return; }
+  try{
+    if(!Array.isArray(TASKS)||!Object.isExtensible(TASKS)) TASKS = Array.isArray(TASKS)?fresh(TASKS):[];
+    if(newTask.id){ const idx=TASKS.findIndex(x=>x.id===newTask.id);
+      if(idx>=0){ const t=fresh(TASKS[idx]); t.kind=newTask.kind; t.system=newTask.system; t.object=newTask.object.trim(); t.assignees=newTask.assignees.map(a=>({name:a.name,login:a.login})); t.from=newTask.from||''; t.to=newTask.to||''; t.naryad=newTask.noNaryad?'':(newTask.naryad||'').trim(); t.noNaryad=!!newTask.noNaryad; TASKS[idx]=t; }
+      saveTasks(); ntSay('Задача изменена',1); goTasks(); return; }
+    TASKS.push({ id:'t'+Date.now(), kind:newTask.kind, system:newTask.system, object:newTask.object.trim(),
+      assignees:newTask.assignees.map(a=>({name:a.name,login:a.login})),
+      from:newTask.from||'', to:newTask.to||'',
+      naryad:newTask.noNaryad?'':(newTask.naryad||'').trim(), noNaryad:!!newTask.noNaryad,
+      engineer:(PROFILE&&PROFILE.name)||'', engineerLogin:(PROFILE&&PROFILE.login)||'', status:{}, created:Date.now() });
+    saveTasks(); ntSay('✅ Задача создана ('+TASKS.length+')',1); goTasks();
+  }catch(err){ ntSay('Ошибка: '+(err&&err.message||err)); }
+}
+function renderNewTask(){
+  const people = ACCOUNTS.filter(a=>rolesOf(a).includes('Сотрудник')||rolesOf(a).includes('Инженер'));
+  const objs = objectsForTask(newTask.system, newTask.kind);
+  app.innerHTML = `<div class="view">
+    <header><button class="icon-btn" onclick="history.back()">←</button><h1>Новая задача<div class="sub">${newTask.kind==='zay'?'Заявка':'Регламент'}</div></h1></header>
+    <div class="seg" style="margin-bottom:12px"><button class="${newTask.kind==='reg'?'on':''}" onclick="ntKind('reg')">Регламент</button><button class="${newTask.kind==='zay'?'on':''}" onclick="ntKind('zay')">Заявка</button></div>
+    <div class="sys">Система</div>
+    <select class="naryad" onchange="ntSys(this.value)">${SYS_LIST.map(s=>`<option${newTask.system===s?' selected':''}>${s}</option>`).join('')}</select>
+    <div class="sys" style="margin-top:14px">Объект ${newTask.kind==='reg'?'(по графику на '+MONTHS_GEN[today.getMonth()]+')':'(все объекты)'}</div>
+    <select id="ntObjSel" class="naryad" onchange="ntObj(this.value)">
+      <option value="">— выберите объект —</option>
+      ${objs.map(o=>`<option${newTask.object===o?' selected':''}>${o}</option>`).join('')}
+    </select>
+    ${objs.length?'':'<div class="foot" style="margin-top:6px">Для этой системы в выбранном типе объектов нет.</div>'}
+    <div class="sys" style="margin-top:14px">Срок проведения (с — по)</div>
+    <div class="daterow"><input type="date" class="naryad" value="${newTask.from||''}" oninput="ntFrom(this.value)"><span>—</span><input type="date" class="naryad" value="${newTask.to||''}" oninput="ntTo(this.value)"></div>
+    <div class="sys" style="margin-top:14px">Наряд</div>
+    <input type="text" class="naryad" placeholder="Номер наряда" value="${newTask.naryad||''}" oninput="ntNaryad(this.value)"${newTask.noNaryad?' disabled style="opacity:.45"':''}>
+    <label class="nonar"><input type="checkbox"${newTask.noNaryad?' checked':''} onchange="ntNoNaryad(this.checked)"><span>Без наряда</span></label>
+    <div class="sys" style="margin-top:14px">Исполнители</div>
+    <div class="grp" style="padding:6px 12px">${people.map(a=>`<div class="staffrow"><button class="chk pick${newTask.assignees.find(x=>x.id===a.id)?' on':''}" style="flex:1" onclick="ntToggle('${a.id}')"><span class="box"></span><span class="txt">${a.name}${a.login?` <small style="color:var(--muted)">@${a.login}</small>`:''}</span></button></div>`).join('')||'<div class="empty" style="border:0">Нет сотрудников</div>'}</div>
+    <button class="save-btn" onclick="createTask()">Создать задачу</button>
+    <div id="ntMsg" style="min-height:20px;margin-top:8px;font-weight:700;color:var(--accent);text-align:center"></div>
+    <div class="foot">Задача появится у выбранных сотрудников во вкладке «Задачи». Если у сотрудника привязан логин — придёт уведомление (в приложении).</div>
+  </div>`;
+}
+
+/* ---------- Вкладка: Профиль ---------- */
+function renderProfile(){
+  const a=PROFILE;
+  let html = `<div class="view"><div class="tabhead"><h1>Профиль</h1></div>
+    <div class="grp"><div class="tasktitle">${a.name}</div>
+      <div class="taskmeta">Логин: <b>${a.login||'—'}</b></div>
+      <div class="taskmeta">Роль: <b>${rolesText(a)}</b></div></div>`;
+  if(isAdmin()){
+    html += `<button class="mbtn" onclick="location.hash='profile-users'"><span class="ic">👥</span><span class="t">Сотрудники и роли<span class="s">Имена, логины, роли ростера</span></span><span class="arrow">›</span></button>`;
+    html += `<button class="mbtn" onclick="if(window.Android&&window.Android.openAdmin)window.Android.openAdmin()"><span class="ic">🔑</span><span class="t">Создать вход<span class="s">Логин и пароль для входа (Firebase)</span></span><span class="arrow">›</span></button>`;
+  }
+  html += `<button class="mbtn" style="margin-top:12px" onclick="if(window.Android&&window.Android.logout)window.Android.logout()"><span class="ic">🚪</span><span class="t">Выйти<span class="s">Сменить пользователя</span></span><span class="arrow">›</span></button>`;
+  html += `</div>`;
+  app.innerHTML = html;
+}
+function switchProfile(id){
+  const a=ACCOUNTS.find(x=>x.id===id); if(!a) return;
+  PROFILE=a; try{ localStorage.setItem('previewProfile', JSON.stringify(a)); }catch(e){}
+  if(isEmployeeOnly()) location.hash='tasks'; else { renderProfile(); renderTabbar(); }
+  renderTabbar();
+}
+
+/* Админ: список пользователей */
+function renderUsers(){
+  let html = `<div class="view"><header><button class="icon-btn" onclick="location.hash='profile'">←</button><h1>Пользователи<div class="sub">${ACCOUNTS.length} аккаунтов</div></h1></header><div class="menu">`;
+  ACCOUNTS.forEach(a=>{
+    const online = isMe(a);
+    html += `<button class="mbtn" onclick="editUser('${a.id}')"><span class="ic">${online?'🟢':'👤'}</span><span class="t">${a.name}<span class="s">${a.login?'@'+a.login:'логин не задан'} · ${rolesText(a)}${online?' · в сети':''}</span></span><span class="arrow">›</span></button>`;
+  });
+  html += `</div>
+    <div class="sys" style="margin-top:16px">Добавить аккаунт</div>
+    <div class="addrow"><input id="newAcc" placeholder="Имя сотрудника" onkeydown="if(event.key==='Enter')addUser()"><button onclick="addUser()">＋</button></div>
+    <div class="foot">🟢 — кто сейчас авторизован. Нажми на аккаунт, чтобы задать логин, роль, пароль или удалить.</div>
+  </div>`;
+  app.innerHTML = html;
+}
+function addUser(){
+  const inp=document.getElementById('newAcc'); const v=(inp.value||'').trim(); if(!v) return;
+  ACCOUNTS.push({id:'u'+Date.now(), name:v, login:'', roles:['Сотрудник'], pass:''}); saveAccounts(); renderUsers();
+}
+function editUser(id){ state.editId=id; location.hash='profile-user'; }
+function renderEditUser(){
+  const a=ACCOUNTS.find(x=>x.id===state.editId);
+  if(!a){ location.hash='profile-users'; return; }
+  app.innerHTML = `<div class="view">
+    <header><button class="icon-btn" onclick="location.hash='profile-users'">←</button><h1>${a.name}<div class="sub">Настройка аккаунта</div></h1></header>
+    <div class="sys">Имя</div><input class="naryad" value="${(a.name||'').replace(/"/g,'&quot;')}" oninput="updUser('name',this.value)">
+    <div class="sys" style="margin-top:14px">Логин</div><input class="naryad" placeholder="например ivanov" value="${(a.login||'').replace(/"/g,'&quot;')}" oninput="updUser('login',this.value.trim().toLowerCase())">
+    <div class="sys" style="margin-top:14px">Роли (до 2)</div>
+    <div class="grp" style="padding:6px 12px">${['Администратор','Начальник','Инженер','Сотрудник'].map(r=>`<div class="staffrow"><button class="chk${rolesOf(a).includes(r)?' done':''}" style="flex:1" onclick="toggleRole('${r}')"><span class="box"></span><span class="txt">${r}</span></button></div>`).join('')}</div>
+    <div class="sys" style="margin-top:14px">Пароль</div><input class="naryad" placeholder="новый пароль" value="${(a.pass||'').replace(/"/g,'&quot;')}" oninput="updUser('pass',this.value)">
+    <button class="save-btn" style="margin-top:16px" onclick="location.hash='profile-users'">Сохранить</button>
+    ${a.id!=='admin'?`<button class="save-btn" style="background:#8c0808;margin-top:12px" onclick="delUser('${a.id}')">Удалить аккаунт</button>`:''}
+    <div class="foot">Логин привязывается к имени сотрудника. По этому логину человек входит и получает задачи и уведомления.</div>
+  </div>`;
+}
+function updUser(f, v){ const a=ACCOUNTS.find(x=>x.id===state.editId); if(!a) return; a[f]=v;
+  if(a.id===PROFILE.id){ PROFILE=a; try{localStorage.setItem('previewProfile',JSON.stringify(a));}catch(e){} }
+  saveAccounts(); }
+function toggleRole(r){ const a=ACCOUNTS.find(x=>x.id===state.editId); if(!a) return;
+  if(!Array.isArray(a.roles)) a.roles = a.role?[a.role]:[];
+  const i=a.roles.indexOf(r);
+  if(i>=0) a.roles.splice(i,1); else { if(a.roles.length>=2){ toast('Максимум 2 роли'); return; } a.roles.push(r); }
+  if(!a.roles.length) a.roles=['Сотрудник'];
+  if(a.id===PROFILE.id){ PROFILE=a; try{localStorage.setItem('previewProfile',JSON.stringify(a));}catch(e){} }
+  saveAccounts(); renderEditUser(); }
+function delUser(id){ ACCOUNTS=ACCOUNTS.filter(x=>x.id!==id); saveAccounts(); if(PROFILE.id===id) PROFILE=ACCOUNTS[0]; location.hash='profile-users'; toast('Аккаунт удалён'); }
+
 let tt;
 function toast(msg){
   const el = document.getElementById('toast');
@@ -1363,13 +1766,18 @@ function toast(msg){
 }
 function route(keep){
   const h = location.hash.slice(1);
+  renderTabbar();
+  if(h==='tasks'){ renderTasks(); if(!keep) window.scrollTo(0,0); return; }
+  if(h==='newtask'){ if(!newTask) newTask={system:'АПС',object:'',assignees:[]}; renderNewTask(); if(!keep) window.scrollTo(0,0); return; }
+  if(h==='profile'){ renderProfile(); if(!keep) window.scrollTo(0,0); return; }
+  if(h==='profile-users'){ renderUsers(); if(!keep) window.scrollTo(0,0); return; }
+  if(h==='profile-user'){ renderEditUser(); if(!keep) window.scrollTo(0,0); return; }
   if(h==='zsub' && state.zs && state.day) renderZSub();
   else if(h==='sub' && state.sub && state.day) renderSub();
   else if(h==='menu' && state.day && state.mode) renderMenu();
   else if(h==='nar' && state.day) renderNar();
   else if(h==='plan' && state.day) renderPlan();
   else if(h==='notif') renderNotif();
-  else if(h==='account') renderAccount();
   else if(h==='item' && state.day && state.itemKey && state.mode) renderItem();
   else if(h==='week' && state.weekStart!==null) renderWeek();
   else if(h==='month') renderMonth();
@@ -1378,19 +1786,15 @@ function route(keep){
 }
 window.addEventListener('hashchange', route);
 if(location.hash && location.hash!=='#') { try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
+if((!location.hash || location.hash==='#') && isEmployeeOnly()){ try{ location.hash='tasks'; }catch(e){} }
 route();
-(function(){
-  if(!window.Android || today.getDate()>7) return;
-  const pm = new Date(today.getFullYear(), today.getMonth()-1, 1), key='auto-report-'+pm.getFullYear()+'-'+pm.getMonth();
-  try{ if(localStorage.getItem(key)) return; }catch(e){ return; }
-  setTimeout(async()=>{
-    try{
-      const dates = rng(1,new Date(pm.getFullYear(),pm.getMonth()+1,0).getDate()).map(d=>new Date(pm.getFullYear(),pm.getMonth(),d));
-      const r = await makeReportRange(dates, '');
-      await DL.save({filename:`Отчёт ${MONTHS[pm.getMonth()]} ${pm.getFullYear()}.xlsx`, data:r.bytes});
-      localStorage.setItem(key,'1'); toast(`Отчёт за ${MONTHS[pm.getMonth()].toLowerCase()} сохранён в Загрузки/Ежедневник`);
-    }catch(e){}
-  }, 2600);
+(function(){ const a=document.getElementById('app'); let sx=0,sy=0;
+  a.addEventListener('touchstart',e=>{ const t=e.touches[0]; sx=t.clientX; sy=t.clientY; },{passive:true});
+  a.addEventListener('touchend',e=>{ const h=location.hash.slice(1);
+    if(!(h===''||h==='tasks'||h==='profile')) return;
+    const t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy;
+    if(Math.abs(dx)>70 && Math.abs(dx)>Math.abs(dy)*1.8){ const o=tabOrder(); let i=o.indexOf(curTab());
+      if(dx<0&&i<o.length-1) goTab(o[i+1]); else if(dx>0&&i>0) goTab(o[i-1]); } },{passive:true});
 })();
 setTimeout(()=>{ const sp = document.getElementById('splash'); if(sp){ sp.classList.add('hide'); setTimeout(()=>sp.remove(), 600); } }, 1800);
 </script>
