@@ -527,6 +527,9 @@ const ZAY = {
     { name:'ЗДУ и аварийные выходы', icon:'🚪', items:['ЗДУ №1','ЗДУ №2','ЗДУ №3','ЗДУ №4','ЗДУ №5','Аварийные выходы ЗДУ-1, 2, 3, 4','Операторная ИСБ','БП'] },
     { name:'Посты и шлагбаумы', icon:'🚪', items:['Пост БО','Ж/Д','ПСГ пост 10','Шлагбаумы ЗДУ-2','Пост 17'] },
     { name:'Терминалы Face-ID', icon:'🚪', items:['Терминалы Face-ID'] }
+  ]}],
+  ggs: [ { name:'ГГС', subs:[
+    { name:'Оборудование ГГС', icon:'📢', items:B(['01','02','03','05','50','06','07','700','207','10','517','04']) }
   ]}]
 };
 const M_SHORT = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
@@ -551,7 +554,6 @@ if(window.Android && window.Android.fsCall){
     async set(obj){ await __fs('set', dp, obj||{}); return true; }
   }; } }; } };
 }
-// Вход (логин/роль) из нативного приложения
 let NLOGIN='', NROLE='';
 try{ if(window.Android && window.Android.getRole){ NROLE = window.Android.getRole()||''; NLOGIN = window.Android.getLogin()||''; } }catch(e){}
 const dbReady = Promise.resolve();
@@ -726,7 +728,7 @@ const MENU = { reg:{ title:'Регламент', keys:['aps','aos','video','ggs'
                zp:{ title:'Заявка', parent:'Запланированные', keys:['aps','aos','video','ggs','skud'] },
                pn:{ title:'Простые наряды', parent:'Запланированные', keys:['aps','aos','video','ggs','skud'] },
                on:{ title:'Опасные наряды', parent:'Запланированные', keys:['aps','aos','video','ggs','skud'] },
-               zay:{ title:'Заявки',    keys:['aps','aos','video','skud'] } };
+               zay:{ title:'Заявки',    keys:['aps','aos','video','ggs','skud'] } };
 function allItems(r, sys){
   const seen = new Set(), out = [];
   sys.groups.forEach(g=>g.items.forEach(x=>{ if(!seen.has(x)){ seen.add(x); out.push(x); } }));
@@ -828,40 +830,147 @@ function renderSub(){
 function zkey(key, sec, sb, x, mode){ return `${mode||state.mode}|${key}|${sec.name}|${sb.name}|${x}`; }
 function openZSub(si, bi){ state.zs = [si, bi]; location.hash = 'zsub'; }
 function zAll(v){
+  if(!needDiary()) return;
   const [si,bi] = state.zs, sec = ZAY[state.sub][si], sb = sec.subs[bi], set = checkSet();
-  sb.items.forEach(x=>{ const k = zkey(state.sub,sec,sb,x); if(v) set.add(k); else set.delete(k); });
+  [...sb.items, ...zxItems(state.sub,sec,sb)].forEach(x=>{ const k = zkey(state.sub,sec,sb,x); if(v) set.add(k); else set.delete(k); });
   saveChecks(dayKey()); const y = window.scrollY; renderZSub(); window.scrollTo(0,y);
 }
+/* ---------- Свои объекты в заявках (добавить/изменить/удалить) ---------- */
+let ZAYX = {};
+try{ ZAYX = JSON.parse(localStorage.getItem('zayx')||'{}'); }catch(e){}
+function zxKey(sysKey, sec, sb){ return sysKey+'|'+sec.name+'|'+sb.name; }
+function zxItems(sysKey, sec, sb){ const a=ZAYX[zxKey(sysKey,sec,sb)]; return Array.isArray(a)?a:[]; }
+function saveZayx(){
+  try{ localStorage.setItem('zayx', JSON.stringify(ZAYX)); }catch(e){}
+  clearTimeout(window.__zxT); window.__zxT=setTimeout(async()=>{ await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('zayx').set({map:ZAYX}); }catch(e){} } },400);
+}
+async function loadZayx(){ await dbReady; if(!DB) return; try{ const snap=await DB.collection('data/users/'+UID).doc('zayx').get(); const d=snap&&typeof snap.data==='function'?snap.data():snap; if(d&&d.map&&typeof d.map==='object'){ ZAYX={...d.map}; try{localStorage.setItem('zayx',JSON.stringify(ZAYX));}catch(e){} if(location.hash.slice(1)==='zsub') route(true); } }catch(e){} }
+function curZSub(){ const [si,bi]=state.zs; const sec=ZAY[state.sub][si]; return {sec, sb:sec.subs[bi]}; }
+
+/* ---------- Секторы под объектом и группы объектов ---------- */
+let ZSEC = {}; try{ ZSEC = JSON.parse(localStorage.getItem('zsec')||'{}'); }catch(e){}
+let ZGRP = {}; try{ ZGRP = JSON.parse(localStorage.getItem('zgrp')||'{}'); }catch(e){}
+function saveZsec(){ try{ localStorage.setItem('zsec', JSON.stringify(ZSEC)); }catch(e){} clearTimeout(window.__zsT); window.__zsT=setTimeout(async()=>{ await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('zsec').set({map:ZSEC}); }catch(e){} } },400); }
+function saveZgrp(){ try{ localStorage.setItem('zgrp', JSON.stringify(ZGRP)); }catch(e){} clearTimeout(window.__zgT); window.__zgT=setTimeout(async()=>{ await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('zgrp').set({map:ZGRP}); }catch(e){} } },400); }
+async function loadZsec(){ await dbReady; if(!DB) return; try{ const s=await DB.collection('data/users/'+UID).doc('zsec').get(); const d=s&&typeof s.data==='function'?s.data():s; if(d&&d.map&&typeof d.map==='object'){ ZSEC={...d.map}; try{localStorage.setItem('zsec',JSON.stringify(ZSEC));}catch(e){} const h=location.hash.slice(1); if(h==='zsub'||h==='zsec') route(true); } }catch(e){} }
+async function loadZgrp(){ await dbReady; if(!DB) return; try{ const s=await DB.collection('data/users/'+UID).doc('zgrp').get(); const d=s&&typeof s.data==='function'?s.data():s; if(d&&d.map&&typeof d.map==='object'){ ZGRP={...d.map}; try{localStorage.setItem('zgrp',JSON.stringify(ZGRP));}catch(e){} const h=location.hash.slice(1); if(h==='zsub'||h==='zgroup') route(true); } }catch(e){} }
+
+// Секторы: ZSEC[subKey][parentObj] = [sectorName,...]; объект сектора = parent + ' · ' + sectorName
+function secsOf(subK, parent){ const m=ZSEC[subK]||{}; return Array.isArray(m[parent])?m[parent]:[]; }
+function secName(parent, s){ return parent+' · '+s; }
+function openSectors(objName){ state.secObj=objName; location.hash='zsec'; }
+function addSectorAuto(){ if(!needDiary()) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); const parent=state.secObj; const arr=secsOf(subK,parent).slice(); let n=1; while(arr.includes('Сектор '+n)) n++; arr.push('Сектор '+n); ZSEC[subK]=Object.assign({},ZSEC[subK],{[parent]:arr}); saveZsec(); renderSectors(); }
+function addSectorNamed(){ if(!needDiary()) return; const inp=document.getElementById('newSec'); const v=(inp&&inp.value||'').trim(); if(!v) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); const parent=state.secObj; const arr=secsOf(subK,parent).slice(); if(arr.includes(v)){ toast('Такой сектор уже есть'); return; } arr.push(v); ZSEC[subK]=Object.assign({},ZSEC[subK],{[parent]:arr}); saveZsec(); renderSectors(); }
+function saveSector(i){ if(!needDiary()) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); const parent=state.secObj; const arr=secsOf(subK,parent).slice(); const inp=document.getElementById('sc_'+i); const nv=(inp&&inp.value||'').trim(); if(!nv){ toast('Введите название'); return; } if(nv===arr[i]){ toast('Без изменений'); return; } if(arr.some((x,j)=>j!==i&&x===nv)){ toast('Такой сектор уже есть'); return; } arr[i]=nv; ZSEC[subK]=Object.assign({},ZSEC[subK],{[parent]:arr}); saveZsec(); renderSectors(); }
+function delSector(i){ if(!needDiary()) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); const parent=state.secObj; const arr=secsOf(subK,parent).slice(); arr.splice(i,1); ZSEC[subK]=Object.assign({},ZSEC[subK],{[parent]:arr}); saveZsec(); toast('Удалено'); renderSectors(); }
+function renderSectors(){
+  ensureMonthLoaded(); KEYS=[];
+  const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); const parent=state.secObj; const r=REG[state.sub];
+  const secs=secsOf(subK,parent); let rows='', ids=[];
+  secs.forEach(s=>{ rows += itemRow(zkey(state.sub,sec,sb,secName(parent,s)), s); ids.push(KEYS.length-1); });
+  const av = s => (s||'').replace(/"/g,'&quot;');
+  const manage = canEditDiary() ? `
+    <div class="grp"><h3><span>Управление секторами</span></h3>
+      ${secs.length ? secs.map((s,i)=>`<div class="objrow" style="margin-bottom:8px"><input type="text" id="sc_${i}" class="naryad" style="flex:1" value="${av(s)}"><button class="tbtn" onclick="saveSector(${i})">✓</button><button class="tbtn del" onclick="delSector(${i})">🗑</button></div>`).join('') : '<div class="foot" style="border:0">Секторов пока нет.</div>'}
+      <div class="objrow" style="margin-top:6px"><input type="text" id="newSec" class="naryad" style="flex:1" placeholder="Название сектора" onkeydown="if(event.key==='Enter')addSectorNamed()"><button class="tbtn" onclick="addSectorNamed()">➕ Сохранить</button></div>
+      <button class="tbtn" style="width:100%;margin-top:8px" onclick="addSectorAuto()">➕ Добавить сектор с номером</button>
+    </div>` : '';
+  app.innerHTML = `<div class="view">
+    <header><button class="icon-btn" onclick="history.back()">←</button><h1>${parent}<div class="sub">Секторы · ${r.title} · ${dayTitle()}</div></h1></header>
+    <div class="grp"><h3><span>Секторы</span><small class="cnt" data-count="${ids.join(',')}"></small></h3>${rows||'<div class="foot" style="border:0">Добавьте секторы ниже.</div>'}</div>
+    ${secs.length?'<div class="seg"><button onclick="secAll(true)">Отметить все</button><button onclick="secAll(false)">Снять все</button></div>':''}
+    ${manage}
+  </div>`;
+  updateCounters();
+}
+function secAll(v){ if(!needDiary()) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); const parent=state.secObj; const set=checkSet(); secsOf(subK,parent).forEach(s=>{ const k=zkey(state.sub,sec,sb,secName(parent,s)); if(v)set.add(k); else set.delete(k); }); saveChecks(dayKey()); const y=window.scrollY; renderSectors(); window.scrollTo(0,y); }
+
+// Группы: ZGRP[subKey] = [{id,name,items:[objName,...]}]
+function grpsOf(subK){ return Array.isArray(ZGRP[subK])?ZGRP[subK]:[]; }
+function addGroup(){ if(!needDiary()) return; const inp=document.getElementById('newGrp'); const v=(inp&&inp.value||'').trim(); if(!v) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); const arr=grpsOf(subK).slice(); arr.unshift({id:'g'+Date.now(), name:v, items:[]}); ZGRP[subK]=arr; saveZgrp(); toast('Группа создана'); renderZSub(); }
+function delGroup(id){ if(!needDiary()) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); ZGRP[subK]=grpsOf(subK).filter(g=>g.id!==id); saveZgrp(); renderZSub(); }
+function renameGroup(id){ if(!needDiary()) return; const inp=document.getElementById('gn_'+id); const nv=(inp&&inp.value||'').trim(); if(!nv) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); ZGRP[subK]=grpsOf(subK).map(g=>g.id===id?{...g,name:nv}:g); saveZgrp(); toast('Сохранено'); renderZSub(); }
+function openGroup(id){ state.grpId=id; location.hash='zgroup'; }
+function toggleGroupMember(objName){ if(!needDiary()) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); ZGRP[subK]=grpsOf(subK).map(g=>{ if(g.id!==state.grpId) return g; const items=g.items.includes(objName)?g.items.filter(x=>x!==objName):[...g.items,objName]; return {...g,items}; }); saveZgrp(); renderGroup(); }
+function renderGroup(){
+  ensureMonthLoaded(); KEYS=[];
+  const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); const r=REG[state.sub];
+  const g=grpsOf(subK).find(x=>x.id===state.grpId); if(!g){ history.back(); return; }
+  const allObjs=[...sb.items, ...zxItems(state.sub,sec,sb)];
+  let rows='', ids=[];
+  g.items.forEach(o=>{ rows += itemRow(zkey(state.sub,sec,sb,o), o); ids.push(KEYS.length-1); });
+  const esc = s => (s||'').replace(/'/g,"\\'");
+  const picker = canEditDiary() ? `<div class="grp"><h3><span>Состав группы (отметьте, что входит)</span></h3>
+    ${allObjs.map(o=>`<div class="staffrow"><button class="chk pick${g.items.includes(o)?' on':''}" style="flex:1" onclick="toggleGroupMember('${esc(o)}')"><span class="box"></span><span class="txt">${o}</span></button></div>`).join('')}
+  </div>` : '';
+  app.innerHTML = `<div class="view">
+    <header><button class="icon-btn" onclick="history.back()">←</button><h1>📁 ${g.name}<div class="sub">Группа · ${r.title} · ${dayTitle()}</div></h1></header>
+    <div class="grp"><h3><span>Объекты группы</span><small class="cnt" data-count="${ids.join(',')}"></small></h3>${rows||'<div class="foot" style="border:0">Пока пусто — отметьте объекты ниже.</div>'}</div>
+    ${g.items.length?'<div class="seg"><button onclick="grpAll(true)">Отметить все</button><button onclick="grpAll(false)">Снять все</button></div>':''}
+    ${picker}
+  </div>`;
+  updateCounters();
+}
+function grpAll(v){ if(!needDiary()) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); const g=grpsOf(subK).find(x=>x.id===state.grpId); if(!g) return; const set=checkSet(); g.items.forEach(o=>{ const k=zkey(state.sub,sec,sb,o); if(v)set.add(k); else set.delete(k); }); saveChecks(dayKey()); const y=window.scrollY; renderGroup(); window.scrollTo(0,y); }
+function addZayObj(){ if(!needDiary()) return; const inp=document.getElementById('newZObj'); const v=(inp&&inp.value||'').trim(); if(!v) return; const {sec,sb}=curZSub(); const k=zxKey(state.sub,sec,sb); if(sb.items.includes(v)||zxItems(state.sub,sec,sb).includes(v)){ toast('Такой объект уже есть'); return; } ZAYX[k]=[...zxItems(state.sub,sec,sb), v]; saveZayx(); renderZSub(); }
+function delZayObj(i){ if(!needDiary()) return; const {sec,sb}=curZSub(); const k=zxKey(state.sub,sec,sb); const arr=zxItems(state.sub,sec,sb).slice(); arr.splice(i,1); ZAYX[k]=arr; saveZayx(); toast('Удалено'); renderZSub(); }
+function saveZayObj(i){ if(!needDiary()) return; const {sec,sb}=curZSub(); const k=zxKey(state.sub,sec,sb); const arr=zxItems(state.sub,sec,sb).slice(); const inp=document.getElementById('zx_'+i); const nv=(inp&&inp.value||'').trim(); if(!nv){ toast('Введите название'); return; } if(nv===arr[i]){ toast('Без изменений'); return; } if(sb.items.includes(nv)||arr.some((x,j)=>j!==i&&x===nv)){ toast('Такой объект уже есть'); return; } arr[i]=nv; ZAYX[k]=arr; saveZayx(); toast('Сохранено'); renderZSub(); }
 function renderZSub(){
   ensureMonthLoaded();
   KEYS = [];
   const [si,bi] = state.zs, sec = ZAY[state.sub][si], sb = sec.subs[bi], r = REG[state.sub];
+  const subK = zxKey(state.sub, sec, sb);
+  const custom = zxItems(state.sub, sec, sb);
+  const av = s => (s||'').replace(/"/g,'&quot;');
+  const esc = s => (s||'').replace(/'/g,"\\'");
+  const set0 = checkSet();
+  const isCam = o => /Камера\s*№/.test(o) || /^В-\d/.test(o);
+  const secLink = (obj) => { if(state.sub!=='aos') return ''; if(isCam(obj)) return ''; const sc=secsOf(subK,obj); if(!canEditDiary() && !sc.length) return ''; const dn=sc.filter(s=>set0.has(zkey(state.sub,sec,sb,secName(obj,s)))).length; return `<div style="padding:0 12px 10px 46px"><button class="tbtn" style="font-size:12px;padding:4px 10px" onclick="openSectors('${esc(obj)}')">▸ секторы${sc.length?` (${dn}/${sc.length})`:''}</button></div>`; };
   let rows = '', ids = [];
-  sb.items.forEach(x=>{ rows += itemRow(zkey(state.sub,sec,sb,x), x); ids.push(KEYS.length-1); });
+  sb.items.forEach(x=>{ rows += itemRow(zkey(state.sub,sec,sb,x), x); ids.push(KEYS.length-1); rows += secLink(x); });
+  custom.forEach(x=>{ rows += itemRow(zkey(state.sub,sec,sb,x), x); ids.push(KEYS.length-1); rows += secLink(x); });
+  const groups = grpsOf(subK);
+  const groupsHtml = (groups.length || canEditDiary()) ? `<div class="sys" style="margin-top:4px">Группы</div>` +
+    (canEditDiary()?`<div class="grp"><div class="objrow"><input type="text" id="newGrp" class="naryad" style="flex:1" placeholder="Название новой группы" onkeydown="if(event.key==='Enter')addGroup()"><button class="tbtn" onclick="addGroup()">➕ Создать</button></div></div>`:'') +
+    groups.map(g=>{ const dn=g.items.filter(o=>set0.has(zkey(state.sub,sec,sb,o))).length;
+      return `<div class="grp"><button class="mbtn" style="width:100%;text-align:left" onclick="openGroup('${g.id}')"><span class="ic">📁</span><span class="t">${g.name}<span class="s">${g.items.length} об.${g.items.length?` · ✓${dn}`:''}</span></span><span class="arrow">›</span></button>
+        ${canEditDiary()?`<div class="objrow" style="margin-top:8px"><input type="text" id="gn_${g.id}" class="naryad" style="flex:1" value="${av(g.name)}"><button class="tbtn" onclick="renameGroup('${g.id}')" title="Сохранить имя">💾</button><button class="tbtn del" onclick="delGroup('${g.id}')" title="Удалить">🗑</button></div>`:''}
+      </div>`; }).join('') : '';
+  const manage = canEditDiary() ? `
+    <div class="grp"><h3><span>Свои объекты</span></h3>
+      ${custom.length ? custom.map((x,i)=>`<div class="objrow" style="margin-bottom:8px"><input type="text" id="zx_${i}" class="naryad" style="flex:1" value="${av(x)}"><button class="tbtn" onclick="saveZayObj(${i})" title="Сохранить">✓</button><button class="tbtn del" onclick="delZayObj(${i})" title="Удалить">🗑</button></div>`).join('') : '<div class="foot" style="border:0">Пока нет своих объектов. Добавьте ниже.</div>'}
+      <div class="foot" style="border:0;margin:2px 0 8px">Измените название в поле и нажмите ✓, либо 🗑 чтобы удалить.</div>
+      <div class="objrow"><input type="text" id="newZObj" class="naryad" style="flex:1" placeholder="Новый объект" onkeydown="if(event.key==='Enter')addZayObj()"><button class="tbtn" onclick="addZayObj()">➕ Сохранить</button></div>
+    </div>` : '';
   app.innerHTML = `<div class="view">
     <header>
       <button class="icon-btn" onclick="history.back()" aria-label="Назад">←</button>
       <h1>${sb.name}<div class="sub">${MENU[state.mode].title} · ${r.title}${ZAY[state.sub].length>1?' · '+sec.name:''} · ${dayTitle()}</div></h1>
     </header>
     ${sb.note?`<div class="note" style="color:var(--muted);font-size:13px;margin:-8px 2px 12px">${sb.note}</div>`:''}
+    ${groupsHtml}
     <div class="grp"><h3><span>Объекты</span><small class="cnt" data-count="${ids.join(',')}"></small></h3>${rows}</div>
     <div class="seg"><button onclick="zAll(true)">Отметить все</button><button onclick="zAll(false)">Снять все</button></div>
+    ${manage}
   </div>`;
   updateCounters();
 }
 /* ---------- Отчёт за месяц в Excel (.xlsx) ---------- */
 const pad2 = n => String(n).padStart(2,'0');
-let DL = null;
+let DL = {
+  async save(blob, filename){
+    if(!(window.Android && window.Android.saveFile)){ toast('Сохранение недоступно'); return; }
+    try{
+      const buf = await blob.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      let bin = ''; const chunk = 0x8000;
+      for(let i=0;i<bytes.length;i+=chunk){ bin += String.fromCharCode.apply(null, bytes.subarray(i, i+chunk)); }
+      const b64 = btoa(bin);
+      window.Android.saveFile(filename, b64);
+    }catch(e){ toast('Не удалось сохранить файл'); }
+  }
+};
 const dlReady = Promise.resolve();
-if(window.Android){
-  DL = { save: async ({filename, data}) => {
-    const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
-    let bin=''; for(let i=0;i<bytes.length;i+=0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i,i+0x8000));
-    const res = window.Android.saveFile(filename, btoa(bin));
-    if(res !== 'ok') throw {code:'unavailable', message:res};
-    return {status:'saved'};
-  }};
-}
 
 async function loadMonthChecks(y,m){
   await dbReady;
@@ -1029,6 +1138,18 @@ async function makeReportRange(dates, title){
   const SYS_SHORT = {'Видеонаблюдение':'CCTV'};
   const ORD = {reg:0, zay:1, zp:2, pn:3, on:4};
   const camName = o => { const mm = o.obj.match(/^Камера № (\d+)$/); return (mm && CAM_LABELS[+mm[1]]) ? `${o.obj} (${CAM_LABELS[+mm[1]]})` : o.obj; };
+  // Наименование: объект - группа - подгруппа (если есть), иначе просто объект
+  const objHier = (k, o) => {
+    const base = camName(o); const p = (k||'').split('|');
+    if(p[0]!=='zay' || p.length<5) return base;
+    const sysKey=p[1], secN=p[2], subN=p[3], obj=p[4];
+    const subK = sysKey+'|'+secN+'|'+subN;
+    let grp=''; (typeof ZGRP!=='undefined'?(ZGRP[subK]||[]):[]).forEach(g=>{ if(!grp && (g.items||[]).includes(obj)) grp=g.name; });
+    // группа: своя группа, иначе раздел (если разделов несколько); подгруппа: подраздел
+    const groupLabel = grp || ((ZAY[sysKey]&&ZAY[sysKey].length>1)?secN:'');
+    const parts=[base]; if(groupLabel) parts.push(groupLabel); if(subN) parts.push(subN);
+    return parts.join(' - ');
+  };
   const log = [ JHEAD.map(v=>({v,s:1})) ];
   dates.forEach((dt,i)=>{
     const keys = [...checks[i]].sort((a,b)=> (ORD[a.split('|')[0]]-ORD[b.split('|')[0]]) || a.localeCompare(b));
@@ -1052,7 +1173,7 @@ async function makeReportRange(dates, title){
       const mx = prim.match(/продлено до\s*([\d.]+)/);
       if(mx && mx[1]) tend = mx[1];
       prim = prim.replace(/Срок:[^;]*/g,'').replace(/продлено до[^;]*/g,'').replace(/[;\s]+$/,'').replace(/^[;\s]+/,'').trim();
-      log.push([ {v:n,s:3}, {v:dateStr,s:3}, {v:camName(o),s:6}, {v:sysName,s:3},
+      log.push([ {v:n,s:3}, {v:dateStr,s:3}, {v:objHier(k,o),s:6}, {v:sysName,s:3},
         {v:work,s:3}, {v:nar,s:3},{v:fio,s:6},{v:tbeg,s:3},{v:tend,s:3},{v:'',s:3},{v:prim,s:6} ]);
     });
   });
@@ -1143,7 +1264,7 @@ function pickLogo(input){
   rd.readAsDataURL(f);
 }
 function removeLogo(){
-  LOGO = null; try{ localStorage.removeItem('logo'); localStorage.removeItem('accent'); }catch(e){}
+  LOGO = 'logo.png'; try{ localStorage.removeItem('logo'); localStorage.removeItem('accent'); }catch(e){}
   saveSettings({logo:'', accent:''}); renderSettings();
 }
 async function saveSettings(obj){
@@ -1156,7 +1277,7 @@ async function loadSettings(){
     const snap = await DB.collection('data/users/'+UID).doc('settings').get();
     const data = snap && typeof snap.data === 'function' ? snap.data() : snap;
     if(data && typeof data.logo === 'string'){
-      LOGO = data.logo || null;
+      LOGO = data.logo || 'logo.png';
       try{ if(LOGO){ localStorage.setItem('logo',LOGO); localStorage.setItem('accent',data.accent||''); } }catch(e){}
       const h = location.hash.slice(1); if(!h || h==='settings') route(true);
     }
@@ -1223,7 +1344,7 @@ async function saveNotif(){
   const time = document.getElementById('nfTime').value || '08:00';
   NOTIF = { on, time };
   try{ localStorage.setItem('notif', JSON.stringify(NOTIF)); }catch(e){}
-  if(window.Android && window.Android.setReminder){ try{ const pp=time.split(':'); window.Android.setReminder(on, parseInt(pp[0])||0, parseInt(pp[1])||0); }catch(e){} }
+  try{ if(window.Android && window.Android.setReminder){ const pp=time.split(':'); window.Android.setReminder(on, parseInt(pp[0])||0, parseInt(pp[1])||0); } }catch(e){}
   await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('notify').set(NOTIF); }catch(e){} }
   toast('Сохранено');
   setTimeout(()=>history.back(), 500);
@@ -1282,7 +1403,7 @@ async function loadStaff(){
     const data = snap && typeof snap.data === 'function' ? snap.data() : snap;
     if(data && Array.isArray(data.list) && data.list.length && data.ver===STAFF_VER){
       STAFF = fresh(data.list); try{ localStorage.setItem('staff', JSON.stringify(STAFF)); }catch(e){}
-      if(location.hash.slice(1)==='item') route(true);
+      if(['item','sub','zsub'].includes(location.hash.slice(1))) route(true);
     } else {
       saveStaff();
     }
@@ -1308,7 +1429,7 @@ async function loadMetaRemote(k){
     if(data && data.items && typeof data.items==='object'){
       META[k] = {...data.items, ...META[k]};
       try{ localStorage.setItem('meta-'+k, JSON.stringify(META[k])); }catch(e){}
-      if(dayKey()===k && location.hash.slice(1)==='item') route(true);
+      if(dayKey()===k){ const h=location.hash.slice(1); if(['sub','zsub','item','menu','nar'].includes(h)){ const y=window.scrollY; route(true); window.scrollTo(0,y); } }
     }
   }catch(e){}
 }
@@ -1350,7 +1471,9 @@ function renderItem(){
   const key=state.itemKey, o=parseKey(key), done=checkSet().has(key), rec=itemRec(key);
   const mm = o.obj.match(/^Камера № (\d+)$/);
   const name = (mm && CAM_LABELS[+mm[1]]) ? `${o.obj} (${CAM_LABELS[+mm[1]]})` : o.obj;
-  let rows = STAFF.map(n=>`<div class="staffrow">
+  const roster = (typeof ACCOUNTS!=='undefined'?ACCOUNTS:[]).filter(a=>rolesOf(a).includes('Сотрудник')||rolesOf(a).includes('Инженер')).map(a=>a.name);
+  const wnames = [...new Set([...STAFF, ...roster, ...(rec.w||[])])];
+  let rows = wnames.map(n=>`<div class="staffrow">
       <button class="chk${rec.w.includes(n)?' done':''}" style="flex:1" onclick="toggleItemWorker('${n.replace(/'/g,"\\'")}')"><span class="box"></span><span class="txt">${n}</span></button>
     </div>`).join('');
   app.innerHTML = `<div class="view">
@@ -1360,7 +1483,7 @@ function renderItem(){
     </header>
     <button class="bigdone${done?' on':''}" onclick="toggleItemDone()">${done?'✓ Выполнено — нажмите, чтобы снять':'Отметить выполненным'}</button>
     <div class="sys" style="margin-top:16px">Наряд</div>
-    <input type="text" class="naryad" placeholder="Номер наряда (например N-53)" value="${(rec.n||'').replace(/"/g,'&quot;')}" oninput="setNaryad(this.value)">
+    <input type="text" inputmode="numeric" pattern="[0-9]*" class="naryad" placeholder="Номер наряда" value="${(rec.n||'').replace(/"/g,'&quot;')}" oninput="setNaryad(this.value)">
     <div class="sys" style="margin-top:16px">Исполнители работ</div>
     <div class="grp" style="padding:6px 12px">${rows || '<div class="empty" style="border:0">Список пуст</div>'}</div>
     <div class="addrow">
@@ -1434,11 +1557,10 @@ function applyRoleMig(){
 if(!ACCOUNTS.length) seedAccounts();
 applyRoleMig();
 let PROFILE = null;
-// PROFILE = вошедший пользователь (логин/роль из нативного входа); сопоставляем с ростером по логину
 function resolveProfile(){
-  let a = NLOGIN ? ACCOUNTS.find(x=> x.login && x.login.toLowerCase()===NLOGIN.toLowerCase()) : null;
+  let a = NLOGIN ? ACCOUNTS.find(x=>x.login && x.login.toLowerCase()===NLOGIN.toLowerCase()) : null;
   if(!a){ a = { id:'me', name:(NLOGIN||'Пользователь'), login:(NLOGIN||''), roles:[NROLE||'Сотрудник'], pass:'' }; }
-  else if(NROLE && (!a.roles||!a.roles.length)){ a.roles=[NROLE]; }
+  else if(NROLE && (!a.roles || !a.roles.length)){ a.roles = [NROLE]; }
   PROFILE = a;
 }
 resolveProfile();
@@ -1459,24 +1581,22 @@ async function saveAccounts(){
   try{ localStorage.setItem('accounts', JSON.stringify(ACCOUNTS)); }catch(e){}
   await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('accounts').set({list:ACCOUNTS}); }catch(e){} }
 }
+function ensureRoster(){
+  let changed=false;
+  (typeof STAFF!=='undefined'?STAFF:[]).forEach((n,i)=>{
+    if(!ACCOUNTS.find(a=>a.name===n)){ ACCOUNTS.push({id:'u'+i+'_'+Date.now(), name:n, login:'', roles:[ROLE_MIG[n]||'Сотрудник'], pass:''}); changed=true; }
+  });
+  if(changed){ try{localStorage.setItem('accounts',JSON.stringify(ACCOUNTS));}catch(e){} }
+}
 async function loadAccounts(){
   await dbReady; if(!DB) return;
   try{ const snap=await DB.collection('data/users/'+UID).doc('accounts').get();
     const d=snap&&typeof snap.data==='function'?snap.data():snap;
     if(d&&Array.isArray(d.list)&&d.list.length){ ACCOUNTS=fresh(d.list); applyRoleMig();
       try{localStorage.setItem('accounts',JSON.stringify(ACCOUNTS));}catch(e){}
-      ensureRoster();
-      resolveProfile();
+      ensureRoster(); resolveProfile();
       const h=location.hash.slice(1); if(h==='profile'||h==='tasks'||h.indexOf('profile-')===0) route(true);
     } }catch(e){}
-}
-function ensureRoster(){
-  try{
-    const have = new Set(ACCOUNTS.map(a=>(a.name||'').trim()));
-    let added=false;
-    (typeof STAFF!=='undefined'?STAFF:[]).forEach((n)=>{ if(n && !have.has(n.trim())){ ACCOUNTS.push({id:'u'+Date.now()+Math.floor(Math.random()*1000), name:n, login:'', roles:[(typeof ROLE_MIG!=='undefined'&&ROLE_MIG[n])||'Сотрудник'], pass:''}); added=true; } });
-    if(added) saveAccounts();
-  }catch(e){}
 }
 loadAccounts();
 
@@ -1497,6 +1617,9 @@ async function loadTasks(){
         if(location.hash.slice(1)==='tasks') route(true); } } }catch(e){}
 }
 loadTasks();
+loadZayx();
+loadZsec();
+loadZgrp();
 function statusOf(t, a){ return (t.status && t.status[acctKey(a)]) || 'new'; }
 
 /* ---------- Нижняя навигация ---------- */
@@ -1518,13 +1641,33 @@ function renderTabbar(){
 }
 
 /* ---------- Вкладка: Задачи ---------- */
+let HIDE_DONE = false; try{ HIDE_DONE = localStorage.getItem('hideDoneTasks')==='1'; }catch(e){}
+function taskDone(t){ return t.source==='diary' || !!t.closed; }
+// Начальник открыл список задач → отмечаем задачи как просмотренные (видно инженеру/админу)
+function markBossViewed(){
+  if(!(hasRole('Начальник') && !canAssign())) return;
+  let ch=false;
+  TASKS.forEach(t=>{ if(t && t.source!=='diary' && !t.bossViewed){ t.bossViewed = (PROFILE&&PROFILE.name)||'Начальник'; ch=true; } });
+  if(ch) saveTasks();
+}
+function toggleHideDone(){ HIDE_DONE=!HIDE_DONE; try{ localStorage.setItem('hideDoneTasks', HIDE_DONE?'1':'0'); }catch(e){} renderTasks(); }
 function renderTasks(){
   const role=myRole();
   let html = `<div class="view"><div class="tabhead"><h1>Задачи</h1><div class="sub">${PROFILE.name} · ${role}</div></div>`;
   if(canAssign()) html += `<button class="save-btn" style="margin-bottom:14px" onclick="openNewTask()">＋ Новая задача</button>`;
+  markBossViewed();
   let list = TASKS.slice().sort((a,b)=>b.created-a.created);
   if(!canAssign() && !hasRole('Начальник')) list = list.filter(t=>(t.assignees||[]).some(a=>isMe(a)));
-  if(!list.length) html += `<div class="empty">Задач пока нет</div>`;
+  if(isEmployeeOnly()){
+    // сотрудник: завершённые инженером задачи пропадают сразу, без переключателя
+    list = list.filter(t=>!taskDone(t));
+    if(!list.length) html += `<div class="empty">Нет активных задач</div>`;
+  } else {
+    const doneCount = list.filter(taskDone).length;
+    if(doneCount) html += `<label class="nonar" style="margin:0 0 12px"><input type="checkbox"${HIDE_DONE?' checked':''} onchange="toggleHideDone()"><span>Скрыть выполненные (${doneCount})</span></label>`;
+    if(HIDE_DONE) list = list.filter(t=>!taskDone(t));
+    if(!list.length) html += `<div class="empty">${(HIDE_DONE&&doneCount)?'Выполненные скрыты':'Задач пока нет'}</div>`;
+  }
   list.forEach(t=> html += taskCard(t));
   html += `</div>`;
   app.innerHTML = html;
@@ -1558,12 +1701,14 @@ function taskCard(t){
     ${ext}`;
   // Инженер/Админ — полный контроль
   if(canAssign()){
+    const boss = t.bossViewed ? `<div class="taskmeta" style="color:#2f8a4e;font-weight:700">👁 Начальник просмотрел${typeof t.bossViewed==='string'?' ('+t.bossViewed+')':''}</div>` : `<div class="taskmeta" style="color:var(--muted)">👁 Начальник ещё не смотрел</div>`;
     const resp = (t.assignees||[]).map(a=>{ const key=a.login||a.name; const st=statusOf(t,a);
       return `<div class="respline"><span>${a.name}</span><button class="st st-${st}" onclick="cycleStatus('${t.id}','${key.replace(/'/g,"\\'")}')">${stName(st)} ✎</button></div>`; }).join('');
-    let foot = t.closed ? '<div class="closedtag">✔ Внесено в ежедневник</div>'
+    let foot = t.closed ? `<div class="closedtag">✔ Внесено в ежедневник</div><button class="tbtn" style="margin-top:8px;width:100%" onclick="finishTask('${t.id}')">🔄 Обновить в ежедневнике</button>`
       : `<div class="extrow"><input type="date" id="ext_${t.id}" class="naryad" value="${t.extendedTo||''}"><button class="tbtn" onclick="extendTask('${t.id}')">⏱ Продлить</button></div>
          <button class="save-btn" style="margin-top:8px" onclick="finishTask('${t.id}')">Завершить — внести в ежедневник</button>`;
     return `<div class="grp taskcard${t.closed?' closed':''}">${info}
+      ${boss}
       <div class="resp"><div class="resphead">Ответы (нажмите статус, чтобы изменить):</div>${resp||'—'}</div>
       ${foot}
       <div class="taskbtns"><button class="tbtn" onclick="editTask('${t.id}')">✎ Изменить</button><button class="tbtn del" onclick="deleteTask('${t.id}')">🗑 Удалить</button></div>
@@ -1607,13 +1752,19 @@ function objectsForTask(sysName, kind, m, y){
   const key = SYS_KEY[sysName]; if(!key) return [];
   if(typeof m!=='number') m = today.getMonth();
   if(typeof y!=='number') y = today.getFullYear();
-  if(kind==='zay'){ const out=[]; (ZAY[key]||[]).forEach(sec=>sec.subs.forEach(sb=>sb.items.forEach(x=>{ if(!out.includes(x)) out.push(x); }))); return out; }
+  if(kind==='zay'){ const out=[]; (ZAY[key]||[]).forEach(sec=>sec.subs.forEach(sb=>sb.items.forEach(x=>{ if(!out.includes(x)) out.push(x); })));
+    if(typeof ZAYX!=='undefined'){ Object.keys(ZAYX).forEach(k=>{ const p=k.split('|'); if(p[0]===key) (ZAYX[k]||[]).forEach(x=>{ if(!out.includes(x)) out.push(x); }); }); }
+    if(typeof ZSEC!=='undefined'){ Object.keys(ZSEC).forEach(k=>{ const p=k.split('|'); if(p[0]===key){ const mm=ZSEC[k]||{}; Object.keys(mm).forEach(parent=>{ (mm[parent]||[]).forEach(s=>{ const nm=parent+' · '+s; if(!out.includes(nm)) out.push(nm); }); }); } }); }
+    return out; }
   const out=[];
   (REG[key]?REG[key].systems:[]).forEach(sys=>sys.groups.forEach(g=>{ if(g.months.includes(m)) g.items.forEach(x=>{ if(!out.includes(x) && !regDoneInMonth(key, x, y, m)) out.push(x); }); }));
   return out;
 }
 function findRegKey(sysKey, obj){ let r=null; (REG[sysKey]?REG[sysKey].systems:[]).forEach(sys=>sys.groups.forEach(g=>{ if(!r && g.items.includes(obj)) r=`reg|${sysKey}|${sys.name}|${obj}`; })); return r; }
-function findZayKey(sysKey, obj){ let r=null; (ZAY[sysKey]||[]).forEach(sec=>sec.subs.forEach(sb=>{ if(!r && sb.items.includes(obj)) r=`zay|${sysKey}|${sec.name}|${sb.name}|${obj}`; })); return r; }
+function findZayKey(sysKey, obj){ let r=null; (ZAY[sysKey]||[]).forEach(sec=>sec.subs.forEach(sb=>{ if(!r && sb.items.includes(obj)) r=`zay|${sysKey}|${sec.name}|${sb.name}|${obj}`; }));
+  if(!r && typeof ZAYX!=='undefined'){ Object.keys(ZAYX).forEach(k=>{ if(!r){ const p=k.split('|'); if(p[0]===sysKey && (ZAYX[k]||[]).includes(obj)) r=`zay|${p[0]}|${p[1]}|${p[2]}|${obj}`; } }); }
+  if(!r && typeof ZSEC!=='undefined'){ Object.keys(ZSEC).forEach(k=>{ if(!r){ const p=k.split('|'); if(p[0]===sysKey){ const mm=ZSEC[k]||{}; Object.keys(mm).forEach(parent=>{ (mm[parent]||[]).forEach(s=>{ if(!r && (parent+' · '+s)===obj) r=`zay|${p[0]}|${p[1]}|${p[2]}|${obj}`; }); }); } } }); }
+  return r; }
 function dayKToTime(k){ const p=(k||'').split('-'); return p.length===3 ? new Date(+p[0],+p[1]-1,+p[2],12,0,0).getTime() : Date.now(); }
 function syncDiaryToTask(key, dayK){
   if(typeof TASKS==='undefined') return;
@@ -1640,8 +1791,9 @@ async function finishTask(id){
   const k = dd.getFullYear()+'-'+pad2(dd.getMonth()+1)+'-'+pad2(dd.getDate());
   try{ await loadDayChecks([dd]); await loadDayMeta([dd]); }catch(e){}
   const set=checkSet(k);
-  const engNames = new Set(ACCOUNTS.filter(a=>rolesOf(a).includes('Инженер')||rolesOf(a).includes('Администратор')).map(a=>a.name));
-  const w=(t.assignees||[]).map(a=>a.name).filter(n=> n!==t.engineer && !engNames.has(n));
+  // исполнители = выбранные сотрудники; убираем только самого инженера задачи, остальных показываем как есть
+  let w=(t.assignees||[]).map(a=>a.name).filter(n=> n!==t.engineer);
+  if(!w.length) w=(t.assignees||[]).map(a=>a.name);
   const meta=metaOf(k);
   const tFrom = t.from||'', tTo = (t.extendedTo||t.to||'');
   let done=0; const missed=[];
@@ -1654,6 +1806,8 @@ async function finishTask(id){
     done++;
   });
   saveChecks(k); saveMeta(k);
+  // при завершении все исполнители автоматически получают статус «завершено»
+  t.status = t.status||{}; (t.assignees||[]).forEach(a=>{ t.status[acctKey(a)]='done'; });
   t.closed=true; saveTasks(); renderTasks(); renderTabbar();
   if(missed.length) toast('Внесено на '+fmtDate(k)+': '+done+'. Не сопоставлено: '+missed.join(', '));
   else toast('Внесено в ежедневник на '+fmtDate(k)+' ('+done+' об.)');
@@ -1738,7 +1892,7 @@ function renderNewTask(){
     ${(newTask.objects&&newTask.objects.length)?`<div class="chips">${newTask.objects.map((o,i)=>`<span class="chip">${o}<button type="button" onclick="ntDelObj(${i})">×</button></span>`).join('')}</div><div class="foot" style="margin-top:4px">Добавлено ${newTask.objects.length}/6</div>`:'<div class="foot" style="margin-top:4px">Выберите объект и нажмите «Добавить». Можно до 6.</div>'}
     ${objs.length?'':'<div class="foot" style="margin-top:6px">На этот месяц по этой системе объектов нет (или все уже проведены).</div>'}
     <div class="sys" style="margin-top:14px">Наряд</div>
-    <input type="text" class="naryad" placeholder="Номер наряда" value="${newTask.naryad||''}" oninput="ntNaryad(this.value)"${newTask.noNaryad?' disabled style="opacity:.45"':''}>
+    <input type="text" inputmode="numeric" pattern="[0-9]*" class="naryad" placeholder="Номер наряда" value="${newTask.naryad||''}" oninput="ntNaryad(this.value)"${newTask.noNaryad?' disabled style="opacity:.45"':''}>
     <label class="nonar"><input type="checkbox"${newTask.noNaryad?' checked':''} onchange="ntNoNaryad(this.checked)"><span>Без наряда</span></label>
     <div class="sys" style="margin-top:14px">Исполнители</div>
     <div class="grp" style="padding:6px 12px">${people.map(a=>`<div class="staffrow"><button class="chk pick${newTask.assignees.find(x=>x.id===a.id)?' on':''}" style="flex:1" onclick="ntToggle('${a.id}')"><span class="box"></span><span class="txt">${a.name}${a.login?` <small style="color:var(--muted)">@${a.login}</small>`:''}</span></button></div>`).join('')||'<div class="empty" style="border:0">Нет сотрудников</div>'}</div>
@@ -1755,18 +1909,14 @@ function renderProfile(){
     <div class="grp"><div class="tasktitle">${a.name}</div>
       <div class="taskmeta">Логин: <b>${a.login||'—'}</b></div>
       <div class="taskmeta">Роль: <b>${rolesText(a)}</b></div></div>`;
-  if(isAdmin()){
-    html += `<button class="mbtn" onclick="location.hash='profile-users'"><span class="ic">👥</span><span class="t">Сотрудники и роли<span class="s">Создать, логин, пароль, роли, удалить</span></span><span class="arrow">›</span></button>`;
-  }
-  html += `<button class="mbtn" style="margin-top:12px" onclick="if(window.Android&&window.Android.logout)window.Android.logout()"><span class="ic">🚪</span><span class="t">Выйти<span class="s">Сменить пользователя</span></span><span class="arrow">›</span></button>`;
-  html += `</div>`;
+  if(isAdmin()) html += `<button class="mbtn" onclick="location.hash='profile-users'"><span class="ic">👥</span><span class="t">Пользователи<span class="s">Аккаунты, роли, кто в сети</span></span><span class="arrow">›</span></button>`;
+  if(isAdmin()) html += `<button class="mbtn" onclick="resetDiaryData()"><span class="ic">🗑</span><span class="t">Сбросить данные ежедневника<span class="s">Стереть отметки, наряды и задачи (ростер останется)</span></span><span class="arrow">›</span></button>`;
+  html += `<button class="mbtn" style="margin-top:18px" onclick="doLogout()"><span class="ic">🚪</span><span class="t">Выйти<span class="s">Сменить учётную запись</span></span><span class="arrow">›</span></button>`;
   app.innerHTML = html;
 }
-function switchProfile(id){
-  const a=ACCOUNTS.find(x=>x.id===id); if(!a) return;
-  PROFILE=a; try{ localStorage.setItem('previewProfile', JSON.stringify(a)); }catch(e){}
-  if(isEmployeeOnly()) location.hash='tasks'; else { renderProfile(); renderTabbar(); }
-  renderTabbar();
+function doLogout(){
+  try{ if(window.Android && window.Android.logout){ window.Android.logout(); return; } }catch(e){}
+  toast('Выход недоступен');
 }
 
 /* Админ: список пользователей */
@@ -1804,16 +1954,16 @@ function renderEditUser(){
   </div>`;
 }
 function updUser(f, v){ const a=ACCOUNTS.find(x=>x.id===state.editId); if(!a) return; a[f]=v;
-  if(a.id===PROFILE.id){ PROFILE=a; try{localStorage.setItem('previewProfile',JSON.stringify(a));}catch(e){} }
+  if(a.id===PROFILE.id){ PROFILE=a; }
   saveAccounts(); }
 function toggleRole(r){ const a=ACCOUNTS.find(x=>x.id===state.editId); if(!a) return;
   if(!Array.isArray(a.roles)) a.roles = a.role?[a.role]:[];
   const i=a.roles.indexOf(r);
   if(i>=0) a.roles.splice(i,1); else { if(a.roles.length>=2){ toast('Максимум 2 роли'); return; } a.roles.push(r); }
   if(!a.roles.length) a.roles=['Сотрудник'];
-  if(a.id===PROFILE.id){ PROFILE=a; try{localStorage.setItem('previewProfile',JSON.stringify(a));}catch(e){} }
+  if(a.id===PROFILE.id){ PROFILE=a; }
   saveAccounts(); renderEditUser(); }
-function delUser(id){ ACCOUNTS=ACCOUNTS.filter(x=>x.id!==id); saveAccounts(); if(PROFILE.id===id) PROFILE=ACCOUNTS[0]; location.hash='profile-users'; toast('Аккаунт удалён'); }
+function delUser(id){ ACCOUNTS=ACCOUNTS.filter(x=>x.id!==id); saveAccounts(); if(PROFILE.id===id) resolveProfile(); location.hash='profile-users'; toast('Аккаунт удалён'); }
 
 let tt;
 function toast(msg){
@@ -1830,6 +1980,8 @@ function route(keep){
   if(h==='profile-users'){ renderUsers(); if(!keep) window.scrollTo(0,0); return; }
   if(h==='profile-user'){ renderEditUser(); if(!keep) window.scrollTo(0,0); return; }
   if(h==='zsub' && state.zs && state.day) renderZSub();
+  else if(h==='zsec' && state.zs && state.day && state.secObj) renderSectors();
+  else if(h==='zgroup' && state.zs && state.day && state.grpId) renderGroup();
   else if(h==='sub' && state.sub && state.day) renderSub();
   else if(h==='menu' && state.day && state.mode) renderMenu();
   else if(h==='nar' && state.day) renderNar();
@@ -1841,6 +1993,20 @@ function route(keep){
   else renderYear();
   if(!keep) window.scrollTo(0,0);
 }
+// Одноразовый сброс данных ежедневника/задач (ростер и роли сохраняются)
+async function wipeDiaryData(){
+  const dates=new Set();
+  try{ for(let i=0;i<localStorage.length;i++){ const kk=localStorage.key(i); const m=kk&&kk.match(/^(?:chk|meta)-(.+)$/); if(m) dates.add(m[1]); } }catch(e){}
+  try{ const rm=[]; for(let i=0;i<localStorage.length;i++){ const kk=localStorage.key(i); if(/^(chk|meta)-/.test(kk)||kk==='tasks') rm.push(kk); } rm.forEach(kk=>localStorage.removeItem(kk)); }catch(e){}
+  await dbReady;
+  if(DB){ for(const d of dates){ try{ await DB.collection('data/users/'+UID).doc('day-'+d).set({done:[]}); }catch(e){} try{ await DB.collection('data/users/'+UID).doc('meta-'+d).set({items:{}}); }catch(e){} }
+    try{ await DB.collection('data/users/'+UID).doc('tasks').set({list:[], gen:(typeof TASK_GEN!=='undefined'?TASK_GEN:'1')}); }catch(e){} }
+  try{ for(const k in CHECKS) delete CHECKS[k]; }catch(e){}
+  try{ for(const k in META) delete META[k]; }catch(e){}
+  try{ if(Array.isArray(TASKS)) TASKS.length=0; }catch(e){}
+}
+async function resetDiaryData(){ if(!confirm('Удалить ВСЕ данные ежедневника и задач? Отметки, наряды, исполнители и задачи будут стёрты. Сотрудники и роли останутся.')) return; await wipeDiaryData(); toast('Данные сброшены'); try{ location.hash=''; }catch(e){} setTimeout(()=>{ try{ location.reload(); }catch(e){ route(true); } }, 400); }
+(async()=>{ try{ if(localStorage.getItem('wipe_2026_11')!=='1'){ localStorage.setItem('wipe_2026_11','1'); await wipeDiaryData(); try{ location.reload(); }catch(e){ route(true); } } }catch(e){} })();
 window.addEventListener('hashchange', route);
 if(location.hash && location.hash!=='#') { try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
 if((!location.hash || location.hash==='#') && isEmployeeOnly()){ try{ location.hash='tasks'; }catch(e){} }
