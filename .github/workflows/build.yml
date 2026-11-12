@@ -23,23 +23,27 @@ jobs:
         with:
           gradle-version: '8.9'
 
+      - name: Определить версию
+        id: ver
+        run: echo "v=$(grep -oP 'versionName \"\K[^\"]+' app/build.gradle)" >> "$GITHUB_OUTPUT"
+
       - name: Собрать APK
         run: gradle assembleRelease --no-daemon
 
       - name: Переименовать APK
-        run: cp app/build/outputs/apk/release/app-release.apk "Ezhednevnik-2.0.7.apk"
+        run: cp app/build/outputs/apk/release/app-release.apk "Ezhednevnik-${{ steps.ver.outputs.v }}.apk"
 
       - name: Сохранить APK в Actions
         uses: actions/upload-artifact@v4
         with:
-          name: Ezhednevnik-2.0.7
-          path: Ezhednevnik-2.0.7.apk
+          name: Ezhednevnik-${{ steps.ver.outputs.v }}
+          path: Ezhednevnik-${{ steps.ver.outputs.v }}.apk
 
       - name: Опубликовать в Releases
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.0.9
-          name: Ежедневник 2.0.7
+          tag_name: v${{ steps.ver.outputs.v }}
+          name: Ежедневник ${{ steps.ver.outputs.v }}
           body_path: RELEASE_NOTES.md
-          files: Ezhednevnik-2.0.7.apk
+          files: Ezhednevnik-${{ steps.ver.outputs.v }}.apk
           make_latest: true
