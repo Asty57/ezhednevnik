@@ -81,12 +81,19 @@ public class LoginActivity extends Activity {
 
     private void doLogin() {
         String login = loginField.getText().toString().trim().toLowerCase();
-        String pass = passField.getText().toString();
+        String pass = passField.getText().toString().trim();
         if (login.isEmpty() || pass.isEmpty()) { toast("Введите логин и пароль"); return; }
         btn.setEnabled(false);
         auth.signInWithEmailAndPassword(login + DOMAIN, pass)
                 .addOnSuccessListener(r -> fetchRoleAndGo(auth.getCurrentUser()))
-                .addOnFailureListener(e -> { btn.setEnabled(true); toast("Неверный логин или пароль"); });
+                .addOnFailureListener(e -> { btn.setEnabled(true);
+                    String m = e.getMessage() != null ? e.getMessage() : "";
+                    if (m.toLowerCase().contains("no user record") || m.toLowerCase().contains("no user") )
+                        toastLong("Такого логина нет. Админу: создайте вход в «Пользователи».");
+                    else if (m.toLowerCase().contains("password is invalid") || m.toLowerCase().contains("invalid-credential") || m.toLowerCase().contains("credential is incorrect"))
+                        toastLong("Неверный пароль (или логин). Проверьте у админа.");
+                    else toastLong("Вход не выполнен: " + m);
+                });
     }
 
     private void fetchRoleAndGo(final FirebaseUser user) {
@@ -116,5 +123,6 @@ public class LoginActivity extends Activity {
     }
 
     private void toast(String s) { Toast.makeText(this, s, Toast.LENGTH_SHORT).show(); }
+    private void toastLong(String s) { Toast.makeText(this, s, Toast.LENGTH_LONG).show(); }
     private int dp(int v) { return (int) (v * getResources().getDisplayMetrics().density); }
 }

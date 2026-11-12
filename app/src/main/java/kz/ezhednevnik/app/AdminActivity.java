@@ -112,7 +112,7 @@ public class AdminActivity extends Activity {
 
     private void createUser() {
         String login = loginField.getText().toString().trim().toLowerCase();
-        String pass = passField.getText().toString();
+        String pass = passField.getText().toString().trim();
         final String role = (String) roleSpinner.getSelectedItem();
         if (login.isEmpty() || pass.length() < 6) { toast("Логин и пароль (от 6 символов)"); return; }
         createBtn.setEnabled(false);
@@ -129,24 +129,35 @@ public class AdminActivity extends Activity {
         final String flogin = login;
         secAuth.createUserWithEmailAndPassword(login + DOMAIN, pass)
                 .addOnSuccessListener(res -> {
-                    String uid = res.getUser().getUid();
+                    String uid = res.getUser() != null ? res.getUser().getUid() : null;
+                    if (uid == null) { createBtn.setEnabled(true); toastLong("Создано, но UID пуст — сообщите разработчику"); return; }
                     Map<String, Object> m = new HashMap<>();
                     m.put("login", flogin);
                     m.put("role", role);
-                    FirebaseFirestore.getInstance().collection("users").document(uid).set(m);
-                    secAuth.signOut();
-                    createBtn.setEnabled(true);
-                    loginField.setText(""); passField.setText("");
-                    toast("Аккаунт создан: " + flogin);
-                    loadUsers();
+                    FirebaseFirestore.getInstance().collection("users").document(uid).set(m)
+                        .addOnSuccessListener(x -> {
+                            secAuth.signOut();
+                            createBtn.setEnabled(true);
+                            loginField.setText(""); passField.setText("");
+                            toastLong("Аккаунт создан: " + flogin + " (роль: " + role + ")");
+                            loadUsers();
+                        })
+                        .addOnFailureListener(e2 -> {
+                            secAuth.signOut();
+                            createBtn.setEnabled(true);
+                            toastLong("Вход создан, но роль не сохранилась: " + e2.getMessage());
+                            loadUsers();
+                        });
                 })
                 .addOnFailureListener(e -> {
                     createBtn.setEnabled(true);
-                    String msg = e.getMessage() != null && e.getMessage().contains("already") ? "Такой логин уже есть" : "Ошибка создания";
-                    toast(msg);
+                    String m = e.getMessage() != null ? e.getMessage() : "неизвестная ошибка";
+                    if (m.contains("already")) toastLong("Такой логин уже есть: " + flogin);
+                    else toastLong("Ошибка создания: " + m);
                 });
     }
 
     private void toast(String s) { Toast.makeText(this, s, Toast.LENGTH_SHORT).show(); }
+    private void toastLong(String s) { Toast.makeText(this, s, Toast.LENGTH_LONG).show(); }
     private int dp(int v) { return (int) (v * getResources().getDisplayMetrics().density); }
 }
