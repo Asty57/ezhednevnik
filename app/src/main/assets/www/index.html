@@ -960,15 +960,22 @@ function renderZSub(){
 /* ---------- Отчёт за месяц в Excel (.xlsx) ---------- */
 const pad2 = n => String(n).padStart(2,'0');
 let DL = {
-  async save(blob, filename){
+  // совместимо с вызовом DL.save({ filename, data }) — data: Uint8Array/ArrayBuffer/Blob
+  async save(opt){
     if(!(window.Android && window.Android.saveFile)){ toast('Сохранение недоступно'); return; }
     try{
-      const buf = await blob.arrayBuffer();
-      const bytes = new Uint8Array(buf);
+      const filename = (opt && opt.filename) || 'file';
+      let src = opt && opt.data;
+      let bytes;
+      if(src instanceof Uint8Array) bytes = src;
+      else if(src instanceof ArrayBuffer) bytes = new Uint8Array(src);
+      else if(src && typeof src.arrayBuffer === 'function') bytes = new Uint8Array(await src.arrayBuffer());
+      else bytes = new Uint8Array(src || []);
       let bin = ''; const chunk = 0x8000;
       for(let i=0;i<bytes.length;i+=chunk){ bin += String.fromCharCode.apply(null, bytes.subarray(i, i+chunk)); }
       const b64 = btoa(bin);
-      window.Android.saveFile(filename, b64);
+      const res = window.Android.saveFile(filename, b64);
+      if(res && res !== 'ok') toast(res);
     }catch(e){ toast('Не удалось сохранить файл'); }
   }
 };
