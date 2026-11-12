@@ -27,18 +27,19 @@ jobs:
         run: gradle assembleRelease --no-daemon
 
       - name: Переименовать APK
-        run: cp app/build/outputs/apk/release/app-release.apk "Ezhednevnik-2.0.6.apk"
+        run: cp app/build/outputs/apk/release/app-release.apk "Ezhednevnik-2.0.7.apk"
 
       - name: Сохранить APK в Actions
         uses: actions/upload-artifact@v4
         with:
-          name: Ezhednevnik-2.0.6
-          path: Ezhednevnik-2.0.6.apk
+          name: Ezhednevnik-2.0.7
+          path: Ezhednevnik-2.0.7.apk
 
       - name: Опубликовать в Releases
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.0.6
-          name: Ежедневник 2.0.6
+          tag_name: v2.0.7
+          name: Ежедневник 2.0.7
           body_path: RELEASE_NOTES.md
-          files: Ezhednevnik-2.0.6.apk
+          files: Ezhednevnik-2.0.7.apk
+          make_latest: true
