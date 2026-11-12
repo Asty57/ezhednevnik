@@ -205,11 +205,23 @@ public class MainActivity extends Activity {
                 ContentValues v = new ContentValues();
                 v.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
                 v.put(MediaStore.Downloads.MIME_TYPE, mime);
-                v.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Ежедневник");
+                v.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Ezhednevnik");
                 v.put(MediaStore.Downloads.IS_PENDING, 1);
                 ContentResolver cr = getContentResolver();
-                Uri uri = cr.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
-                if (uri == null) return "Не удалось создать файл";
+                Uri uri;
+                try { uri = cr.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, v); }
+                catch (Exception ex) { uri = null; }
+                if (uri == null) {
+                    // запасной вариант — без подпапки, прямо в «Загрузки»
+                    ContentValues v2 = new ContentValues();
+                    v2.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
+                    v2.put(MediaStore.Downloads.MIME_TYPE, mime);
+                    v2.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+                    v2.put(MediaStore.Downloads.IS_PENDING, 1);
+                    v = v2;
+                    uri = cr.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
+                }
+                if (uri == null) return "Не удалось создать файл (нет доступа к «Загрузки»)";
                 try (OutputStream out = cr.openOutputStream(uri)) {
                     if (out == null) return "Не удалось открыть файл";
                     out.write(bytes);

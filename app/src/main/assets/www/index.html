@@ -293,7 +293,7 @@ function rangeText(s){
 /* ---------- Страница 1: календарь (месяцы) ---------- */
 function renderYear(){
   let html = `<div class="view">
-    <div class="topbar">${isEmployeeOnly() ? '' : `<button class="bell${NOTIF.on?' on':''}" onclick="openNotif()" aria-label="Уведомления">🔔</button>`}</div>
+    <div class="topbar"><button class="bell${NOTIF.on?' on':''}" onclick="openNotif()" aria-label="Уведомления">🔔</button></div>
     <header>
       <button class="icon-btn" onclick="changeYear(-1)" aria-label="Предыдущий год">‹</button>
       <h1 style="text-align:center">${state.year}<div class="sub">Сегодня: ${today.getDate()} ${MONTHS_GEN[today.getMonth()]} ${today.getFullYear()}</div></h1>
@@ -1374,10 +1374,12 @@ try{ const raw = localStorage.getItem('notif'); if(raw) NOTIF = {...NOTIF, ...JS
 function openNotif(){ location.hash = 'notif'; }
 async function saveNotif(){
   const on = document.getElementById('nfOn').checked;
-  const time = document.getElementById('nfTime').value || '08:00';
+  const tEl = document.getElementById('nfTime');
+  const time = (tEl && tEl.value) || NOTIF.time || '08:00';
   NOTIF = { on, time };
   try{ localStorage.setItem('notif', JSON.stringify(NOTIF)); }catch(e){}
-  try{ if(window.Android && window.Android.setReminder){ const pp=time.split(':'); window.Android.setReminder(on, parseInt(pp[0])||0, parseInt(pp[1])||0); } }catch(e){}
+  // таймер-напоминание — только для инженера (у сотрудника времени нет)
+  try{ if(tEl && window.Android && window.Android.setReminder){ const pp=time.split(':'); window.Android.setReminder(on, parseInt(pp[0])||0, parseInt(pp[1])||0); } }catch(e){}
   await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('notify').set(NOTIF); }catch(e){} }
   toast('Сохранено');
   setTimeout(()=>history.back(), 500);
@@ -1399,20 +1401,20 @@ function renderNotif(){
   app.innerHTML = `<div class="view">
     <header>
       <button class="icon-btn" onclick="history.back()" aria-label="Назад">←</button>
-      <h1>Уведомления<div class="sub">Напоминания о работах</div></h1>
+      <h1>Уведомления<div class="sub">${isEmployeeOnly()?'О новых задачах':'Напоминания о работах'}</div></h1>
     </header>
     <label class="switch">
-      <span>Присылать напоминания</span>
-      <input type="checkbox" id="nfOn" ${NOTIF.on?'checked':''} onchange="document.getElementById('nfTimeRow').style.opacity=this.checked?'1':'.45'">
+      <span>${isEmployeeOnly()?'Уведомлять о задачах':'Присылать напоминания'}</span>
+      <input type="checkbox" id="nfOn" ${NOTIF.on?'checked':''} onchange="var r=document.getElementById('nfTimeRow'); if(r) r.style.opacity=this.checked?'1':'.45'">
       <span class="track"></span>
     </label>
-    <div class="grp" id="nfTimeRow" style="opacity:${NOTIF.on?'1':'.45'}">
+    ${isEmployeeOnly()?'':`<div class="grp" id="nfTimeRow" style="opacity:${NOTIF.on?'1':'.45'}">
       <h3><span>Время напоминания</span></h3>
       <div class="note">В это время каждый день будет приходить напоминание отметить работы.</div>
       <input type="time" id="nfTime" class="timeinput" value="${NOTIF.time}">
-    </div>
+    </div>`}
     <button class="save-btn" onclick="saveNotif()">Сохранить</button>
-    <div class="foot">Во временной версии уведомления ещё не приходят — заработают в приложении на телефоне. Время сохраняется.</div>
+    <div class="foot">${isEmployeeOnly()?'Когда вам поставят задачу, придёт уведомление (проверка примерно раз в 15 минут).':'В приложении напоминание приходит в указанное время.'}</div>
   </div>`;
 }
 /* ---------- Сотрудники (общий список) ---------- */
@@ -1973,6 +1975,7 @@ function renderProfile(){
   if(isAdmin()) html += `<div class="sys" style="margin-top:18px">Просмотр как пользователь</div>
     <select class="naryad" onchange="switchProfile(this.value)">${ACCOUNTS.map(x=>`<option value="${x.id}"${x.id===a.id?' selected':''}>${x.name} · ${rolesText(x)}</option>`).join('')}</select>
     <div class="foot">Администратор может смотреть приложение глазами любого сотрудника без повторного входа. Выбор сохраняется.</div>`;
+  if(isEmployeeOnly()) html += `<button class="mbtn" onclick="openNotif()"><span class="ic">🔔</span><span class="t">Уведомления<span class="s">О новых задачах</span></span><span class="arrow">›</span></button>`;
   html += `<button class="mbtn" style="margin-top:18px" onclick="doLogout()"><span class="ic">🚪</span><span class="t">Выйти<span class="s">Сменить учётную запись</span></span><span class="arrow">›</span></button>`;
   app.innerHTML = html;
 }
