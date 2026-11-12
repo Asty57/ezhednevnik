@@ -50,6 +50,14 @@ public class MainActivity extends Activity {
             if (getIntent().getStringExtra("role") != null) role = getIntent().getStringExtra("role");
             if (getIntent().getStringExtra("login") != null) login = getIntent().getStringExtra("login");
         }
+        // если запуск без явного входа — берём сохранённую сессию
+        android.content.SharedPreferences sp = getSharedPreferences("sess", MODE_PRIVATE);
+        if (login == null || login.isEmpty()) { login = sp.getString("login", ""); role = sp.getString("role", "Сотрудник"); }
+        if (login == null || login.isEmpty()) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
 
         web = new WebView(this);
         setContentView(web);
@@ -124,7 +132,7 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void logout() {
-            FirebaseAuth.getInstance().signOut();
+            getSharedPreferences("sess", MODE_PRIVATE).edit().clear().apply();
             runOnUiThread(() -> {
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
                 finish();

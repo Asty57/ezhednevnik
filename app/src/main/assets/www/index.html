@@ -1454,9 +1454,19 @@ async function loadAccounts(){
     const d=snap&&typeof snap.data==='function'?snap.data():snap;
     if(d&&Array.isArray(d.list)&&d.list.length){ ACCOUNTS=fresh(d.list); applyRoleMig();
       try{localStorage.setItem('accounts',JSON.stringify(ACCOUNTS));}catch(e){}
+      ensureRoster();
       resolveProfile();
       const h=location.hash.slice(1); if(h==='profile'||h==='tasks'||h.indexOf('profile-')===0) route(true);
     } }catch(e){}
+}
+// Добавляем в ростер сотрудников из списка STAFF, которых ещё нет (чтобы первичный вход-админ не стирал бригаду)
+function ensureRoster(){
+  try{
+    const have = new Set(ACCOUNTS.map(a=>(a.name||'').trim()));
+    let added=false;
+    (typeof STAFF!=='undefined'?STAFF:[]).forEach((n)=>{ if(n && !have.has(n.trim())){ ACCOUNTS.push({id:'u'+Date.now()+Math.floor(Math.random()*1000), name:n, login:'', roles:[(typeof ROLE_MIG!=='undefined'&&ROLE_MIG[n])||'Сотрудник'], pass:''}); added=true; } });
+    if(added) saveAccounts();
+  }catch(e){}
 }
 loadAccounts();
 
@@ -1698,8 +1708,7 @@ function renderProfile(){
       <div class="taskmeta">Логин: <b>${a.login||'—'}</b></div>
       <div class="taskmeta">Роль: <b>${rolesText(a)}</b></div></div>`;
   if(isAdmin()){
-    html += `<button class="mbtn" onclick="location.hash='profile-users'"><span class="ic">👥</span><span class="t">Сотрудники и роли<span class="s">Имена, логины, роли ростера</span></span><span class="arrow">›</span></button>`;
-    html += `<button class="mbtn" onclick="if(window.Android&&window.Android.openAdmin)window.Android.openAdmin()"><span class="ic">🔑</span><span class="t">Создать вход<span class="s">Логин и пароль для входа (Firebase)</span></span><span class="arrow">›</span></button>`;
+    html += `<button class="mbtn" onclick="location.hash='profile-users'"><span class="ic">👥</span><span class="t">Сотрудники и роли<span class="s">Создать, логин, пароль, роли, удалить</span></span><span class="arrow">›</span></button>`;
   }
   html += `<button class="mbtn" style="margin-top:12px" onclick="if(window.Android&&window.Android.logout)window.Android.logout()"><span class="ic">🚪</span><span class="t">Выйти<span class="s">Сменить пользователя</span></span><span class="arrow">›</span></button>`;
   html += `</div>`;

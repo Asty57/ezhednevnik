@@ -2,6 +2,7 @@ package kz.ezhednevnik.app;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
@@ -15,15 +16,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class LoginActivity extends Activity {
 
-    static final String DOMAIN = "@ezhednevnik.app";
+    static final String ACC_DOC = "data/users/team/accounts";
     private FirebaseAuth auth;
     private EditText loginField, passField;
     private Button btn;
@@ -32,9 +34,12 @@ public class LoginActivity extends Activity {
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         auth = FirebaseAuth.getInstance();
+        ensureAnon(null); // прогреваем анонимный доступ к базе
 
-        FirebaseUser cur = auth.getCurrentUser();
-        if (cur != null) { fetchRoleAndGo(cur); return; }
+        // уже входили на этом устройстве — пропускаем форму
+        SharedPreferences sp = getSharedPreferences("sess", MODE_PRIVATE);
+        String savedLogin = sp.getString("login", "");
+        if (!savedLogin.isEmpty()) { goMain(savedLogin, sp.getString("role", "Сотрудник")); return; }
 
         int pad = dp(24);
         LinearLayout root = new LinearLayout(this);
@@ -76,42 +81,94 @@ public class LoginActivity extends Activity {
         });
         root.addView(btn);
 
+        TextView hint = new TextView(this);
+        hint.setText("Первый вход под логином admin создаёт администратора.");
+        hint.setTextColor(Color.parseColor("#777777"));
+        hint.setPadding(0, dp(16), 0, 0);
+        root.addView(hint);
+
         setContentView(root);
     }
 
-    private void doLogin() {
-        String login = loginField.getText().toString().trim().toLowerCase();
-        String pass = passField.getText().toString().trim();
-        if (login.isEmpty() || pass.isEmpty()) { toast("Введите логин и пароль"); return; }
-        btn.setEnabled(false);
-        auth.signInWithEmailAndPassword(login + DOMAIN, pass)
-                .addOnSuccessListener(r -> fetchRoleAndGo(auth.getCurrentUser()))
-                .addOnFailureListener(e -> { btn.setEnabled(true);
-                    String m = e.getMessage() != null ? e.getMessage() : "";
-                    if (m.toLowerCase().contains("no user record") || m.toLowerCase().contains("no user") )
-                        toastLong("Такого логина нет. Админу: создайте вход в «Пользователи».");
-                    else if (m.toLowerCase().contains("password is invalid") || m.toLowerCase().contains("invalid-credential") || m.toLowerCase().contains("credential is incorrect"))
-                        toastLong("Неверный пароль (или логин). Проверьте у админа.");
-                    else toastLong("Вход не выполнен: " + m);
-                });
+    private void ensureAnon(final Runnable then) {
+        if (auth.getCurrentUser() != null) { if (then != null) then.run(); return; }
+        auth.signInAnonymously()
+            .addOnSuccessListener(r -> { if (then != null) then.run(); })
+            .addOnFailureListener(e -> {
+                if (btn != null) btn.setEnabled(true);
+                toastLong("Нет доступа к базе. Включите вход «Anonymous» в Firebase (Authentication → Sign-in method). " + e.getMessage());
+            });
     }
 
-    private void fetchRoleAndGo(final FirebaseUser user) {
-        final String login = user.getEmail() != null ? user.getEmail().replace(DOMAIN, "") : "";
-        final String uid = user.getUid();
-        FirebaseFirestore.getInstance().collection("users").document(uid).get()
-                .addOnSuccessListener(snap -> {
-                    String role = snap.exists() && snap.getString("role") != null ? snap.getString("role") : null;
-                    if (role == null) {
-                        role = login.equals("admin") ? "Администратор" : "Сотрудник";
-                        Map<String, Object> m = new HashMap<>();
-                        m.put("login", login);
-                        m.put("role", role);
-                        FirebaseFirestore.getInstance().collection("users").document(uid).set(m);
-                    }
-                    goMain(login, role);
-                })
-                .addOnFailureListener(e -> goMain(login, login.equals("admin") ? "Администратор" : "Сотрудник"));
+    private void doLogin() {
+        final String login = loginField.getText().toString().trim().toLowerCase();
+        final String pass = passField.getText().toString().trim();
+        if (login.isEmpty() || pass.isEmpty()) { toast("Введите логин и пароль"); return; }
+        btn.setEnabled(false);
+        ensureAnon(() -> checkAccounts(login, pass));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void checkAccounts(final String login, final String pass) {
+        FirebaseFirestore.getInstance().document(ACC_DOC).get()
+            .addOnSuccessListener(snap -> {
+                List<Map<String, Object>> list = new ArrayList<>();
+                Object raw = snap != null ? snap.get("list") : null;
+                if (raw instanceof List) {
+                    for (Object o : (List<Object>) raw) if (o instanceof Map) list.add((Map<String, Object>) o);
+                }
+                // ищем совпадение по логину
+                Map<String, Object> found = null;
+                boolean anyLogin = false;
+                for (Map<String, Object> a : list) {
+                    String al = a.get("login") != null ? a.get("login").toString().trim().toLowerCase() : "";
+                    if (!al.isEmpty()) anyLogin = true;
+                    if (!al.isEmpty() && al.equals(login)) { found = a; break; }
+                }
+                if (found != null) {
+                    String ap = found.get("pass") != null ? found.get("pass").toString().trim() : "";
+                    if (ap.equals(pass)) { success(login, primaryRole(found)); }
+                    else { btn.setEnabled(true); toastLong("Неверный пароль для «" + login + "». Проверьте у администратора."); }
+                    return;
+                }
+                // логина нет
+                if (!anyLogin) {
+                    // первый вход — создаём администратора
+                    Map<String, Object> adm = new HashMap<>();
+                    adm.put("id", "adm" + System.currentTimeMillis());
+                    adm.put("name", login);
+                    adm.put("login", login);
+                    List<String> roles = new ArrayList<>(); roles.add("Администратор");
+                    adm.put("roles", roles);
+                    adm.put("pass", pass);
+                    list.add(adm);
+                    Map<String, Object> doc = new HashMap<>(); doc.put("list", list);
+                    FirebaseFirestore.getInstance().document(ACC_DOC).set(doc)
+                        .addOnSuccessListener(x -> success(login, "Администратор"))
+                        .addOnFailureListener(e -> { btn.setEnabled(true); toastLong("Не удалось создать администратора: " + e.getMessage()); });
+                } else {
+                    btn.setEnabled(true);
+                    toastLong("Такого логина нет. Администратор должен добавить его в «Сотрудники».");
+                }
+            })
+            .addOnFailureListener(e -> { btn.setEnabled(true); toastLong("Ошибка доступа к базе: " + e.getMessage()); });
+    }
+
+    @SuppressWarnings("unchecked")
+    private String primaryRole(Map<String, Object> a) {
+        Object r = a.get("roles");
+        if (r instanceof List && !((List<Object>) r).isEmpty()) {
+            Object first = ((List<Object>) r).get(0);
+            if (first != null) return first.toString();
+        }
+        if (a.get("role") != null) return a.get("role").toString();
+        return "Сотрудник";
+    }
+
+    private void success(String login, String role) {
+        SharedPreferences sp = getSharedPreferences("sess", MODE_PRIVATE);
+        sp.edit().putString("login", login).putString("role", role).apply();
+        goMain(login, role);
     }
 
     private void goMain(String login, String role) {
