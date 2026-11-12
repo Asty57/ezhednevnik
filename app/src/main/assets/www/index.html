@@ -219,9 +219,15 @@
   .st-prog{background:#fdefcc;color:#9a6a00}
   .st-done{background:#ddf2e3;color:#2f8a4e}
   .taskseg{margin-top:12px}
-  .taskrow{display:flex;align-items:flex-start;gap:10px}
+  .taskrow{display:flex;align-items:stretch;gap:10px}
   .taskinfo{flex:1;min-width:0}
-  .taskacts{display:flex;gap:8px;flex:none;align-items:center}
+  .taskacts{display:flex;flex-direction:column;gap:12px;flex:none;align-items:center;justify-content:space-between}
+  .emojiwrap{display:flex;flex-direction:column;align-items:center;gap:3px}
+  .emojiwrap .cap{font-size:10px;font-weight:700;color:var(--muted)}
+  .objrow{display:flex;gap:8px;align-items:center}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:#eef2ff;border:1px solid #cdd7f5;border-radius:999px;padding:5px 10px;font-size:13px;font-weight:600}
+  .chip button{border:0;background:#c00d0d;color:#fff;width:18px;height:18px;border-radius:50%;font-size:12px;line-height:1;cursor:pointer}
   .emoji{width:46px;height:46px;border-radius:14px;border:1.5px solid var(--line);background:#f3f5f9;font-size:22px;cursor:pointer;opacity:.5;transition:.15s}
   .emoji.on{opacity:1}
   .emoji.on.done{background:#ddf2e3;border-color:#2f8a4e}
@@ -447,7 +453,7 @@ const REG = {
   aps: { title:'АПС', icon:'🔥', sub:'Пожарная сигнализация · Болид', systems:[
     { name:'АПС системы Болид', groups:[
       { months:Q1, items:['АБК ЗЛ','ЗЛ-7000','Склад МЦ','Склад 806','ЗДУ-1','УЦК','АБК ГСО','Операторная ЛК-6у','Котельная ПВВС','АБК ПЧ','Склад ПЧ','АБК ОСВПТиПК','Склад ЗЛ','Мед. пункт','РПИ-завод'] },
-      { months:Q2, items:['АБК ПВВС','АКС','АБК ЛК-6у','АБК ТСЦ','ЗДУ-2','Склад ДИТ','КИПиА (22)','Прувер КИПиА','Склад 803','Склад 804','Склад 805','ЛМИС гараж','АБК БО'] },
+      { months:Q2, items:['АБК ПВВС','АКС','АБК ЛК-6у','АБК ТСЦ','ЗДУ-2','Склад ДИТ','ТП-22','Прувер КИПиА','Склад 803','Склад 804','Склад 805','ЛМИС гараж','АБК БО'] },
       { months:Q3, items:[...TP3,'КТП8','7ЩСУ2','БУТ','Операторная УВПМ','Висбрекинг','Пост 21','Центральная проходная','ПСГ','Склад электроцеха','Столовая','ЗДУ-3'] },
       { months:ALL, items:['Склад 801','Склад 802','Склад 705','ТП-23','Газобаллонный','Конференц-зал'] }
     ]}
@@ -500,7 +506,7 @@ const ZAY = {
     { name:'Склады', icon:'📦', items:['Склад МЦ','Склад 806','Склад ПЧ','Склад ЗЛ','Склад ДИТ','Склад 801','Склад 802','Склад 803','Склад 804','Склад 805','Склад 705','Склад электроцеха'] },
     { name:'ТП и КТП', icon:'⚡', items:[...TP3,'ТП-23','КТП8','7ЩСУ2'] },
     { name:'ЗДУ', icon:'🏭', items:['ЗДУ-1','ЗДУ-2','ЗДУ-3'] },
-    { name:'Операторные и установки', icon:'🛠️', items:['Операторная ЛК-6у','Операторная УВПМ','Котельная ПВВС','Висбрекинг','ЗЛ-7000','БУТ','КИПиА (22)','Прувер КИПиА'] },
+    { name:'Операторные и установки', icon:'🛠️', items:['Операторная ЛК-6у','Операторная УВПМ','Котельная ПВВС','Висбрекинг','ЗЛ-7000','БУТ','ТП-22','Прувер КИПиА'] },
     { name:'Прочие объекты', icon:'📍', items:['УЦК','Мед. пункт','РПИ-завод','АКС','ЛМИС гараж','Пост 21','Центральная проходная','ПСГ','Столовая','Газобаллонный','Конференц-зал'] }
   ]}],
   aos: [ { name:'АОС системы Болид', subs:[
@@ -639,11 +645,6 @@ function itemRow(key, text){
     const rk = 'reg|' + kp.slice(1).join('|'), d = new Date(state.day), y = d.getFullYear(), m = d.getMonth(), rd = [];
     for(let n=1; n<=new Date(y,m+1,0).getDate(); n++){ const set = CHECKS[`${y}-${pad2(m+1)}-${pad2(n)}`]; if(set && set.has(rk)) rd.push(n); }
     if(rd.length) hint += `<small class="regdone">✅ Проведён регламент: ${rd.map(n=>n+' '+MONTHS_GEN[m]).join(', ')}</small>`;
-  }
-  if(typeof TASKS!=='undefined'){
-    const tk = TASKS.find(t=>t.object===text);
-    if(tk){ const resp=(tk.assignees||[]).map(a=>a.name+': '+stName((tk.status&&tk.status[a.login||a.name])||'new')).join(', ');
-      hint += `<small class="taskhint">📋 задача — ${resp}</small>`; }
   }
   const rc = metaOf()[key];
   if(rc && ((rc.w && rc.w.length) || rc.n)){
@@ -1040,9 +1041,19 @@ async function makeReportRange(dates, title){
       const rec = (dayMeta[i] && dayMeta[i][k]) || {};
       const fio = (rec.w || []).join('\n');
       const nar = rec.n || '';
-      const prim = rec.note || '';
+      let tbeg = rec.from ? fmtDate(rec.from) : '';
+      let tend = rec.to ? fmtDate(rec.to) : '';
+      let prim = rec.note || '';
+      // совместимость со старыми записями: срок/продление лежали в «Примечании»
+      if(!tbeg && !tend){
+        const ms = prim.match(/Срок:\s*([\d.]+)?\s*—\s*([\d.]+)?/);
+        if(ms){ tbeg = ms[1]||''; tend = ms[2]||''; }
+      }
+      const mx = prim.match(/продлено до\s*([\d.]+)/);
+      if(mx && mx[1]) tend = mx[1];
+      prim = prim.replace(/Срок:[^;]*/g,'').replace(/продлено до[^;]*/g,'').replace(/[;\s]+$/,'').replace(/^[;\s]+/,'').trim();
       log.push([ {v:n,s:3}, {v:dateStr,s:3}, {v:camName(o),s:6}, {v:sysName,s:3},
-        {v:work,s:3}, {v:nar,s:3},{v:fio,s:6},{v:'',s:3},{v:'',s:3},{v:'',s:3},{v:prim,s:6} ]);
+        {v:work,s:3}, {v:nar,s:3},{v:fio,s:6},{v:tbeg,s:3},{v:tend,s:3},{v:'',s:3},{v:prim,s:6} ]);
     });
   });
   if(log.length===1) log.push([{v:'За этот период отметок нет'}]);
@@ -1459,7 +1470,6 @@ async function loadAccounts(){
       const h=location.hash.slice(1); if(h==='profile'||h==='tasks'||h.indexOf('profile-')===0) route(true);
     } }catch(e){}
 }
-// Добавляем в ростер сотрудников из списка STAFF, которых ещё нет (чтобы первичный вход-админ не стирал бригаду)
 function ensureRoster(){
   try{
     const have = new Set(ACCOUNTS.map(a=>(a.name||'').trim()));
@@ -1520,6 +1530,8 @@ function renderTasks(){
   app.innerHTML = html;
 }
 function taskTitle(t){ return (t.kind==='zay') ? '📝 Заявка' : '📋 Провести регламент'; }
+function taskObjs(t){ return (t.objects&&t.objects.length)?t.objects:(t.object?[t.object]:[]); }
+function objLine(t){ const o=taskObjs(t); return `<div class="taskmeta">Объект${o.length>1?'ы ('+o.length+')':''}: <b>${o.join(', ')||'—'}</b></div>`; }
 function fmtDate(iso){ if(!iso) return ''; const p=iso.split('-'); return p.length===3 ? `${p[2]}.${p[1]}.${p[0]}` : iso; }
 function taskNote(t){ let a=[]; if(t.from||t.to) a.push('Срок: '+(t.from?fmtDate(t.from):'…')+' — '+(t.to?fmtDate(t.to):'…')); if(t.extendedTo) a.push('продлено до '+fmtDate(t.extendedTo)); return a.join('; '); }
 function taskCard(t){
@@ -1527,7 +1539,7 @@ function taskCard(t){
     const resp=(t.assignees||[]).map(a=>`<div class="respline"><span>${a.name}</span><span class="st st-done">Выполнено</span></div>`).join('');
     return `<div class="grp taskcard"><div class="diarytag">🗓 Из ежедневника · ${t.day?t.day.split('-').reverse().join('.'):''}</div>
       <div class="tasktitle">${taskTitle(t)}</div>
-      <div class="taskmeta">Объект: <b>${t.object||'—'}</b></div>
+      ${objLine(t)}
       <div class="taskmeta">Система: <b>${t.system}</b></div>
       ${t.note?`<div class="taskmeta">Примечание: ${t.note}</div>`:''}
       <div class="resp"><div class="resphead">Исполнители:</div>${resp||'—'}</div></div>`;
@@ -1537,7 +1549,7 @@ function taskCard(t){
   const narTxt = t.noNaryad ? 'без наряда' : (t.naryad||'');
   const nar = narTxt ? `<div class="taskmeta">Наряд: <b>${narTxt}</b></div>` : '';
   const info = `<div class="tasktitle">${taskTitle(t)}</div>
-    <div class="taskmeta">Объект: <b>${t.object||'—'}</b></div>
+    ${objLine(t)}
     <div class="taskmeta">Система: <b>${t.system}</b></div>
     ${nar}
     ${period}
@@ -1570,8 +1582,8 @@ function taskCard(t){
   return `<div class="grp taskcard${t.closed?' closed':''}">
     <div class="taskrow"><div class="taskinfo">${info}</div>
       <div class="taskacts">
-        <button class="emoji${my==='done'?' on done':''}" onclick="setTaskStatus('${t.id}','done')" aria-label="Выполнено">✅</button>
-        <button class="emoji${my==='prog'?' on prog':''}" onclick="setTaskStatus('${t.id}','prog')" aria-label="В процессе">🔄</button>
+        <div class="emojiwrap"><button class="emoji${my==='done'?' on done':''}" onclick="setTaskStatus('${t.id}','done')" aria-label="Готово">✅</button><span class="cap">готово</span></div>
+        <div class="emojiwrap"><button class="emoji${my==='prog'?' on prog':''}" onclick="setTaskStatus('${t.id}','prog')" aria-label="В процессе">🔄</button><span class="cap">в процессе</span></div>
       </div></div>
     ${t.closed?'<div class="closedtag">✔ Внесено в ежедневник</div>':''}</div>`;
 }
@@ -1579,16 +1591,25 @@ function cycleStatus(id, key){ const t=TASKS.find(x=>x.id===id); if(!t) return;
   const order=['new','prog','done']; t.status=t.status||{}; const cur=t.status[key]||'new';
   t.status[key]=order[(order.indexOf(cur)+1)%3]; saveTasks(); renderTasks(); }
 function editTask(id){ const t=TASKS.find(x=>x.id===id); if(!t) return;
-  newTask={ id:t.id, kind:t.kind||'reg', system:t.system, object:t.object, from:t.from||'', to:t.to||'', assignees:(t.assignees||[]).map(a=>({id:(ACCOUNTS.find(x=>x.name===a.name)||{}).id, name:a.name, login:a.login})) };
+  newTask={ id:t.id, kind:t.kind||'reg', system:t.system, object:t.object, objects:taskObjs(t).slice(), from:t.from||'', to:t.to||'', naryad:t.naryad||'', noNaryad:!!t.noNaryad, assignees:(t.assignees||[]).map(a=>({id:(ACCOUNTS.find(x=>x.name===a.name)||{}).id, name:a.name, login:a.login})) };
   location.hash='newtask'; }
 function deleteTask(id){ TASKS=TASKS.filter(x=>x.id!==id); saveTasks(); renderTasks(); renderTabbar(); toast('Задача удалена'); }
 /* сопоставление системы и ключей */
 const SYS_KEY = {'АПС':'aps','АОС':'aos','Видеонаблюдение':'video','ГГС':'ggs','СКУД':'skud'};
-function objectsForTask(sysName, kind){
+function ymdToDate(s){ const p=(s||'').split('-'); return (p.length===3)? new Date(+p[0], +p[1]-1, +p[2]) : new Date(today); }
+function regDoneInMonth(sysKey, obj, y, m){
+  const key = findRegKey(sysKey, obj); if(!key) return false;
+  const days = new Date(y, m+1, 0).getDate();
+  for(let n=1; n<=days; n++){ const set = CHECKS[`${y}-${pad2(m+1)}-${pad2(n)}`]; if(set && set.has(key)) return true; }
+  return false;
+}
+function objectsForTask(sysName, kind, m, y){
   const key = SYS_KEY[sysName]; if(!key) return [];
+  if(typeof m!=='number') m = today.getMonth();
+  if(typeof y!=='number') y = today.getFullYear();
   if(kind==='zay'){ const out=[]; (ZAY[key]||[]).forEach(sec=>sec.subs.forEach(sb=>sb.items.forEach(x=>{ if(!out.includes(x)) out.push(x); }))); return out; }
-  const m = today.getMonth(); const out=[];
-  (REG[key]?REG[key].systems:[]).forEach(sys=>sys.groups.forEach(g=>{ if(g.months.includes(m)) g.items.forEach(x=>{ if(!out.includes(x)) out.push(x); }); }));
+  const out=[];
+  (REG[key]?REG[key].systems:[]).forEach(sys=>sys.groups.forEach(g=>{ if(g.months.includes(m)) g.items.forEach(x=>{ if(!out.includes(x) && !regDoneInMonth(key, x, y, m)) out.push(x); }); }));
   return out;
 }
 function findRegKey(sysKey, obj){ let r=null; (REG[sysKey]?REG[sysKey].systems:[]).forEach(sys=>sys.groups.forEach(g=>{ if(!r && g.items.includes(obj)) r=`reg|${sysKey}|${sys.name}|${obj}`; })); return r; }
@@ -1605,24 +1626,37 @@ function syncDiaryToTask(key, dayK){
   const rec = metaOf(dayK)[key] || {};
   const assignees = (rec.w||[]).map(n=>({name:n, login:(ACCOUNTS.find(a=>a.name===n)||{}).login||''}));
   const status={}; assignees.forEach(a=>status[a.login||a.name]='done');
-  const t = { id, kind, system:o.sys, object:o.obj, assignees, engineer:(PROFILE&&PROFILE.name)||'', engineerLogin:(PROFILE&&PROFILE.login)||'', status, closed:true, source:'diary', day:dayK, note:(rec.note||''), created:dayKToTime(dayK) };
+  const t = { id, kind, system:o.sys, object:o.obj, objects:[o.obj], assignees, engineer:(PROFILE&&PROFILE.name)||'', engineerLogin:(PROFILE&&PROFILE.login)||'', status, closed:true, source:'diary', day:dayK, note:(rec.note||''), created:dayKToTime(dayK) };
   if(idx>=0) TASKS[idx]=t; else TASKS.push(t);
   saveTasks(); if(location.hash.slice(1)==='tasks') renderTasks();
 }
-function finishTask(id){
+async function finishTask(id){
   const t=TASKS.find(x=>x.id===id); if(!t) return;
   const sk=SYS_KEY[t.system];
-  const key = t.kind==='zay' ? findZayKey(sk, t.object) : findRegKey(sk, t.object);
-  if(!key){ toast('Не удалось сопоставить объект'); return; }
-  const d=new Date(), k=d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
-  const set=checkSet(k); set.add(key); saveChecks(k);
+  const objs=taskObjs(t);
+  if(!objs.length){ toast('Нет объектов'); return; }
+  // дата записи — срок «с», иначе сегодня
+  const dd = (t.from && /^\d{4}-\d{2}-\d{2}$/.test(t.from)) ? ymdToDate(t.from) : new Date();
+  const k = dd.getFullYear()+'-'+pad2(dd.getMonth()+1)+'-'+pad2(dd.getDate());
+  try{ await loadDayChecks([dd]); await loadDayMeta([dd]); }catch(e){}
+  const set=checkSet(k);
   const engNames = new Set(ACCOUNTS.filter(a=>rolesOf(a).includes('Инженер')||rolesOf(a).includes('Администратор')).map(a=>a.name));
   const w=(t.assignees||[]).map(a=>a.name).filter(n=> n!==t.engineer && !engNames.has(n));
-  const note=taskNote(t); const meta=metaOf(k);
-  const nar = t.noNaryad ? 'без наряда' : (t.naryad||(meta[key]&&meta[key].n)||'');
-  meta[key]={ w:w, n:nar, note: note||((meta[key]&&meta[key].note)||'') }; saveMeta(k);
+  const meta=metaOf(k);
+  const tFrom = t.from||'', tTo = (t.extendedTo||t.to||'');
+  let done=0; const missed=[];
+  objs.forEach(obj=>{
+    const key = t.kind==='zay' ? findZayKey(sk, obj) : findRegKey(sk, obj);
+    if(!key){ missed.push(obj); return; }
+    set.add(key);
+    const nar = t.noNaryad ? 'без наряда' : (t.naryad||(meta[key]&&meta[key].n)||'');
+    meta[key]={ w:w, n:nar, note: (meta[key]&&meta[key].note)||'', from: tFrom, to: tTo };
+    done++;
+  });
+  saveChecks(k); saveMeta(k);
   t.closed=true; saveTasks(); renderTasks(); renderTabbar();
-  toast('Внесено в ежедневник за сегодня');
+  if(missed.length) toast('Внесено на '+fmtDate(k)+': '+done+'. Не сопоставлено: '+missed.join(', '));
+  else toast('Внесено в ежедневник на '+fmtDate(k)+' ('+done+' об.)');
 }
 function extendTask(id){
   const el=document.getElementById('ext_'+id); const v=el?el.value:'';
@@ -1640,11 +1674,17 @@ function setTaskStatus(id, code){
 
 /* Новая задача (инженер) */
 let newTask = null;
-function openNewTask(){ newTask={kind:'reg', system:'АПС', object:'', assignees:[], from:'', to:'', naryad:'', noNaryad:false}; location.hash='newtask'; }
-function ntKind(v){ newTask.kind=v; newTask.object=''; renderNewTask(); }
-function ntSys(v){ newTask.system=v; newTask.object=''; renderNewTask(); }
+function openNewTask(){ newTask={kind:'reg', system:'АПС', object:'', objects:[], assignees:[], from:'', to:'', naryad:'', noNaryad:false}; location.hash='newtask'; }
+function ntKind(v){ newTask.kind=v; newTask.object=''; newTask.objects=[]; renderNewTask(); }
+function ntSys(v){ newTask.system=v; newTask.object=''; newTask.objects=[]; renderNewTask(); }
 function ntObj(v){ newTask.object=v; }
-function ntFrom(v){ newTask.from=v; }
+function ntAddObj(){ const sel=document.getElementById('ntObjSel'); const v=sel?sel.value:''; if(!v){ toast('Выберите объект из списка'); return; }
+  if(!Array.isArray(newTask.objects)) newTask.objects=[];
+  if(newTask.objects.includes(v)){ toast('Этот объект уже добавлен'); return; }
+  if(newTask.objects.length>=6){ toast('Максимум 6 объектов'); return; }
+  newTask.objects.push(v); newTask.object=newTask.objects[0]; renderNewTask(); }
+function ntDelObj(i){ if(Array.isArray(newTask.objects)){ newTask.objects.splice(i,1); newTask.object=newTask.objects[0]||''; renderNewTask(); } }
+function ntFrom(v){ newTask.from=v; renderNewTask(); }
 function ntTo(v){ newTask.to=v; }
 function ntNaryad(v){ newTask.naryad=v; }
 function ntNoNaryad(c){ newTask.noNaryad=c; if(c) newTask.naryad=''; renderNewTask(); }
@@ -1656,39 +1696,47 @@ function goTasks(){ location.hash='tasks'; try{ route(true); }catch(e){} }
 function ntSay(msg,ok){ const el=document.getElementById('ntMsg'); if(el){ el.textContent=msg; el.style.color = ok?'#2f8a4e':'var(--accent)'; } toast(msg); }
 function createTask(){
   if(!newTask){ ntSay('Форма сброшена, откройте заново'); goTasks(); return; }
-  // подстраховка: берём объект прямо из списка, если состояние не успело записаться
-  if(!newTask.object){ const sel=document.getElementById('ntObjSel'); if(sel&&sel.value) newTask.object=sel.value; }
-  if(!newTask.object||!newTask.object.trim()){ ntSay('⚠️ Выберите объект из списка'); return; }
+  // собираем объекты (до 6); если ничего не добавлено — берём выбранный в списке
+  let objs = Array.isArray(newTask.objects) ? newTask.objects.slice() : [];
+  if(!objs.length){ const sel=document.getElementById('ntObjSel'); if(sel&&sel.value) objs=[sel.value]; }
+  objs = objs.map(o=>(o||'').trim()).filter(Boolean).slice(0,6);
+  if(!objs.length){ ntSay('⚠️ Добавьте хотя бы один объект'); return; }
   if(!newTask.assignees.length){ ntSay('⚠️ Отметьте хотя бы одного исполнителя'); return; }
   try{
     if(!Array.isArray(TASKS)||!Object.isExtensible(TASKS)) TASKS = Array.isArray(TASKS)?fresh(TASKS):[];
     if(newTask.id){ const idx=TASKS.findIndex(x=>x.id===newTask.id);
-      if(idx>=0){ const t=fresh(TASKS[idx]); t.kind=newTask.kind; t.system=newTask.system; t.object=newTask.object.trim(); t.assignees=newTask.assignees.map(a=>({name:a.name,login:a.login})); t.from=newTask.from||''; t.to=newTask.to||''; t.naryad=newTask.noNaryad?'':(newTask.naryad||'').trim(); t.noNaryad=!!newTask.noNaryad; TASKS[idx]=t; }
+      if(idx>=0){ const t=fresh(TASKS[idx]); t.kind=newTask.kind; t.system=newTask.system; t.objects=objs; t.object=objs[0]; t.assignees=newTask.assignees.map(a=>({name:a.name,login:a.login})); t.from=newTask.from||''; t.to=newTask.to||''; t.naryad=newTask.noNaryad?'':(newTask.naryad||'').trim(); t.noNaryad=!!newTask.noNaryad; TASKS[idx]=t; }
       saveTasks(); ntSay('Задача изменена',1); goTasks(); return; }
-    TASKS.push({ id:'t'+Date.now(), kind:newTask.kind, system:newTask.system, object:newTask.object.trim(),
+    TASKS.push({ id:'t'+Date.now(), kind:newTask.kind, system:newTask.system, object:objs[0], objects:objs,
       assignees:newTask.assignees.map(a=>({name:a.name,login:a.login})),
       from:newTask.from||'', to:newTask.to||'',
       naryad:newTask.noNaryad?'':(newTask.naryad||'').trim(), noNaryad:!!newTask.noNaryad,
       engineer:(PROFILE&&PROFILE.name)||'', engineerLogin:(PROFILE&&PROFILE.login)||'', status:{}, created:Date.now() });
-    saveTasks(); ntSay('✅ Задача создана ('+TASKS.length+')',1); goTasks();
+    saveTasks(); ntSay('✅ Задача создана ('+objs.length+' объект.)',1); goTasks();
   }catch(err){ ntSay('Ошибка: '+(err&&err.message||err)); }
 }
 function renderNewTask(){
   const people = ACCOUNTS.filter(a=>rolesOf(a).includes('Сотрудник')||rolesOf(a).includes('Инженер'));
-  const objs = objectsForTask(newTask.system, newTask.kind);
+  const sm = ymdToDate(newTask.from); const mIdx = sm.getMonth(), yIdx = sm.getFullYear();
+  const objs = objectsForTask(newTask.system, newTask.kind, mIdx, yIdx);
   app.innerHTML = `<div class="view">
     <header><button class="icon-btn" onclick="history.back()">←</button><h1>Новая задача<div class="sub">${newTask.kind==='zay'?'Заявка':'Регламент'}</div></h1></header>
     <div class="seg" style="margin-bottom:12px"><button class="${newTask.kind==='reg'?'on':''}" onclick="ntKind('reg')">Регламент</button><button class="${newTask.kind==='zay'?'on':''}" onclick="ntKind('zay')">Заявка</button></div>
     <div class="sys">Система</div>
     <select class="naryad" onchange="ntSys(this.value)">${SYS_LIST.map(s=>`<option${newTask.system===s?' selected':''}>${s}</option>`).join('')}</select>
-    <div class="sys" style="margin-top:14px">Объект ${newTask.kind==='reg'?'(по графику на '+MONTHS_GEN[today.getMonth()]+')':'(все объекты)'}</div>
-    <select id="ntObjSel" class="naryad" onchange="ntObj(this.value)">
-      <option value="">— выберите объект —</option>
-      ${objs.map(o=>`<option${newTask.object===o?' selected':''}>${o}</option>`).join('')}
-    </select>
-    ${objs.length?'':'<div class="foot" style="margin-top:6px">Для этой системы в выбранном типе объектов нет.</div>'}
     <div class="sys" style="margin-top:14px">Срок проведения (с — по)</div>
     <div class="daterow"><input type="date" class="naryad" value="${newTask.from||''}" oninput="ntFrom(this.value)"><span>—</span><input type="date" class="naryad" value="${newTask.to||''}" oninput="ntTo(this.value)"></div>
+    <div class="foot" style="margin-top:4px">Объекты показываются по месяцу даты «с».</div>
+    <div class="sys" style="margin-top:14px">Объекты — до 6 ${newTask.kind==='reg'?'(по графику на '+MONTHS_GEN[mIdx]+')':'(все объекты)'}</div>
+    <div class="objrow">
+      <select id="ntObjSel" class="naryad" style="flex:1" onchange="ntObj(this.value)">
+        <option value="">— выберите объект —</option>
+        ${objs.filter(o=>!(newTask.objects||[]).includes(o)).map(o=>`<option>${o}</option>`).join('')}
+      </select>
+      <button class="tbtn" type="button" onclick="ntAddObj()" style="white-space:nowrap">➕ Добавить</button>
+    </div>
+    ${(newTask.objects&&newTask.objects.length)?`<div class="chips">${newTask.objects.map((o,i)=>`<span class="chip">${o}<button type="button" onclick="ntDelObj(${i})">×</button></span>`).join('')}</div><div class="foot" style="margin-top:4px">Добавлено ${newTask.objects.length}/6</div>`:'<div class="foot" style="margin-top:4px">Выберите объект и нажмите «Добавить». Можно до 6.</div>'}
+    ${objs.length?'':'<div class="foot" style="margin-top:6px">На этот месяц по этой системе объектов нет (или все уже проведены).</div>'}
     <div class="sys" style="margin-top:14px">Наряд</div>
     <input type="text" class="naryad" placeholder="Номер наряда" value="${newTask.naryad||''}" oninput="ntNaryad(this.value)"${newTask.noNaryad?' disabled style="opacity:.45"':''}>
     <label class="nonar"><input type="checkbox"${newTask.noNaryad?' checked':''} onchange="ntNoNaryad(this.checked)"><span>Без наряда</span></label>
