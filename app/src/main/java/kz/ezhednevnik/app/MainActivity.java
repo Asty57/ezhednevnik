@@ -78,6 +78,13 @@ public class MainActivity extends Activity {
 
         ReminderScheduler.createChannel(this);
         ReminderScheduler.apply(this);
+
+        // уведомления о новых задачах (фоновая проверка базы)
+        if (Build.VERSION.SDK_INT >= 33
+                && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 2);
+        }
+        TaskCheckScheduler.schedule(this);
     }
 
     @Override
@@ -133,6 +140,8 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void logout() {
             getSharedPreferences("sess", MODE_PRIVATE).edit().clear().apply();
+            getSharedPreferences("tasknotif", MODE_PRIVATE).edit().clear().apply();
+            TaskCheckScheduler.cancel(MainActivity.this);
             runOnUiThread(() -> {
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
                 finish();

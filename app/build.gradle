@@ -14,7 +14,7 @@ android {
         minSdk 29
         targetSdk 34
         versionCode buildNumber
-        versionName "2.1.1"
+        versionName "2.2.0"
     }
 
     signingConfigs {
@@ -43,4 +43,5 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:33.5.1')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-firestore'
+    implementation 'androidx.work:work-runtime:2.9.1'
 }
