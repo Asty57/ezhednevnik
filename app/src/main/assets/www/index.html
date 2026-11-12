@@ -697,7 +697,6 @@ function renderPlan(){
     <div class="menu">
       ${weekend?'':`<button class="mbtn" onclick="openMenu('reg')"><span class="ic">📋</span><span class="t">Регламент<span class="s">ТО и ремонт систем по графику</span></span><span class="arrow">›</span></button>`}
       <button class="mbtn" onclick="openMenu('zay')"><span class="ic">📝</span><span class="t">Заявки<span class="s">Все объекты по системам</span></span><span class="arrow">›</span></button>
-      ${weekend?'':`<button class="mbtn" onclick="openNar()"><span class="ic">📌</span><span class="t">Запланированные<span class="s">Простые и опасные наряды</span></span><span class="arrow">›</span></button>`}
     </div>
     ${weekend?'<div class="foot">Выходной день — доступны только заявки.</div>':''}</div>`;
 }
@@ -960,21 +959,18 @@ function renderZSub(){
 /* ---------- Отчёт за месяц в Excel (.xlsx) ---------- */
 const pad2 = n => String(n).padStart(2,'0');
 let DL = {
-  // совместимо с вызовом DL.save({ filename, data }) — data: Uint8Array/ArrayBuffer/Blob
   async save(opt){
     if(!(window.Android && window.Android.saveFile)){ toast('Сохранение недоступно'); return; }
     try{
       const filename = (opt && opt.filename) || 'file';
-      let src = opt && opt.data;
-      let bytes;
+      let src = opt && opt.data; let bytes;
       if(src instanceof Uint8Array) bytes = src;
       else if(src instanceof ArrayBuffer) bytes = new Uint8Array(src);
       else if(src && typeof src.arrayBuffer === 'function') bytes = new Uint8Array(await src.arrayBuffer());
       else bytes = new Uint8Array(src || []);
       let bin = ''; const chunk = 0x8000;
       for(let i=0;i<bytes.length;i+=chunk){ bin += String.fromCharCode.apply(null, bytes.subarray(i, i+chunk)); }
-      const b64 = btoa(bin);
-      const res = window.Android.saveFile(filename, b64);
+      const res = window.Android.saveFile(filename, btoa(bin));
       if(res && res !== 'ok') toast(res);
     }catch(e){ toast('Не удалось сохранить файл'); }
   }
@@ -1147,14 +1143,14 @@ async function makeReportRange(dates, title){
   const SYS_SHORT = {'Видеонаблюдение':'CCTV'};
   const ORD = {reg:0, zay:1, zp:2, pn:3, on:4};
   const camName = o => { const mm = o.obj.match(/^Камера № (\d+)$/); return (mm && CAM_LABELS[+mm[1]]) ? `${o.obj} (${CAM_LABELS[+mm[1]]})` : o.obj; };
-  // Наименование: объект - группа - подгруппа (если есть), иначе просто объект
+  // Наименование: объект - группа (если есть своя группа или несколько разделов), иначе просто объект
   const objHier = (k, o) => {
     const base = camName(o); const p = (k||'').split('|');
     if(p[0]!=='zay' || p.length<5) return base;
     const sysKey=p[1], secN=p[2], subN=p[3], obj=p[4];
     const subK = sysKey+'|'+secN+'|'+subN;
     let grp=''; (typeof ZGRP!=='undefined'?(ZGRP[subK]||[]):[]).forEach(g=>{ if(!grp && (g.items||[]).includes(obj)) grp=g.name; });
-    // группа: своя группа, иначе раздел (если разделов несколько); подгруппа: подраздел
+    // группа: своя группа, иначе раздел (если разделов несколько). Подгруппу не выводим.
     const groupLabel = grp || ((ZAY[sysKey]&&ZAY[sysKey].length>1)?secN:'');
     const parts=[base]; if(groupLabel) parts.push(groupLabel);
     return parts.join(' - ');
@@ -1193,17 +1189,45 @@ async function makeReportRange(dates, title){
 }
 async function saveReport(dates, title, filename){
   await dlReady;
-  if(!DL){ toast('Скачивание недоступно здесь. Откройте дневник в приложении Claude или на claude.ai'); return; }
   toast('Готовлю отчёт…');
-  try{
-    const r = await makeReportRange(dates, title);
-    await DL.save({ filename, data:r.bytes });
-    toast('Отчёт сохранён');
-  }catch(e){
-    const c = e && e.code;
-    if(c==='declined') return;
-    toast(c==='rate_limited' ? 'Подождите и попробуйте ещё раз' : 'Не удалось сохранить отчёт');
+  let r;
+  try{ r = await makeReportRange(dates, title); }
+  catch(e){ toast('Не удалось сформировать отчёт'); return; }
+  // 1) штатный способ — через возможности claude.ai
+  if(DL && DL.save){
+    try{ await DL.save({ filename, data:r.bytes }); toast('Отчёт сохранён'); return; }
+    catch(e){ const c=e&&e.code; if(c==='declined') return; if(c==='rate_limited'){ toast('Подождите и попробуйте ещё раз'); return; } /* иначе — пробуем запасной способ */ }
   }
+  // 2) запасной способ — обычное скачивание через ссылку
+  try{
+    const blob = new Blob([r.bytes], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download=filename; a.rel='noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(_){} }, 15000);
+    toast('Отчёт сохранён');
+  }catch(e){ toast('Скачивание недоступно здесь. Откройте дневник в приложении Claude или на claude.ai'); }
+}
+async function saveBytes(bytes, filename){
+  await dlReady;
+  if(DL&&DL.save){ try{ await DL.save({filename, data:bytes}); toast('Сохранено'); return; }catch(e){ const c=e&&e.code; if(c==='declined')return; if(c==='rate_limited'){toast('Подождите и попробуйте ещё раз');return;} } }
+  try{ const blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>{try{URL.revokeObjectURL(url);}catch(_){}} ,15000); toast('Сохранено'); }
+  catch(e){ toast('Скачивание недоступно здесь. Откройте дневник в приложении Claude или на claude.ai'); }
+}
+function exportNaryads(){
+  const head=['№','Срок с','Срок по','Вид наряда','№ наряда','Система','Объекты','Исполнители','Инженер'];
+  const rows=[head.map(v=>({v,s:1}))];
+  let n=0;
+  TASKS.filter(t=> t.source!=='diary' && !t.noNaryad && (t.naryadType||t.naryad))
+    .sort((a,b)=>(a.from||'').localeCompare(b.from||''))
+    .forEach(t=>{ n++;
+      const vid=t.naryadType||'нету';
+      const nar=t.naryad||'';
+      rows.push([{v:n},{v:fmtDate(t.from)},{v:fmtDate(t.to)},{v:vid},{v:nar},{v:t.system},{v:taskObjs(t).join(', '),s:6},{v:(t.assignees||[]).map(a=>a.name).join(', '),s:6},{v:t.engineer}]);
+    });
+  if(rows.length===1) rows.push([{v:'Нарядов пока нет'}]);
+  const bytes=buildXlsx([{name:'Наряды', rows, widths:[6,12,12,14,14,20,34,24,18], freeze:[0,1]}]);
+  saveBytes(bytes, 'Наряды.xlsx');
 }
 function exportMonth(y,m){
   const dates = rng(1,new Date(y,m+1,0).getDate()).map(d=>new Date(y,m,d));
@@ -1567,10 +1591,13 @@ if(!ACCOUNTS.length) seedAccounts();
 applyRoleMig();
 let PROFILE = null;
 function resolveProfile(){
-  let a = NLOGIN ? ACCOUNTS.find(x=>x.login && x.login.toLowerCase()===NLOGIN.toLowerCase()) : null;
-  if(!a){ a = { id:'me', name:(NLOGIN||'Пользователь'), login:(NLOGIN||''), roles:[NROLE||'Сотрудник'], pass:'' }; }
-  else if(NROLE && (!a.roles || !a.roles.length)){ a.roles = [NROLE]; }
-  PROFILE = a;
+  let base = NLOGIN ? ACCOUNTS.find(x=>x.login && x.login.toLowerCase()===NLOGIN.toLowerCase()) : null;
+  if(!base){ base = { id:'me', name:(NLOGIN||'Пользователь'), login:(NLOGIN||''), roles:[NROLE||'Сотрудник'], pass:'' }; }
+  else if(NROLE && (!base.roles || !base.roles.length)){ base.roles = [NROLE]; }
+  // админ может просматривать приложение как другой пользователь без повторного входа
+  let pv=''; try{ pv=localStorage.getItem('previewLogin')||''; }catch(e){}
+  if(pv && rolesOf(base).includes('Администратор')){ const a=ACCOUNTS.find(x=>x.login && x.login.toLowerCase()===pv.toLowerCase()); if(a){ PROFILE=a; return; } }
+  PROFILE = base;
 }
 resolveProfile();
 function rolesOf(a){ return (a&&Array.isArray(a.roles)&&a.roles.length)?a.roles:(a&&a.role?[a.role]:['Сотрудник']); }
@@ -1590,13 +1617,6 @@ async function saveAccounts(){
   try{ localStorage.setItem('accounts', JSON.stringify(ACCOUNTS)); }catch(e){}
   await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('accounts').set({list:ACCOUNTS}); }catch(e){} }
 }
-function ensureRoster(){
-  let changed=false;
-  (typeof STAFF!=='undefined'?STAFF:[]).forEach((n,i)=>{
-    if(!ACCOUNTS.find(a=>a.name===n)){ ACCOUNTS.push({id:'u'+i+'_'+Date.now(), name:n, login:'', roles:[ROLE_MIG[n]||'Сотрудник'], pass:''}); changed=true; }
-  });
-  if(changed){ try{localStorage.setItem('accounts',JSON.stringify(ACCOUNTS));}catch(e){} }
-}
 async function loadAccounts(){
   await dbReady; if(!DB) return;
   try{ const snap=await DB.collection('data/users/'+UID).doc('accounts').get();
@@ -1606,6 +1626,13 @@ async function loadAccounts(){
       ensureRoster(); resolveProfile();
       const h=location.hash.slice(1); if(h==='profile'||h==='tasks'||h.indexOf('profile-')===0) route(true);
     } }catch(e){}
+}
+function ensureRoster(){
+  let changed=false;
+  (typeof STAFF!=='undefined'?STAFF:[]).forEach((n,i)=>{
+    if(!ACCOUNTS.find(a=>a.name===n)){ ACCOUNTS.push({id:'u'+i+'_'+Date.now(), name:n, login:'', roles:[ROLE_MIG[n]||'Сотрудник'], pass:''}); changed=true; }
+  });
+  if(changed){ try{localStorage.setItem('accounts',JSON.stringify(ACCOUNTS));}catch(e){} }
 }
 loadAccounts();
 
@@ -1663,6 +1690,7 @@ function toggleHideDone(){ HIDE_DONE=!HIDE_DONE; try{ localStorage.setItem('hide
 function renderTasks(){
   const role=myRole();
   let html = `<div class="view"><div class="tabhead"><h1>Задачи</h1><div class="sub">${PROFILE.name} · ${role}</div></div>`;
+  html += `<button class="tbtn" style="margin-bottom:10px;width:100%" onclick="refreshData()">🔄 Обновить</button>`;
   if(canAssign()) html += `<button class="save-btn" style="margin-bottom:14px" onclick="openNewTask()">＋ Новая задача</button>`;
   markBossViewed();
   let list = TASKS.slice().sort((a,b)=>b.created-a.created);
@@ -1681,7 +1709,9 @@ function renderTasks(){
   html += `</div>`;
   app.innerHTML = html;
 }
-function taskTitle(t){ return (t.kind==='zay') ? '📝 Заявка' : '📋 Провести регламент'; }
+function taskTitle(t){ return t.kind==='zay'?'📝 Заявка':t.kind==='pn'?'🔧 Простой наряд':t.kind==='on'?'⚠️ Опасный наряд':'📋 Провести регламент'; }
+function isPlanned(t){ if(!t.from||!/^\d{4}-\d{2}-\d{2}$/.test(t.from)) return false; const td=new Date(); const ty=td.getFullYear()+'-'+pad2(td.getMonth()+1)+'-'+pad2(td.getDate()); return t.from>ty; }
+async function refreshData(){ toast('Обновляю…'); try{ const ps=[]; if(typeof loadTasks==='function')ps.push(loadTasks()); if(typeof loadAccounts==='function')ps.push(loadAccounts()); if(typeof loadStaff==='function')ps.push(loadStaff()); if(typeof loadZayx==='function')ps.push(loadZayx()); if(typeof loadZsec==='function')ps.push(loadZsec()); if(typeof loadZgrp==='function')ps.push(loadZgrp()); await Promise.all(ps); }catch(e){} route(true); toast('Обновлено'); }
 function taskObjs(t){ return (t.objects&&t.objects.length)?t.objects:(t.object?[t.object]:[]); }
 function objLine(t){ const o=taskObjs(t); const sk=SYS_KEY[t.system];
   const lbl = x => { const g=(t.kind==='zay')?groupForObj(sk,x):''; return g?`${x} · ${g}`:x; };
@@ -1700,9 +1730,11 @@ function taskCard(t){
   }
   const period = (t.from||t.to) ? `<div class="taskmeta">Срок: <b>${t.from?fmtDate(t.from):'…'} — ${t.to?fmtDate(t.to):'…'}</b></div>` : '';
   const ext = t.extendedTo ? `<div class="taskmeta" style="color:#9a6a00">Продлено до: <b>${fmtDate(t.extendedTo)}</b></div>` : '';
-  const narTxt = t.noNaryad ? 'без наряда' : (t.naryad||'');
+  const narType = t.noNaryad ? '' : (t.naryadType||'');
+  const narTxt = t.noNaryad ? 'без наряда' : ((t.naryad||'') + (narType?` · ${narType}`:(t.naryad?'':'')) || '');
   const nar = narTxt ? `<div class="taskmeta">Наряд: <b>${narTxt}</b></div>` : '';
   const info = `<div class="tasktitle">${taskTitle(t)}</div>
+    ${isPlanned(t)?`<div class="taskmeta" style="color:#2563eb;font-weight:700">📌 Запланированная задача — с ${fmtDate(t.from)}</div>`:''}
     ${objLine(t)}
     <div class="taskmeta">Система: <b>${t.system}</b></div>
     ${nar}
@@ -1747,7 +1779,7 @@ function cycleStatus(id, key){ const t=TASKS.find(x=>x.id===id); if(!t) return;
   const order=['new','prog','done']; t.status=t.status||{}; const cur=t.status[key]||'new';
   t.status[key]=order[(order.indexOf(cur)+1)%3]; saveTasks(); renderTasks(); }
 function editTask(id){ const t=TASKS.find(x=>x.id===id); if(!t) return;
-  newTask={ id:t.id, kind:t.kind||'reg', system:t.system, object:t.object, objects:taskObjs(t).slice(), from:t.from||'', to:t.to||'', naryad:t.naryad||'', noNaryad:!!t.noNaryad, assignees:(t.assignees||[]).map(a=>({id:(ACCOUNTS.find(x=>x.name===a.name)||{}).id, name:a.name, login:a.login})) };
+  newTask={ id:t.id, kind:t.kind||'reg', system:t.system, object:t.object, objects:taskObjs(t).slice(), from:t.from||'', to:t.to||'', naryad:t.naryad||'', noNaryad:!!t.noNaryad, naryadType:t.naryadType||'', assignees:(t.assignees||[]).map(a=>({id:(ACCOUNTS.find(x=>x.name===a.name)||{}).id, name:a.name, login:a.login})) };
   location.hash='newtask'; }
 function deleteTask(id){ TASKS=TASKS.filter(x=>x.id!==id); saveTasks(); renderTasks(); renderTabbar(); toast('Задача удалена'); }
 /* сопоставление системы и ключей */
@@ -1763,7 +1795,7 @@ function objectsForTask(sysName, kind, m, y){
   const key = SYS_KEY[sysName]; if(!key) return [];
   if(typeof m!=='number') m = today.getMonth();
   if(typeof y!=='number') y = today.getFullYear();
-  if(kind==='zay'){ const out=[]; (ZAY[key]||[]).forEach(sec=>sec.subs.forEach(sb=>sb.items.forEach(x=>{ if(!out.includes(x)) out.push(x); })));
+  if(kind==='zay'||kind==='pn'||kind==='on'){ const out=[]; (ZAY[key]||[]).forEach(sec=>sec.subs.forEach(sb=>sb.items.forEach(x=>{ if(!out.includes(x)) out.push(x); })));
     if(typeof ZAYX!=='undefined'){ Object.keys(ZAYX).forEach(k=>{ const p=k.split('|'); if(p[0]===key) (ZAYX[k]||[]).forEach(x=>{ if(!out.includes(x)) out.push(x); }); }); }
     if(typeof ZSEC!=='undefined'){ Object.keys(ZSEC).forEach(k=>{ const p=k.split('|'); if(p[0]===key){ const mm=ZSEC[k]||{}; Object.keys(mm).forEach(parent=>{ (mm[parent]||[]).forEach(s=>{ const nm=parent+' · '+s; if(!out.includes(nm)) out.push(nm); }); }); } }); }
     return out; }
@@ -1797,6 +1829,11 @@ async function finishTask(id){
   const sk=SYS_KEY[t.system];
   const objs=taskObjs(t);
   if(!objs.length){ toast('Нет объектов'); return; }
+  // наряды (простой/опасный) в ежедневник не пишутся — только закрываются и попадают в выгрузку нарядов
+  if(t.kind==='pn'||t.kind==='on'){
+    t.status=t.status||{}; (t.assignees||[]).forEach(a=>{ t.status[acctKey(a)]='done'; });
+    t.closed=true; saveTasks(); renderTasks(); renderTabbar(); toast('Наряд завершён'); return;
+  }
   // дата записи — срок «с», иначе сегодня
   const dd = (t.from && /^\d{4}-\d{2}-\d{2}$/.test(t.from)) ? ymdToDate(t.from) : new Date();
   const k = dd.getFullYear()+'-'+pad2(dd.getMonth()+1)+'-'+pad2(dd.getDate());
@@ -1839,7 +1876,8 @@ function setTaskStatus(id, code){
 
 /* Новая задача (инженер) */
 let newTask = null;
-function openNewTask(){ newTask={kind:'reg', system:'АПС', object:'', objects:[], assignees:[], from:'', to:'', naryad:'', noNaryad:false}; location.hash='newtask'; }
+function openNewTask(){ newTask={kind:'reg', system:'АПС', object:'', objects:[], assignees:[], from:'', to:'', naryad:'', noNaryad:false, naryadType:''}; location.hash='newtask'; }
+function kindLabel(k){ return k==='zay'?'Заявка':k==='pn'?'Простой наряд':k==='on'?'Опасный наряд':'Регламент'; }
 function ntKind(v){ newTask.kind=v; newTask.object=''; newTask.objects=[]; renderNewTask(); }
 function ntSys(v){ newTask.system=v; newTask.object=''; newTask.objects=[]; renderNewTask(); }
 function ntObj(v){ newTask.object=v; }
@@ -1852,6 +1890,7 @@ function ntDelObj(i){ if(Array.isArray(newTask.objects)){ newTask.objects.splice
 function ntFrom(v){ newTask.from=v; renderNewTask(); }
 function ntTo(v){ newTask.to=v; }
 function ntNaryad(v){ newTask.naryad=v; }
+function ntNarType(v){ newTask.naryadType=v; newTask.noNaryad=!v; if(!v) newTask.naryad=''; renderNewTask(); }
 function ntNoNaryad(c){ newTask.noNaryad=c; if(c) newTask.naryad=''; renderNewTask(); }
 function ntToggle(id){ const a=ACCOUNTS.find(x=>x.id===id); if(!a) return;
   const i=newTask.assignees.findIndex(x=>x.id===id);
@@ -1870,12 +1909,12 @@ function createTask(){
   try{
     if(!Array.isArray(TASKS)||!Object.isExtensible(TASKS)) TASKS = Array.isArray(TASKS)?fresh(TASKS):[];
     if(newTask.id){ const idx=TASKS.findIndex(x=>x.id===newTask.id);
-      if(idx>=0){ const t=fresh(TASKS[idx]); t.kind=newTask.kind; t.system=newTask.system; t.objects=objs; t.object=objs[0]; t.assignees=newTask.assignees.map(a=>({name:a.name,login:a.login})); t.from=newTask.from||''; t.to=newTask.to||''; t.naryad=newTask.noNaryad?'':(newTask.naryad||'').trim(); t.noNaryad=!!newTask.noNaryad; TASKS[idx]=t; }
+      if(idx>=0){ const t=fresh(TASKS[idx]); t.kind=newTask.kind; t.system=newTask.system; t.objects=objs; t.object=objs[0]; t.assignees=newTask.assignees.map(a=>({name:a.name,login:a.login})); t.from=newTask.from||''; t.to=newTask.to||''; t.naryad=newTask.noNaryad?'':(newTask.naryad||'').trim(); t.noNaryad=!!newTask.noNaryad; t.naryadType=newTask.noNaryad?'':(newTask.naryadType||''); TASKS[idx]=t; }
       saveTasks(); ntSay('Задача изменена',1); goTasks(); return; }
     TASKS.push({ id:'t'+Date.now(), kind:newTask.kind, system:newTask.system, object:objs[0], objects:objs,
       assignees:newTask.assignees.map(a=>({name:a.name,login:a.login})),
       from:newTask.from||'', to:newTask.to||'',
-      naryad:newTask.noNaryad?'':(newTask.naryad||'').trim(), noNaryad:!!newTask.noNaryad,
+      naryad:newTask.noNaryad?'':(newTask.naryad||'').trim(), noNaryad:!!newTask.noNaryad, naryadType:newTask.noNaryad?'':(newTask.naryadType||''),
       engineer:(PROFILE&&PROFILE.name)||'', engineerLogin:(PROFILE&&PROFILE.login)||'', status:{}, created:Date.now() });
     saveTasks(); ntSay('✅ Задача создана ('+objs.length+' объект.)',1); goTasks();
   }catch(err){ ntSay('Ошибка: '+(err&&err.message||err)); }
@@ -1887,7 +1926,7 @@ function renderNewTask(){
   const sysKey = SYS_KEY[newTask.system];
   const grpLbl = o => { const g = (newTask.kind==='zay') ? groupForObj(sysKey, o) : ''; return g ? ` · ${g}` : ''; };
   app.innerHTML = `<div class="view">
-    <header><button class="icon-btn" onclick="history.back()">←</button><h1>Новая задача<div class="sub">${newTask.kind==='zay'?'Заявка':'Регламент'}</div></h1></header>
+    <header><button class="icon-btn" onclick="history.back()">←</button><h1>Новая задача<div class="sub">${kindLabel(newTask.kind)}</div></h1></header>
     <div class="seg" style="margin-bottom:12px"><button class="${newTask.kind==='reg'?'on':''}" onclick="ntKind('reg')">Регламент</button><button class="${newTask.kind==='zay'?'on':''}" onclick="ntKind('zay')">Заявка</button></div>
     <div class="sys">Система</div>
     <select class="naryad" onchange="ntSys(this.value)">${SYS_LIST.map(s=>`<option${newTask.system===s?' selected':''}>${s}</option>`).join('')}</select>
@@ -1904,9 +1943,14 @@ function renderNewTask(){
     </div>
     ${(newTask.objects&&newTask.objects.length)?`<div class="chips">${newTask.objects.map((o,i)=>`<span class="chip">${o}${grpLbl(o)}<button type="button" onclick="ntDelObj(${i})">×</button></span>`).join('')}</div><div class="foot" style="margin-top:4px">Добавлено ${newTask.objects.length}/6</div>`:'<div class="foot" style="margin-top:4px">Выберите объект и нажмите «Добавить». Можно до 6.</div>'}
     ${objs.length?'':'<div class="foot" style="margin-top:6px">На этот месяц по этой системе объектов нет (или все уже проведены).</div>'}
-    <div class="sys" style="margin-top:14px">Наряд</div>
-    <input type="text" inputmode="numeric" pattern="[0-9]*" class="naryad" placeholder="Номер наряда" value="${newTask.naryad||''}" oninput="ntNaryad(this.value)"${newTask.noNaryad?' disabled style="opacity:.45"':''}>
-    <label class="nonar"><input type="checkbox"${newTask.noNaryad?' checked':''} onchange="ntNoNaryad(this.checked)"><span>Без наряда</span></label>
+    <div class="sys" style="margin-top:14px">Вид наряда</div>
+    <select class="naryad" onchange="ntNarType(this.value)">
+      <option value=""${!newTask.naryadType?' selected':''}>Нету</option>
+      <option value="Простой"${newTask.naryadType==='Простой'?' selected':''}>Простой</option>
+      <option value="Опасный"${newTask.naryadType==='Опасный'?' selected':''}>Опасный</option>
+    </select>
+    ${newTask.naryadType?`<div class="sys" style="margin-top:10px">Номер наряда</div>
+    <input type="text" inputmode="numeric" pattern="[0-9]*" class="naryad" placeholder="Номер наряда" value="${newTask.naryad||''}" oninput="ntNaryad(this.value)">`:''}
     <div class="sys" style="margin-top:14px">Исполнители</div>
     <div class="grp" style="padding:6px 12px">${people.map(a=>`<div class="staffrow"><button class="chk pick${newTask.assignees.find(x=>x.id===a.id)?' on':''}" style="flex:1" onclick="ntToggle('${a.id}')"><span class="box"></span><span class="txt">${a.name}${a.login?` <small style="color:var(--muted)">@${a.login}</small>`:''}</span></button></div>`).join('')||'<div class="empty" style="border:0">Нет сотрудников</div>'}</div>
     <button class="save-btn" onclick="createTask()">Создать задачу</button>
@@ -1923,11 +1967,23 @@ function renderProfile(){
       <div class="taskmeta">Логин: <b>${a.login||'—'}</b></div>
       <div class="taskmeta">Роль: <b>${rolesText(a)}</b></div></div>`;
   if(isAdmin()) html += `<button class="mbtn" onclick="location.hash='profile-users'"><span class="ic">👥</span><span class="t">Пользователи<span class="s">Аккаунты, роли, кто в сети</span></span><span class="arrow">›</span></button>`;
+  if(canAssign()) html += `<button class="mbtn" onclick="exportNaryads()"><span class="ic">📋</span><span class="t">Сохранить все наряды<span class="s">Выгрузить таблицу нарядов в Excel</span></span><span class="arrow">›</span></button>`;
   if(isAdmin()) html += `<button class="mbtn" onclick="resetDiaryData()"><span class="ic">🗑</span><span class="t">Сбросить данные ежедневника<span class="s">Стереть отметки, наряды и задачи (ростер останется)</span></span><span class="arrow">›</span></button>`;
+  // переключение «просмотр как пользователь» — только для администратора
+  if(isAdmin()) html += `<div class="sys" style="margin-top:18px">Просмотр как пользователь</div>
+    <select class="naryad" onchange="switchProfile(this.value)">${ACCOUNTS.map(x=>`<option value="${x.id}"${x.id===a.id?' selected':''}>${x.name} · ${rolesText(x)}</option>`).join('')}</select>
+    <div class="foot">Администратор может смотреть приложение глазами любого сотрудника без повторного входа. Выбор сохраняется.</div>`;
   html += `<button class="mbtn" style="margin-top:18px" onclick="doLogout()"><span class="ic">🚪</span><span class="t">Выйти<span class="s">Сменить учётную запись</span></span><span class="arrow">›</span></button>`;
   app.innerHTML = html;
 }
+function switchProfile(id){
+  const a=ACCOUNTS.find(x=>x.id===id); if(!a) return;
+  PROFILE=a; try{ localStorage.setItem('previewLogin', a.login||''); }catch(e){}
+  if(isEmployeeOnly()) location.hash='tasks'; else { renderProfile(); renderTabbar(); }
+  renderTabbar();
+}
 function doLogout(){
+  try{ localStorage.removeItem('previewLogin'); }catch(e){}
   try{ if(window.Android && window.Android.logout){ window.Android.logout(); return; } }catch(e){}
   toast('Выход недоступен');
 }
@@ -1967,16 +2023,16 @@ function renderEditUser(){
   </div>`;
 }
 function updUser(f, v){ const a=ACCOUNTS.find(x=>x.id===state.editId); if(!a) return; a[f]=v;
-  if(a.id===PROFILE.id){ PROFILE=a; }
+  if(a.id===PROFILE.id){ PROFILE=a; try{localStorage.setItem('previewProfile',JSON.stringify(a));}catch(e){} }
   saveAccounts(); }
 function toggleRole(r){ const a=ACCOUNTS.find(x=>x.id===state.editId); if(!a) return;
   if(!Array.isArray(a.roles)) a.roles = a.role?[a.role]:[];
   const i=a.roles.indexOf(r);
   if(i>=0) a.roles.splice(i,1); else { if(a.roles.length>=2){ toast('Максимум 2 роли'); return; } a.roles.push(r); }
   if(!a.roles.length) a.roles=['Сотрудник'];
-  if(a.id===PROFILE.id){ PROFILE=a; }
+  if(a.id===PROFILE.id){ PROFILE=a; try{localStorage.setItem('previewProfile',JSON.stringify(a));}catch(e){} }
   saveAccounts(); renderEditUser(); }
-function delUser(id){ ACCOUNTS=ACCOUNTS.filter(x=>x.id!==id); saveAccounts(); if(PROFILE.id===id) resolveProfile(); location.hash='profile-users'; toast('Аккаунт удалён'); }
+function delUser(id){ ACCOUNTS=ACCOUNTS.filter(x=>x.id!==id); saveAccounts(); if(PROFILE.id===id) PROFILE=ACCOUNTS[0]; location.hash='profile-users'; toast('Аккаунт удалён'); }
 
 let tt;
 function toast(msg){
