@@ -82,7 +82,7 @@ public class LoginActivity extends Activity {
         root.addView(btn);
 
         TextView hint = new TextView(this);
-        hint.setText("Первый вход под логином admin создаёт администратора.");
+        hint.setText("Если пароль ещё не задан — первый вход под вашим логином установит его.");
         hint.setTextColor(Color.parseColor("#777777"));
         hint.setPadding(0, dp(16), 0, 0);
         root.addView(hint);
@@ -127,6 +127,16 @@ public class LoginActivity extends Activity {
                 }
                 if (found != null) {
                     String ap = found.get("pass") != null ? found.get("pass").toString().trim() : "";
+                    if (ap.isEmpty()) {
+                        // пароль ещё не задан — первый вход устанавливает его
+                        found.put("pass", pass);
+                        Map<String, Object> doc = new HashMap<>(); doc.put("list", list);
+                        final Map<String, Object> ff = found;
+                        FirebaseFirestore.getInstance().document(ACC_DOC).set(doc)
+                            .addOnSuccessListener(x -> success(login, primaryRole(ff)))
+                            .addOnFailureListener(e -> { btn.setEnabled(true); toastLong("Не удалось сохранить пароль: " + e.getMessage()); });
+                        return;
+                    }
                     if (ap.equals(pass)) { success(login, primaryRole(found)); }
                     else { btn.setEnabled(true); toastLong("Неверный пароль для «" + login + "». Проверьте у администратора."); }
                     return;
