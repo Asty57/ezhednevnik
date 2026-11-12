@@ -887,6 +887,8 @@ function secAll(v){ if(!needDiary()) return; const {sec,sb}=curZSub(); const sub
 
 // Группы: ZGRP[subKey] = [{id,name,items:[objName,...]}]
 function grpsOf(subK){ return Array.isArray(ZGRP[subK])?ZGRP[subK]:[]; }
+// имя группы, в которую входит объект (для показа в задачах)
+function groupForObj(sysKey, obj){ let g=''; if(typeof ZGRP!=='undefined') Object.keys(ZGRP).forEach(k=>{ if(!g){ const p=k.split('|'); if(p[0]===sysKey) grpsOf(k).forEach(gr=>{ if(!g && (gr.items||[]).includes(obj)) g=gr.name; }); } }); return g; }
 function addGroup(){ if(!needDiary()) return; const inp=document.getElementById('newGrp'); const v=(inp&&inp.value||'').trim(); if(!v) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); const arr=grpsOf(subK).slice(); arr.unshift({id:'g'+Date.now(), name:v, items:[]}); ZGRP[subK]=arr; saveZgrp(); toast('Группа создана'); renderZSub(); }
 function delGroup(id){ if(!needDiary()) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); ZGRP[subK]=grpsOf(subK).filter(g=>g.id!==id); saveZgrp(); renderZSub(); }
 function renameGroup(id){ if(!needDiary()) return; const inp=document.getElementById('gn_'+id); const nv=(inp&&inp.value||'').trim(); if(!nv) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); ZGRP[subK]=grpsOf(subK).map(g=>g.id===id?{...g,name:nv}:g); saveZgrp(); toast('Сохранено'); renderZSub(); }
@@ -1147,7 +1149,7 @@ async function makeReportRange(dates, title){
     let grp=''; (typeof ZGRP!=='undefined'?(ZGRP[subK]||[]):[]).forEach(g=>{ if(!grp && (g.items||[]).includes(obj)) grp=g.name; });
     // группа: своя группа, иначе раздел (если разделов несколько); подгруппа: подраздел
     const groupLabel = grp || ((ZAY[sysKey]&&ZAY[sysKey].length>1)?secN:'');
-    const parts=[base]; if(groupLabel) parts.push(groupLabel); if(subN) parts.push(subN);
+    const parts=[base]; if(groupLabel) parts.push(groupLabel);
     return parts.join(' - ');
   };
   const log = [ JHEAD.map(v=>({v,s:1})) ];
@@ -1674,7 +1676,9 @@ function renderTasks(){
 }
 function taskTitle(t){ return (t.kind==='zay') ? '📝 Заявка' : '📋 Провести регламент'; }
 function taskObjs(t){ return (t.objects&&t.objects.length)?t.objects:(t.object?[t.object]:[]); }
-function objLine(t){ const o=taskObjs(t); return `<div class="taskmeta">Объект${o.length>1?'ы ('+o.length+')':''}: <b>${o.join(', ')||'—'}</b></div>`; }
+function objLine(t){ const o=taskObjs(t); const sk=SYS_KEY[t.system];
+  const lbl = x => { const g=(t.kind==='zay')?groupForObj(sk,x):''; return g?`${x} · ${g}`:x; };
+  return `<div class="taskmeta">Объект${o.length>1?'ы ('+o.length+')':''}: <b>${o.map(lbl).join(', ')||'—'}</b></div>`; }
 function fmtDate(iso){ if(!iso) return ''; const p=iso.split('-'); return p.length===3 ? `${p[2]}.${p[1]}.${p[0]}` : iso; }
 function taskNote(t){ let a=[]; if(t.from||t.to) a.push('Срок: '+(t.from?fmtDate(t.from):'…')+' — '+(t.to?fmtDate(t.to):'…')); if(t.extendedTo) a.push('продлено до '+fmtDate(t.extendedTo)); return a.join('; '); }
 function taskCard(t){
@@ -1873,6 +1877,8 @@ function renderNewTask(){
   const people = ACCOUNTS.filter(a=>rolesOf(a).includes('Сотрудник')||rolesOf(a).includes('Инженер'));
   const sm = ymdToDate(newTask.from); const mIdx = sm.getMonth(), yIdx = sm.getFullYear();
   const objs = objectsForTask(newTask.system, newTask.kind, mIdx, yIdx);
+  const sysKey = SYS_KEY[newTask.system];
+  const grpLbl = o => { const g = (newTask.kind==='zay') ? groupForObj(sysKey, o) : ''; return g ? ` · ${g}` : ''; };
   app.innerHTML = `<div class="view">
     <header><button class="icon-btn" onclick="history.back()">←</button><h1>Новая задача<div class="sub">${newTask.kind==='zay'?'Заявка':'Регламент'}</div></h1></header>
     <div class="seg" style="margin-bottom:12px"><button class="${newTask.kind==='reg'?'on':''}" onclick="ntKind('reg')">Регламент</button><button class="${newTask.kind==='zay'?'on':''}" onclick="ntKind('zay')">Заявка</button></div>
@@ -1885,11 +1891,11 @@ function renderNewTask(){
     <div class="objrow">
       <select id="ntObjSel" class="naryad" style="flex:1" onchange="ntObj(this.value)">
         <option value="">— выберите объект —</option>
-        ${objs.filter(o=>!(newTask.objects||[]).includes(o)).map(o=>`<option>${o}</option>`).join('')}
+        ${objs.filter(o=>!(newTask.objects||[]).includes(o)).map(o=>`<option value="${o.replace(/"/g,'&quot;')}">${o}${grpLbl(o)}</option>`).join('')}
       </select>
       <button class="tbtn" type="button" onclick="ntAddObj()" style="white-space:nowrap">➕ Добавить</button>
     </div>
-    ${(newTask.objects&&newTask.objects.length)?`<div class="chips">${newTask.objects.map((o,i)=>`<span class="chip">${o}<button type="button" onclick="ntDelObj(${i})">×</button></span>`).join('')}</div><div class="foot" style="margin-top:4px">Добавлено ${newTask.objects.length}/6</div>`:'<div class="foot" style="margin-top:4px">Выберите объект и нажмите «Добавить». Можно до 6.</div>'}
+    ${(newTask.objects&&newTask.objects.length)?`<div class="chips">${newTask.objects.map((o,i)=>`<span class="chip">${o}${grpLbl(o)}<button type="button" onclick="ntDelObj(${i})">×</button></span>`).join('')}</div><div class="foot" style="margin-top:4px">Добавлено ${newTask.objects.length}/6</div>`:'<div class="foot" style="margin-top:4px">Выберите объект и нажмите «Добавить». Можно до 6.</div>'}
     ${objs.length?'':'<div class="foot" style="margin-top:6px">На этот месяц по этой системе объектов нет (или все уже проведены).</div>'}
     <div class="sys" style="margin-top:14px">Наряд</div>
     <input type="text" inputmode="numeric" pattern="[0-9]*" class="naryad" placeholder="Номер наряда" value="${newTask.naryad||''}" oninput="ntNaryad(this.value)"${newTask.noNaryad?' disabled style="opacity:.45"':''}>
