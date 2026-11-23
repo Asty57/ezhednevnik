@@ -940,6 +940,7 @@ function secAll(v){ if(!needDiary()) return; const {sec,sb}=curZSub(); const sub
 function grpsOf(subK){ return Array.isArray(ZGRP[subK])?ZGRP[subK]:[]; }
 // имя группы, в которую входит объект (для показа в задачах)
 function groupForObj(sysKey, obj){ let g=''; if(typeof ZGRP!=='undefined') Object.keys(ZGRP).forEach(k=>{ if(!g){ const p=k.split('|'); if(p[0]===sysKey) grpsOf(k).forEach(gr=>{ if(!g && (gr.items||[]).includes(obj)) g=gr.name; }); } }); return g; }
+function pctvGroup(tag){ if(typeof PCTV==='undefined' || !PCTV) return ''; for(const inst of PCTV){ if((inst.cams||[]).some(c=>c && c.t===tag)) return inst.name; } return ''; }
 function addGroup(){ if(!needDiary()) return; const inp=document.getElementById('newGrp'); const v=(inp&&inp.value||'').trim(); if(!v) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); const arr=grpsOf(subK).slice(); arr.unshift({id:'g'+Date.now(), name:v, items:[]}); ZGRP[subK]=arr; saveZgrp(); toast('Группа создана'); renderZSub(); }
 function delGroup(id){ if(!needDiary()) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); ZGRP[subK]=grpsOf(subK).filter(g=>g.id!==id); saveZgrp(); renderZSub(); }
 function renameGroup(id){ if(!needDiary()) return; const inp=document.getElementById('gn_'+id); const nv=(inp&&inp.value||'').trim(); if(!nv) return; const {sec,sb}=curZSub(); const subK=zxKey(state.sub,sec,sb); ZGRP[subK]=grpsOf(subK).map(g=>g.id===id?{...g,name:nv}:g); saveZgrp(); toast('Сохранено'); renderZSub(); }
@@ -1199,6 +1200,7 @@ async function makeReportRange(dates, title){
     const base = camName(o); const p = (k||'').split('|');
     if(p[0]!=='zay' || p.length<5) return base;
     const sysKey=p[1], secN=p[2], subN=p[3], obj=p[4];
+    if(secN==='Камеры ПКОП') return subN ? `${subN} - ${base}` : base;
     const subK = sysKey+'|'+secN+'|'+subN;
     let grp=''; (typeof ZGRP!=='undefined'?(ZGRP[subK]||[]):[]).forEach(g=>{ if(!grp && (g.items||[]).includes(obj)) grp=g.name; });
     // группа: своя группа, иначе раздел (если разделов несколько). Подгруппу не выводим.
@@ -1874,7 +1876,7 @@ function isPlanned(t){ if(!t.from||!/^\d{4}-\d{2}-\d{2}$/.test(t.from)) return f
 async function refreshData(){ toast('Обновляю…'); try{ const ps=[]; if(typeof loadTasks==='function')ps.push(loadTasks()); if(typeof loadAccounts==='function')ps.push(loadAccounts()); if(typeof loadStaff==='function')ps.push(loadStaff()); if(typeof loadZayx==='function')ps.push(loadZayx()); if(typeof loadZsec==='function')ps.push(loadZsec()); if(typeof loadZgrp==='function')ps.push(loadZgrp()); await Promise.all(ps); }catch(e){} route(true); toast('Обновлено'); }
 function taskObjs(t){ return (t.objects&&t.objects.length)?t.objects:(t.object?[t.object]:[]); }
 function objLine(t){ const o=taskObjs(t); const sk=SYS_KEY[t.system];
-  const lbl = x => { const m=(x||'').match(/^Камера № (\d+)$/); let c=(m&&CAM_LABELS[+m[1]])?` (${CAM_LABELS[+m[1]]})`:''; if(!c && typeof PCTV_IP!=='undefined' && PCTV_IP[x]) c=` · ${PCTV_IP[x]}`; const g=(t.kind==='zay')?groupForObj(sk,x):''; return `${x}${c}${g?` · ${g}`:''}`; };
+  const lbl = x => { const m=(x||'').match(/^Камера № (\d+)$/); let c=(m&&CAM_LABELS[+m[1]])?` (${CAM_LABELS[+m[1]]})`:''; if(!c && typeof PCTV_IP!=='undefined' && PCTV_IP[x]) c=` · ${PCTV_IP[x]}`; const pg=pctvGroup(x); if(pg) return `${pg} — ${x}${c}`; const g=(t.kind==='zay')?groupForObj(sk,x):''; return `${x}${c}${g?` · ${g}`:''}`; };
   return `<div class="taskmeta">Объект${o.length>1?'ы ('+o.length+')':''}: <b>${o.map(lbl).join(', ')||'—'}</b></div>`; }
 function fmtDate(iso){ if(!iso) return ''; const p=iso.split('-'); return p.length===3 ? `${p[2]}.${p[1]}.${p[0]}` : iso; }
 function taskNote(t){ let a=[]; if(t.from||t.to) a.push('Срок: '+(t.from?fmtDate(t.from):'…')+' — '+(t.to?fmtDate(t.to):'…')); if(t.extendedTo) a.push('продлено до '+fmtDate(t.extendedTo)); return a.join('; '); }
@@ -2060,8 +2062,20 @@ function ntObj(v){ newTask.object=v; }
 function ntAddObj(){ const sel=document.getElementById('ntObjSel'); const v=sel?sel.value:''; if(!v){ toast('Выберите объект из списка'); return; }
   if(!Array.isArray(newTask.objects)) newTask.objects=[];
   if(newTask.objects.includes(v)){ toast('Этот объект уже добавлен'); return; }
-  if(newTask.objects.length>=6){ toast('Максимум 6 объектов'); return; }
+  if(newTask.objects.length>=30){ toast('Максимум 30 объектов'); return; }
   newTask.objects.push(v); newTask.object=newTask.objects[0]; renderNewTask(); }
+function ntAddGroup(){
+  const sel=document.getElementById('ntObjSel'); const v=sel?sel.value:'';
+  if(!v){ toast('Сначала выберите камеру из установки'); return; }
+  let mIdx, yIdx; try{ const sm=ymdToDate(newTask.from); mIdx=sm.getMonth(); yIdx=sm.getFullYear(); }catch(e){ const t=new Date(); mIdx=t.getMonth(); yIdx=t.getFullYear(); }
+  const groups=objectsGrouped(newTask.system, newTask.kind, mIdx, yIdx);
+  const g=groups.find(gr=>gr.items.includes(v)); if(!g){ toast('Группа не найдена'); return; }
+  if(!Array.isArray(newTask.objects)) newTask.objects=[];
+  let added=0, skipped=false;
+  for(const o of g.items){ if(newTask.objects.length>=30){ skipped=true; break; } if(!newTask.objects.includes(o)){ newTask.objects.push(o); added++; } }
+  newTask.object=newTask.objects[0]||''; renderNewTask();
+  toast(added?`Добавлено: ${g.group} (${added})${skipped?' — лимит 30':''}`:'Все камеры уже добавлены');
+}
 function ntDelObj(i){ if(Array.isArray(newTask.objects)){ newTask.objects.splice(i,1); newTask.object=newTask.objects[0]||''; renderNewTask(); } }
 function ntFrom(v){ newTask.from=v; renderNewTask(); }
 function ntTo(v){ newTask.to=v; }
@@ -2079,7 +2093,7 @@ function createTask(){
   // собираем объекты (до 6); если ничего не добавлено — берём выбранный в списке
   let objs = Array.isArray(newTask.objects) ? newTask.objects.slice() : [];
   if(!objs.length){ const sel=document.getElementById('ntObjSel'); if(sel&&sel.value) objs=[sel.value]; }
-  objs = objs.map(o=>(o||'').trim()).filter(Boolean).slice(0,6);
+  objs = objs.map(o=>(o||'').trim()).filter(Boolean).slice(0,30);
   if(!objs.length){ ntSay('⚠️ Добавьте хотя бы один объект'); return; }
   if(!newTask.assignees.length){ ntSay('⚠️ Отметьте хотя бы одного исполнителя'); return; }
   try{
@@ -2110,15 +2124,16 @@ function renderNewTask(){
     <div class="sys" style="margin-top:14px">Срок проведения (с — по)</div>
     <div class="daterow"><input type="date" class="naryad" value="${newTask.from||''}" oninput="ntFrom(this.value)"><span>—</span><input type="date" class="naryad" value="${newTask.to||''}" oninput="ntTo(this.value)"></div>
     <div class="foot" style="margin-top:4px">Объекты показываются по месяцу даты «с».</div>
-    <div class="sys" style="margin-top:14px">Объекты — до 6 ${newTask.kind==='reg'?'(по графику на '+MONTHS_GEN[mIdx]+')':'(все объекты)'}</div>
+    <div class="sys" style="margin-top:14px">Объекты — до 30 ${newTask.kind==='reg'?'(по графику на '+MONTHS_GEN[mIdx]+')':'(все объекты)'}</div>
     <div class="objrow">
       <select id="ntObjSel" class="naryad" style="flex:1" onchange="ntObj(this.value)">
         <option value="">— выберите объект —</option>
         ${objectsGrouped(newTask.system, newTask.kind, mIdx, yIdx).map(gr=>{ const opts=gr.items.filter(o=>!(newTask.objects||[]).includes(o)).map(o=>`<option value="${o.replace(/"/g,'&quot;')}">${o}${camLbl(o)}${grpLbl(o)}</option>`).join(''); return opts?`<optgroup label="${(gr.group||'').replace(/"/g,'&quot;')}">${opts}</optgroup>`:''; }).join('')}
       </select>
-      <button class="tbtn" type="button" onclick="ntAddObj()" style="white-space:nowrap">➕ Добавить</button>
+      <button class="tbtn" type="button" onclick="ntAddObj()" style="white-space:nowrap">➕ Добавить</button></div>
+    <div style="margin-top:6px"><button class="tbtn" type="button" onclick="ntAddGroup()" style="white-space:nowrap">📦 Вся установка</button>
     </div>
-    ${(newTask.objects&&newTask.objects.length)?`<div class="chips">${newTask.objects.map((o,i)=>`<span class="chip">${o}${camLbl(o)}${grpLbl(o)}<button type="button" onclick="ntDelObj(${i})">×</button></span>`).join('')}</div><div class="foot" style="margin-top:4px">Добавлено ${newTask.objects.length}/6</div>`:'<div class="foot" style="margin-top:4px">Выберите объект и нажмите «Добавить». Можно до 6.</div>'}
+    ${(newTask.objects&&newTask.objects.length)?`<div class="chips">${newTask.objects.map((o,i)=>`<span class="chip">${o}${camLbl(o)}${grpLbl(o)}<button type="button" onclick="ntDelObj(${i})">×</button></span>`).join('')}</div><div class="foot" style="margin-top:4px">Добавлено ${newTask.objects.length}/30</div>`:'<div class="foot" style="margin-top:4px">Выберите объект → «Добавить», или «Вся установка» — добавить все её камеры. До 30.</div>'}
     ${objs.length?'':'<div class="foot" style="margin-top:6px">На этот месяц по этой системе объектов нет (или все уже проведены).</div>'}
     <div class="sys" style="margin-top:14px">Вид наряда</div>
     <select class="naryad" onchange="ntNarType(this.value)">
