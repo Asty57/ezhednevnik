@@ -14,7 +14,7 @@ android {
         minSdk 29
         targetSdk 34
         versionCode buildNumber
-        versionName "2.3.2"
+        versionName "2.4.0"
     }
 
     signingConfigs {

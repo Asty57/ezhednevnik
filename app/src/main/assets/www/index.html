@@ -104,6 +104,10 @@
   .cbox{background:none;border:0;padding:11px 8px 11px 2px;cursor:pointer;flex:none;display:flex;align-items:flex-start}
   .cbody{flex:1;background:none;border:0;text-align:left;padding:11px 2px;cursor:pointer;display:flex;align-items:flex-start;gap:8px;color:var(--ink);font-size:15px;font-family:inherit;line-height:1.4}
   .cbody .txt{flex:1}
+  .cbody2{flex:1;text-align:left;padding:11px 8px 11px 2px;display:flex;align-items:flex-start;gap:8px;color:var(--ink);font-size:15px;line-height:1.4}
+  .cbody2 .txt{flex:1}
+  .chk.objlp{align-items:flex-start;padding-left:2px;cursor:default;-webkit-user-select:none;user-select:none}
+  .chk.objlp .box{margin:11px 8px 0 2px}
   .chv{color:#c3ccd8;font-size:18px;align-self:center;flex:none}
   .chk .box{width:24px;height:24px;border-radius:8px;border:2px solid #b9c5d6;flex:none;display:grid;place-items:center;transition:.15s;margin-top:-1px}
   .chk.done .box{background:#3f9a5c;border-color:#3f9a5c}
@@ -198,6 +202,11 @@
   .addrow{display:flex;gap:8px;margin-top:12px}
   .addrow input{flex:1;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-family:inherit;color:var(--ink);background:var(--card)}
   .addrow button{width:52px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--grad1),var(--grad2));color:#fff;font-size:24px;cursor:pointer}
+  .camedit{display:flex;gap:6px;margin-bottom:8px;align-items:center}
+  .camedit input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--ink);background:var(--card)}
+  .camedit input:last-of-type{flex:0 0 112px}
+  .camedit .tbtn{flex:0 0 auto;padding:10px 12px}
+  .camedit .tbtn.del{color:#dc2626}
   .save-btn{display:block;width:100%;margin-top:16px;border:0;border-radius:16px;padding:16px;font-weight:700;font-size:16px;cursor:pointer;background:linear-gradient(135deg,var(--grad1),var(--grad2));color:#fff;box-shadow:var(--shadow)}
   .app{padding-bottom:88px}
   .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;background:var(--card);border-top:1px solid var(--line);
@@ -433,6 +442,24 @@ const CAM_LABELS = {
   93:'Вход вице-президента, ЗДУ-1', 94:'Вход вице-президента, ЗДУ-2-1',
   96:'ЗДУ-5, коридор приёмной', 97:'ЗДУ-5, приёмная', 98:'ЗДУ-1-2, мост 2 этаж'
 };
+// Внешние камеры — подписи как на листке
+const EXT_LABELS = {
+  1:'Эст-Налив', 2:'П6Б', 3:'Сера', 4:'ПЖ-Д Вор', 5:'БО Сев-Вост', 6:'БО Юго-Зап', 7:'П8Б',
+  8:'ПСГ Сев.Вост', 9:'ПСГ Юго-Зап', 11:'УВПМ', 12:'А1', 13:'А2', 15:'Склад 806 Вост',
+  16:'БО АТВор', 17:'АТВор-ЦП', 18:'ПСГ АтВор-1', 19:'ПСГ АтВор-2', 20:'АТВор', 22:'ЖД',
+  23:'ПСГ ЖДВор', 24:'БО ЖДВор', 25:'Т-ЦП1', 26:'Т-ЦП2', 27:'Т-А4', 28:'Т-А5', 30:'Т-А2',
+  31:'Т-А3', 33:'Т-БО', 34:'Т-ПСГ', 35:'Т-ЖД', 36:'Факел / Т-П10', 37:'АТВ-П9', 40:'АТВор-ПБО',
+  43:'Площадь-ЦП', 44:'А1-А2-АБ', 45:'А3 ВелоСтоянка', 46:'АвтоСтоянка П17', 47:'Тр кат Кр',
+  48:'Остановка', 49:'Шлагбаум-17', 50:'ГРС', 51:'2-ЗДУ-Б', 52:'КПП2-Проходная', 53:'КПП-Стекляшка',
+  54:'АБ-Стоянка', 55:'ЗДУ2-Шлагбаум', 56:'ЗДУ-Б', 57:'Управление 2', 58:'АТВор-МРМ',
+  59:'Уст.1000 эст', 60:'Б5О-Уст.1000', 61:'Пост 40', 62:'Б5О-Уст.1000', 63:'ПЖУ',
+  64:'Автостоянка-ЗДУ', 66:'Т-КПП2', 67:'40 Пост', 68:'Восток-2 Упр', 69:'Восток-2 Пост',
+  70:'Угол Сев-Вост', 71:'Тр кат Кр', 72:'Восток-ПСГ', 73:'Угол Юго-Восток', 74:'Тр кат Кр / Пост №9',
+  75:'А2', 76:'А2', 77:'Запас. вход А4', 78:'А3', 79:'А3', 80:'А1', 81:'АБ', 82:'Юг Автотранс',
+  83:'АТВор при цехе', 84:'АК-63', 85:'ЛК-2', 86:'УВПМ', 87:'ТСЦ', 88:'ПВВС', 90:'БУТ', 91:'ПСГ', 92:'ПСГ-2'
+};
+Object.assign(CAM_LABELS, EXT_LABELS);
+const EXT_CAMS = Object.keys(EXT_LABELS).map(Number).sort((a,b)=>a-b);
 const HW_OBJ = [
   { name:'Центральный проход и КПП', nums:[25,26,53] },
   { name:'ЗДУ-1', nums:[29,80,93,98] },
@@ -446,8 +473,34 @@ const HW_OBJ = [
 ];
 const HW_ALL = [...new Set([...HW_G1,...HW_IN,...HW_OUT])].sort((a,b)=>a-b);
 const HW_LABELED = new Set(HW_OBJ.flatMap(o=>o.nums));
-const HW_ZAY_SUBS = HW_OBJ.map(o=>({ name:o.name, icon:'🎥', items:cams(o.nums) }))
+const HW_ZAY_SUBS = [{ name:'Внешние', icon:'🎥', items:cams(EXT_CAMS) }]
+  .concat(HW_OBJ.map(o=>({ name:o.name, icon:'🎥', items:cams(o.nums) })))
   .concat([{ name:'Прочие камеры', icon:'🎥', items:cams(HW_ALL.filter(n=>!HW_LABELED.has(n))) }]);
+// --- Камеры ПКОП (PCTV): установки, камеры и IP (из выгрузки VMS) ---
+const PCTV_IP_DEF = {"1000-PCTV-CA001": "10.0.25.5", "1000-PCTV-CA002": "10.0.25.6", "1000-PCTV-CA003": "10.0.25.7", "1000-PCTV-CA004": "10.0.25.8", "1000-PCTV-CA005": "10.0.25.9", "1000-PCTV-CA006": "10.0.25.10", "1000-PCTV-CA007": "10.0.25.11", "1000-PCTV-CA008": "10.0.25.12", "1000-PCTV-CA009": "10.0.25.13", "1000-PCTV-CA010": "10.0.25.14", "1000-PCTV-CA011": "10.0.25.15", "1000-PCTV-CA012": "10.0.25.16", "1000-PCTV-CA013": "10.0.25.17", "1000-PCTV-CA014": "10.0.25.18", "1000-PCTV-CA015": "10.0.25.19", "1000-PCTV-CA016": "10.0.25.20", "1000-PCTV-CA017": "10.0.25.21", "1000-PCTV-CA018": "10.0.25.22", "1000-PCTV-CA019": "10.0.25.23", "1000-PCTV-CA020": "10.0.25.24", "1000-PCTV-CA021": "10.0.25.25", "1000-PCTV-CA022": "10.0.25.26", "1000-PCTV-CA023": "10.0.25.27", "1000-PCTV-CA024": "10.0.25.28", "1000-PCTV-CA025": "10.0.25.29", "1000-PCTV-CA026": "10.0.25.30", "1000-PCTV-CA027": "10.0.25.31", "1000-PCTV-CA028": "10.0.25.32", "1000-PCTV-CA029": "10.0.25.33", "1000-PCTV-CA030": "10.0.25.34", "1000-PCTV-CA031": "10.0.25.35", "1000-PCTV-CA032": "10.0.25.36", "1000-PCTV-CA033": "10.0.25.37", "1000-PCTV-CA034": "10.0.25.38", "1000-PCTV-CA035": "10.0.25.39", "1001-PCTV-CA001": "10.0.25.1", "1001-PCTV-CA002": "10.0.25.2", "1001-PCTV-CA003": "10.0.25.3", "1001-PCTV-CA004": "10.0.25.4", "1002-PCTV-CA001": "10.0.25.40", "1002-PCTV-CA002": "10.0.25.41", "1002-PCTV-CA003": "10.0.25.42", "1002-PCTV-CA004": "10.0.25.43", "1003-PCTV-CA001": "10.0.25.73", "1003-PCTV-CA002": "10.0.25.74", "1003-PCTV-CA003": "10.0.25.75", "1003-PCTV-CA004": "10.0.25.76", "1004-PCTV-CA001": "10.0.25.125", "1004-PCTV-CA002": "10.0.25.126", "1004-PCTV-CA003": "10.0.25.127", "1004-PCTV-CA004": "10.0.25.128", "1005-PCTV-CA001": "10.0.25.144", "1005-PCTV-CA002": "10.0.25.145", "1005-PCTV-CA003": "10.0.25.146", "1005-PCTV-CA004": "10.0.25.147", "1006-PCTV-CA001": "10.0.24.80", "1006-PCTV-CA002": "10.0.24.81", "1006-PCTV-CA003": "10.0.24.82", "1006-PCTV-CA004": "10.0.24.83", "1007-PCTV-CA001": "10.0.25.170", "1007-PCTV-CA002": "10.0.25.171", "1007-PCTV-CA003": "10.0.25.172", "1008-PCTV-CA001": "10.0.25.196", "1008-PCTV-CA002": "10.0.25.197", "1009-PCTV-CA001": "10.0.24.86", "1009-PCTV-CA002": "10.0.24.87", "1010-PCTV-CA001": "10.0.24.1", "1010-PCTV-CA002": "10.0.24.2", "1010-PCTV-CA003": "10.0.24.3", "1010-PCTV-CA004": "10.0.24.4", "1035-PCTV-CA001": "10.0.25.222", "1050-PCTV-CA001": "10.0.25.200", "1050-PCTV-CA002": "10.0.25.201", "1080-PCTV-CA001": "10.0.24.88", "1080-PCTV-CA002": "10.0.24.89", "1080-PCTV-CA003": "10.0.24.90", "1080-PCTV-CA004": "10.0.24.91", "1080-PCTV-CA005": "10.0.24.92", "1080-PCTV-CA006": "10.0.24.93", "1080-PCTV-CA007": "10.0.24.94", "1081-PCTV-CA001": "10.0.24.95", "1081-PCTV-CA002": "10.0.24.96", "1082-PCTV-CA001": "10.0.24.84", "1082-PCTV-CA002": "10.0.24.85", "1100-PCTV-CA001": "10.0.25.44", "1100-PCTV-CA002": "10.0.25.45", "1100-PCTV-CA003": "10.0.25.46", "1100-PCTV-CA004": "10.0.25.47", "1100-PCTV-CA005": "10.0.25.48", "1100-PCTV-CA006": "10.0.25.49", "1100-PCTV-CA007": "10.0.25.50", "1100-PCTV-CA008": "10.0.25.51", "1100-PCTV-CA009": "10.0.25.52", "1100-PCTV-CA010": "10.0.25.53", "1100-PCTV-CA011": "10.0.25.54", "1100-PCTV-CA012": "10.0.25.55", "1100-PCTV-CA013": "10.0.25.56", "1100-PCTV-CA014": "10.0.25.57", "1300-PCTV-CA001": "10.0.25.77", "1300-PCTV-CA002": "10.0.25.78", "1300-PCTV-CA003": "10.0.25.79", "1300-PCTV-CA004": "10.0.25.80", "1300-PCTV-CA005": "10.0.25.81", "1300-PCTV-CA006": "10.0.25.82", "1300-PCTV-CA007": "10.0.25.83", "1300-PCTV-CA008": "10.0.25.84", "1300-PCTV-CA009": "10.0.25.85", "1300-PCTV-CA010": "10.0.25.86", "1300-PCTV-CA011": "10.0.25.87", "1300-PCTV-CA012": "10.0.25.88", "1500-PCTV-CA001": "10.0.25.230", "1500-PCTV-CA002": "10.0.25.231", "1500-PCTV-CA003": "10.0.25.232", "1700-PCTV-CA001": "10.0.25.129", "1700-PCTV-CA002": "10.0.25.130", "1700-PCTV-CA003": "10.0.25.131", "1700-PCTV-CA004": "10.0.25.132", "1700-PCTV-CA005": "10.0.25.133", "1700-PCTV-CA006": "10.0.25.134", "1700-PCTV-CA007": "10.0.25.135", "1700-PCTV-CA008": "10.0.25.136", "1700-PCTV-CA009": "10.0.25.137", "1700-PCTV-CA010": "10.0.25.138", "1700-PCTV-CA011": "10.0.25.139", "1900-PCTV-CA001": "10.0.25.89", "1900-PCTV-CA002": "10.0.25.90", "1900-PCTV-CA003": "10.0.25.91", "1900-PCTV-CA004": "10.0.25.92", "1900-PCTV-CA005": "10.0.25.226", "3000-PCTV-CA001": "10.0.24.101", "3000-PCTV-CA002": "10.0.24.102", "3000-PCTV-CA003": "10.0.24.103", "3000-PCTV-CA004": "10.0.24.104", "3000-PCTV-CA005": "10.0.24.105", "3100-PCTV-CA001": "10.0.25.164", "3100-PCTV-CA002": "10.0.25.165", "3100-PCTV-CA003": "10.0.25.166", "3100-PCTV-CA004": "10.0.25.167", "3100-PCTV-CA005": "10.0.25.168", "3200-PCTV-CA001": "10.0.25.160", "3200-PCTV-CA002": "10.0.25.161", "3200-PCTV-CA003": "10.0.25.162", "3200-PCTV-CA004": "10.0.25.163", "33F1-PCTV-CA001": "10.0.24.19", "34E1-PCTV-CA001": "10.0.24.43", "34E1-PCTV-CA002": "10.0.24.44", "34E1-PCTV-CA003": "10.0.24.45", "34E1-PCTV-CA004": "10.0.24.46", "3500-PCTV-CA001": "10.0.25.154", "3500-PCTV-CA002": "10.0.25.155", "3500-PCTV-CA003": "10.0.25.156", "3500-PCTV-CA004": "10.0.25.157", "3500-PCTV-CA005": "10.0.25.158", "3500-PCTV-CA006": "10.0.25.159", "3500-PCTV-CA007": "10.0.25.227", "36C2-PCTV-CA001": "10.0.24.60", "36C2-PCTV-CA002": "10.0.24.61", "36C2-PCTV-CA003": "10.0.24.62", "36G1-PCTV-CA001": "10.0.24.49", "36G1-PCTV-CA002": "10.0.24.50", "36G1-PCTV-CA003": "10.0.24.51", "36G1-PCTV-CA004": "10.0.24.52", "36G1-PCTV-CA005": "10.0.24.53", "36G1-PCTV-CA006": "10.0.24.54", "36G1-PCTV-CA007": "10.0.24.55", "36G1-PCTV-CA008": "10.0.24.56", "36G1-PCTV-CA009": "10.0.24.57", "37G5-PCTV-CA001": "10.0.25.173", "37G5-PCTV-CA002": "10.0.25.174", "37G5-PCTV-CA003": "10.0.25.175", "37G5-PCTV-CA004": "10.0.25.176", "37G5-PCTV-CA005": "10.0.25.177", "37G5-PCTV-CA006": "10.0.25.178", "37G5-PCTV-CA007": "10.0.25.179", "38E3-PCTV-CA001": "10.0.24.15", "38E3-PCTV-CA002": "10.0.24.16", "38E3-PCTV-CA003": "10.0.24.17", "38E3-PCTV-CA004": "10.0.24.18", "38H1-PCTV-CA001": "10.0.24.5", "38H1-PCTV-CA002": "10.0.24.6", "38H1-PCTV-CA003": "10.0.24.7", "38H1-PCTV-CA004": "10.0.24.8", "38H1-PCTV-CA005": "10.0.24.9", "38H1-PCTV-CA006": "10.0.24.10", "38H1-PCTV-CA007": "10.0.24.11", "38H1-PCTV-CA008": "10.0.24.12", "38H1-PCTV-CA009": "10.0.24.13", "38H1-PCTV-CA010": "10.0.24.14", "39G2-PCTV-CA001": "10.0.24.47", "39G2-PCTV-CA002": "10.0.24.48", "90A0-PCTV-CA001": "10.0.25.150", "90A0-PCTV-CA002": "10.0.25.151", "90A0-PCTV-CA003": "10.0.25.152", "90A0-PCTV-CA004": "10.0.25.153", "90B0-PCTV-CA001": "10.0.25.140", "90B0-PCTV-CA002": "10.0.25.141", "90B0-PCTV-CA003": "10.0.25.142", "90B0-PCTV-CA004": "10.0.25.143", "90C0-PCTV-CA001": "10.0.24.63", "90C0-PCTV-CA002": "10.0.24.64", "90C0-PCTV-CA003": "10.0.24.65", "90C0-PCTV-CA004": "10.0.24.66", "90C0-PCTV-CA005": "10.0.25.65", "90C0-PCTV-CA006": "10.0.25.66", "90C0-PCTV-CA007": "10.0.25.67", "90C0-PCTV-CA008": "10.0.25.68", "90C0-PCTV-CA009": "10.0.25.69", "90C0-PCTV-CA010": "10.0.25.97", "90C0-PCTV-CA011": "10.0.25.98", "90C0-PCTV-CA012": "10.0.25.99", "90C0-PCTV-CA013": "10.0.25.100", "90C0-PCTV-CA014": "10.0.25.101", "90C0-PCTV-CA015": "10.0.25.102", "90C0-PCTV-CA016": "10.0.25.103", "90C0-PCTV-CA017": "10.0.25.104", "90C0-PCTV-CA018": "10.0.25.105", "90C0-PCTV-CA019": "10.0.25.106", "90C0-PCTV-CA020": "10.0.25.107", "90C0-PCTV-CA021": "10.0.25.108", "90C0-PCTV-CA022": "10.0.25.109", "90C0-PCTV-CA023": "10.0.25.110", "90C0-PCTV-CA024": "10.0.25.111", "90C0-PCTV-CA025": "10.0.25.112", "90C0-PCTV-CA026": "10.0.25.113", "90C0-PCTV-CA027": "10.0.25.114", "90C0-PCTV-CA028": "10.0.25.115", "90C0-PCTV-CA029": "10.0.25.116", "90C0-PCTV-CA030": "10.0.25.117", "90C0-PCTV-CA031": "10.0.25.118", "90C0-PCTV-CA032": "10.0.25.119", "90C0-PCTV-CA033": "10.0.25.120", "90C0-PCTV-CA034": "10.0.25.121", "90C0-PCTV-CA035": "10.0.25.122", "90C0-PCTV-CA036": "10.0.25.123", "90C0-PCTV-CA037": "10.0.25.124", "90C0-PCTV-CA038": "10.0.25.180", "90C0-PCTV-CA039": "10.0.25.181", "90C0-PCTV-CA040": "10.0.25.182", "90D0-PCTV-CA001": "10.0.25.58", "90D0-PCTV-CA002": "10.0.25.59", "90D0-PCTV-CA003": "10.0.25.60", "90D0-PCTV-CA004": "10.0.25.61", "90D0-PCTV-CA005": "10.0.25.62", "90D0-PCTV-CA006": "10.0.25.63", "90D0-PCTV-CA007": "10.0.25.64", "90D0-PCTV-CA008": "10.0.25.93", "90D0-PCTV-CA009": "10.0.25.94", "90D0-PCTV-CA010": "10.0.25.95", "90D0-PCTV-CA011": "10.0.25.96", "90D0-PCTV-CA012": "10.0.25.148", "90D0-PCTV-CA013": "10.0.25.149", "90E0-PCTV-CA001": "10.0.24.20", "90E0-PCTV-CA002": "10.0.24.21", "90E0-PCTV-CA003": "10.0.24.22", "90E0-PCTV-CA004": "10.0.24.23", "90E0-PCTV-CA005": "10.0.24.24", "90E0-PCTV-CA006": "10.0.24.25", "90F0-PCTV-CA001": "10.0.24.26", "90F0-PCTV-CA002": "10.0.24.27", "90F0-PCTV-CA003": "10.0.24.28", "90F0-PCTV-CA004": "10.0.24.29", "90F0-PCTV-CA005": "10.0.24.30", "90F0-PCTV-CA006": "10.0.24.31", "90F0-PCTV-CA007": "10.0.24.32", "90F0-PCTV-CA008": "10.0.24.33", "90F0-PCTV-CA009": "10.0.24.34", "90F0-PCTV-CA010": "10.0.24.35", "90F0-PCTV-CA011": "10.0.24.36", "90F0-PCTV-CA012": "10.0.24.37", "90F0-PCTV-CA013": "10.0.24.38", "90F0-PCTV-CA014": "10.0.24.39", "90F0-PCTV-CA015": "10.0.24.40", "90F0-PCTV-CA016": "10.0.24.41", "90F0-PCTV-CA017": "10.0.24.42", "90G0-PCTV-CA001": "10.0.24.67", "90G0-PCTV-CA002": "10.0.24.68", "90G0-PCTV-CA003": "10.0.24.69", "90G0-PCTV-CA004": "10.0.24.70", "90G0-PCTV-CA005": "10.0.24.71", "90G0-PCTV-CA006": "10.0.24.72", "90G0-PCTV-CA007": "10.0.24.73", "90G0-PCTV-CA008": "10.0.24.74", "90G0-PCTV-CA009": "10.0.24.75", "90G0-PCTV-CA010": "10.0.24.76", "90G0-PCTV-CA011": "10.0.24.77", "90G0-PCTV-CA012": "10.0.24.78", "90G0-PCTV-CA013": "10.0.24.79", "90G0-PCTV-CA014": "10.0.25.183", "90G0-PCTV-CA015": "10.0.25.184", "90G0-PCTV-CA016": "10.0.25.185", "90G0-PCTV-CA017": "10.0.25.186", "90G0-PCTV-CA018": "10.0.25.187", "90G0-PCTV-CA019": "10.0.25.188", "90G0-PCTV-CA020": "10.0.25.189", "90G0-PCTV-CA021": "10.0.25.190", "90G0-PCTV-CA022": "10.0.25.191", "90G0-PCTV-CA023": "10.0.25.192", "90G0-PCTV-CA024": "10.0.25.193"};
+const PCTV_INST_DEF = [{"name": "Установка 1000", "cams": ["1000-PCTV-CA001", "1000-PCTV-CA002", "1000-PCTV-CA003", "1000-PCTV-CA004", "1000-PCTV-CA005", "1000-PCTV-CA006", "1000-PCTV-CA007", "1000-PCTV-CA008", "1000-PCTV-CA009", "1000-PCTV-CA010", "1000-PCTV-CA011", "1000-PCTV-CA012", "1000-PCTV-CA013", "1000-PCTV-CA014", "1000-PCTV-CA015", "1000-PCTV-CA016", "1000-PCTV-CA017", "1000-PCTV-CA018", "1000-PCTV-CA019", "1000-PCTV-CA020", "1000-PCTV-CA021", "1000-PCTV-CA022", "1000-PCTV-CA023", "1000-PCTV-CA024", "1000-PCTV-CA025", "1000-PCTV-CA026", "1000-PCTV-CA027", "1000-PCTV-CA028", "1000-PCTV-CA029", "1000-PCTV-CA030", "1000-PCTV-CA031", "1000-PCTV-CA032", "1000-PCTV-CA033", "1000-PCTV-CA034", "1000-PCTV-CA035"]}, {"name": "Установка 1100", "cams": ["1100-PCTV-CA001", "1100-PCTV-CA002", "1100-PCTV-CA003", "1100-PCTV-CA004", "1100-PCTV-CA005", "1100-PCTV-CA006", "1100-PCTV-CA007", "1100-PCTV-CA008", "1100-PCTV-CA009", "1100-PCTV-CA010", "1100-PCTV-CA011", "1100-PCTV-CA012", "1100-PCTV-CA013", "1100-PCTV-CA014"]}, {"name": "Установка 1300", "cams": ["1300-PCTV-CA001", "1300-PCTV-CA002", "1300-PCTV-CA003", "1300-PCTV-CA004", "1300-PCTV-CA005", "1300-PCTV-CA006", "1300-PCTV-CA007", "1300-PCTV-CA008", "1300-PCTV-CA009", "1300-PCTV-CA010", "1300-PCTV-CA011", "1300-PCTV-CA012"]}, {"name": "Установка 1500", "cams": ["1500-PCTV-CA001", "1500-PCTV-CA002", "1500-PCTV-CA003"]}, {"name": "Установка 1700", "cams": ["1700-PCTV-CA001", "1700-PCTV-CA002", "1700-PCTV-CA003", "1700-PCTV-CA004", "1700-PCTV-CA005", "1700-PCTV-CA006", "1700-PCTV-CA007", "1700-PCTV-CA008", "1700-PCTV-CA009", "1700-PCTV-CA010", "1700-PCTV-CA011"]}, {"name": "Установка 1900", "cams": ["1900-PCTV-CA001", "1900-PCTV-CA002", "1900-PCTV-CA003", "1900-PCTV-CA004", "1900-PCTV-CA005"]}, {"name": "Установка 3000", "cams": ["3000-PCTV-CA001", "3000-PCTV-CA002", "3000-PCTV-CA003", "3000-PCTV-CA004", "3000-PCTV-CA005"]}, {"name": "Установка 3100", "cams": ["3100-PCTV-CA001", "3100-PCTV-CA002", "3100-PCTV-CA003", "3100-PCTV-CA004"]}, {"name": "Установка 3200", "cams": ["3200-PCTV-CA001", "3200-PCTV-CA002", "3200-PCTV-CA003", "3200-PCTV-CA004"]}, {"name": "Установка 3500", "cams": ["3500-PCTV-CA001", "3500-PCTV-CA002", "3500-PCTV-CA003", "3500-PCTV-CA004", "3500-PCTV-CA005", "3500-PCTV-CA006", "3500-PCTV-CA007"]}, {"name": "90A0 · Interconnecting Unit", "cams": ["90A0-PCTV-CA001", "90A0-PCTV-CA002", "90A0-PCTV-CA003", "90A0-PCTV-CA004"]}, {"name": "90B0 · Interconnecting Unit", "cams": ["90B0-PCTV-CA001", "90B0-PCTV-CA002", "90B0-PCTV-CA003", "90B0-PCTV-CA004"]}, {"name": "90C0 · Interconnecting Unit", "cams": ["90C0-PCTV-CA001", "90C0-PCTV-CA002", "90C0-PCTV-CA003", "90C0-PCTV-CA004", "90C0-PCTV-CA005", "90C0-PCTV-CA006", "90C0-PCTV-CA007", "90C0-PCTV-CA008", "90C0-PCTV-CA009", "90C0-PCTV-CA010", "90C0-PCTV-CA011", "90C0-PCTV-CA012", "90C0-PCTV-CA013", "90C0-PCTV-CA014", "90C0-PCTV-CA015", "90C0-PCTV-CA016", "90C0-PCTV-CA017", "90C0-PCTV-CA018", "90C0-PCTV-CA019", "90C0-PCTV-CA020", "90C0-PCTV-CA021", "90C0-PCTV-CA022", "90C0-PCTV-CA023", "90C0-PCTV-CA024", "90C0-PCTV-CA025", "90C0-PCTV-CA026", "90C0-PCTV-CA027", "90C0-PCTV-CA028", "90C0-PCTV-CA029", "90C0-PCTV-CA030", "90C0-PCTV-CA031", "90C0-PCTV-CA032", "90C0-PCTV-CA033", "90C0-PCTV-CA034", "90C0-PCTV-CA035", "90C0-PCTV-CA036", "90C0-PCTV-CA037", "90C0-PCTV-CA038", "90C0-PCTV-CA039", "90C0-PCTV-CA040"]}, {"name": "90D0 · Interconnecting Unit", "cams": ["90D0-PCTV-CA001", "90D0-PCTV-CA002", "90D0-PCTV-CA003", "90D0-PCTV-CA004", "90D0-PCTV-CA005", "90D0-PCTV-CA006", "90D0-PCTV-CA007", "90D0-PCTV-CA008", "90D0-PCTV-CA009", "90D0-PCTV-CA010", "90D0-PCTV-CA011", "90D0-PCTV-CA012", "90D0-PCTV-CA013"]}, {"name": "90E0 · Interconnecting Unit", "cams": ["90E0-PCTV-CA001", "90E0-PCTV-CA002", "90E0-PCTV-CA003", "90E0-PCTV-CA004", "90E0-PCTV-CA005", "90E0-PCTV-CA006"]}, {"name": "90F0 · Interconnecting Unit", "cams": ["90F0-PCTV-CA001", "90F0-PCTV-CA002", "90F0-PCTV-CA003", "90F0-PCTV-CA004", "90F0-PCTV-CA005", "90F0-PCTV-CA006", "90F0-PCTV-CA007", "90F0-PCTV-CA008", "90F0-PCTV-CA009", "90F0-PCTV-CA010", "90F0-PCTV-CA011", "90F0-PCTV-CA012", "90F0-PCTV-CA013", "90F0-PCTV-CA014", "90F0-PCTV-CA015", "90F0-PCTV-CA016", "90F0-PCTV-CA017"]}, {"name": "90G0 · Interconnecting Unit", "cams": ["90G0-PCTV-CA001", "90G0-PCTV-CA002", "90G0-PCTV-CA003", "90G0-PCTV-CA004", "90G0-PCTV-CA005", "90G0-PCTV-CA006", "90G0-PCTV-CA007", "90G0-PCTV-CA008", "90G0-PCTV-CA009", "90G0-PCTV-CA010", "90G0-PCTV-CA011", "90G0-PCTV-CA012", "90G0-PCTV-CA013", "90G0-PCTV-CA014", "90G0-PCTV-CA015", "90G0-PCTV-CA016", "90G0-PCTV-CA017", "90G0-PCTV-CA018", "90G0-PCTV-CA019", "90G0-PCTV-CA020", "90G0-PCTV-CA021", "90G0-PCTV-CA022", "90G0-PCTV-CA023", "90G0-PCTV-CA024"]}, {"name": "33F1 · Flare System", "cams": ["33F1-PCTV-CA001"]}, {"name": "34E1 · Cooling Water Unit", "cams": ["34E1-PCTV-CA001", "34E1-PCTV-CA002", "34E1-PCTV-CA003", "34E1-PCTV-CA004"]}, {"name": "36C1 · Hot Oil Tank", "cams": ["36C2-PCTV-CA001", "36C2-PCTV-CA002", "36C2-PCTV-CA003"]}, {"name": "36G1 · Fire Fighting Unit", "cams": ["36G1-PCTV-CA001", "36G1-PCTV-CA002", "36G1-PCTV-CA003", "36G1-PCTV-CA004", "36G1-PCTV-CA005", "36G1-PCTV-CA006", "36G1-PCTV-CA007", "36G1-PCTV-CA008", "36G1-PCTV-CA009"]}, {"name": "Установка 37G5", "cams": ["37G5-PCTV-CA001", "37G5-PCTV-CA002", "37G5-PCTV-CA003", "37G5-PCTV-CA004", "37G5-PCTV-CA005", "37G5-PCTV-CA006", "37G5-PCTV-CA007"]}, {"name": "38E3 · Flare System", "cams": ["38E3-PCTV-CA001", "38E3-PCTV-CA002", "38E3-PCTV-CA003", "38E3-PCTV-CA004"]}, {"name": "38H1 · Flare System", "cams": ["38H1-PCTV-CA001", "38H1-PCTV-CA002", "38H1-PCTV-CA003", "38H1-PCTV-CA004", "38H1-PCTV-CA005", "38H1-PCTV-CA006", "38H1-PCTV-CA007", "38H1-PCTV-CA008", "38H1-PCTV-CA009", "38H1-PCTV-CA010"]}, {"name": "39G2 · Fire Gifhting Unit", "cams": ["39G2-PCTV-CA001", "39G2-PCTV-CA002"]}, {"name": "Здание B01", "cams": ["1001-PCTV-CA001", "1001-PCTV-CA002", "1001-PCTV-CA003", "1001-PCTV-CA004"]}, {"name": "Здание B02", "cams": ["1002-PCTV-CA001", "1002-PCTV-CA002", "1002-PCTV-CA003", "1002-PCTV-CA004"]}, {"name": "Здание B03", "cams": ["1003-PCTV-CA001", "1003-PCTV-CA002", "1003-PCTV-CA003", "1003-PCTV-CA004"]}, {"name": "Здание B04", "cams": ["1004-PCTV-CA001", "1004-PCTV-CA002", "1004-PCTV-CA003", "1004-PCTV-CA004"]}, {"name": "Здание B05", "cams": ["1005-PCTV-CA001", "1005-PCTV-CA002", "1005-PCTV-CA003", "1005-PCTV-CA004"]}, {"name": "Здание B06", "cams": ["1006-PCTV-CA001", "1006-PCTV-CA002", "1006-PCTV-CA003", "1006-PCTV-CA004"]}, {"name": "Здание B07", "cams": ["1007-PCTV-CA001", "1007-PCTV-CA002", "1007-PCTV-CA003"]}, {"name": "Здание B08", "cams": ["1008-PCTV-CA001", "1008-PCTV-CA002"]}, {"name": "Здание B09", "cams": ["1009-PCTV-CA001", "1009-PCTV-CA002"]}, {"name": "Здание B10", "cams": ["1010-PCTV-CA001", "1010-PCTV-CA002", "1010-PCTV-CA003", "1010-PCTV-CA004"]}, {"name": "Здание B35", "cams": ["1035-PCTV-CA001", "3100-PCTV-CA005"]}, {"name": "Здание B50", "cams": ["1050-PCTV-CA001", "1050-PCTV-CA002"]}, {"name": "Здание B80", "cams": ["1080-PCTV-CA001", "1080-PCTV-CA002", "1080-PCTV-CA003", "1080-PCTV-CA004", "1080-PCTV-CA005", "1080-PCTV-CA006", "1080-PCTV-CA007"]}, {"name": "Здание B81", "cams": ["1081-PCTV-CA001", "1081-PCTV-CA002"]}, {"name": "Здание B82", "cams": ["1082-PCTV-CA001", "1082-PCTV-CA002"]}];
+// редактируемое хранилище камер ПКОП
+let PCTV = null;        // [{name, cams:[{t, ip}]}]
+let PCTV_IP = {};       // производная карта tag->ip (для показа IP везде)
+function seedPctv(){ return PCTV_INST_DEF.map(i=>({ name:i.name, cams:i.cams.map(t=>({ t, ip:(PCTV_IP_DEF[t]||'') })) })); }
+function pctvDerive(){
+  PCTV_IP = {};
+  (PCTV||[]).forEach(inst=>(inst.cams||[]).forEach(c=>{ if(c && c.t) PCTV_IP[c.t]=c.ip||''; }));
+  const sec = ZAY.video && ZAY.video.find(s=>s.name==='Камеры ПКОП');
+  if(sec) sec.subs = (PCTV||[]).map(inst=>({ name:inst.name, icon:'🎥', items:(inst.cams||[]).map(c=>c.t).filter(Boolean) }));
+}
+let _pctvT=null;
+function savePctv(){
+  try{ localStorage.setItem('pctv', JSON.stringify(PCTV)); }catch(e){}
+  pctvDerive();
+  clearTimeout(_pctvT); _pctvT=setTimeout(async()=>{ await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('pctv').set({ inst:PCTV }); }catch(e){} } }, 600);
+}
+function loadPctv(){
+  try{ const s=localStorage.getItem('pctv'); if(s){ PCTV=JSON.parse(s); } }catch(e){}
+  if(!Array.isArray(PCTV) || !PCTV.length) PCTV = seedPctv();
+  pctvDerive();
+}
+async function loadPctvRemote(){ await dbReady; if(!DB) return; try{ const snap=await DB.collection('data/users/'+UID).doc('pctv').get(); const d=snap&&typeof snap.data==='function'?snap.data():snap; if(d&&Array.isArray(d.inst)&&d.inst.length){ PCTV=fresh(d.inst); try{localStorage.setItem('pctv',JSON.stringify(PCTV));}catch(e){} pctvDerive(); const h=location.hash.slice(1); if(h==='zsub'||h==='pctv'||h==='pctv-inst') route(true); } }catch(e){} }
 const TP3 = ['14/1','14/3','15','20','11','17','2/2','2/1','25','22','21','28'].map(x=>'ТП-'+x);
 const REG = {
   aps: { title:'АПС', icon:'🔥', sub:'Пожарная сигнализация · Болид', systems:[
@@ -520,7 +573,8 @@ const ZAY = {
       { name:'Здания В-06 – В-82, ГПП', icon:'📹', note:'102 взрывозащ., 49 внутр.', items:[...B(['06','07','08','09','10','80','81','82']),'ГПП',...B(['40','50'])] },
       { name:'Изомеризация и установки', icon:'📹', note:'35 взрывозащ., 41 внутр.', items:['Изомеризация','ЦК-302',...B(['207','517','3050','3100','3500'])] }
     ]},
-    { name:'Huawei', subs:HW_ZAY_SUBS }
+    { name:'Huawei', subs:HW_ZAY_SUBS },
+    { name:'Камеры ПКОП', subs:[] }
   ],
   skud: [ { name:'СКУД (Perco) и Face-ID', subs:[
     { name:'Проходные, столовая, цеха', icon:'🚪', items:['Центральная проходная','КПП-21','Центральная столовая','ЦК-302','ЛК','ТСЦ','Цех №2','Цех №3','Юг автосервис','Ворота при ЧС'] },
@@ -631,15 +685,16 @@ function ensureMonthLoaded(){
 }
 function itemRow(key, text){
   const i = KEYS.push(key) - 1;
-  const cm = text.match(/^Камера № (\d+)$/); const disp = (cm && CAM_LABELS[+cm[1]]) ? `${text}<small class="camloc">${CAM_LABELS[+cm[1]]}</small>` : text;
+  const base = (typeof OBJNAME!=='undefined' && OBJNAME[text]) ? OBJNAME[text] : text;
+  const cm = base.match(/^Камера № (\d+)$/);
+  const disp = (cm && CAM_LABELS[+cm[1]]) ? `${base}<small class="camloc">${CAM_LABELS[+cm[1]]}</small>`
+    : ((typeof PCTV_IP!=='undefined' && PCTV_IP[text]) ? `${base}<small class="camloc">${PCTV_IP[text]}</small>` : base);
   const mine = checkSet().has(key), other = otherDays(key);
   const isReg = key.startsWith('reg|');
   const dates = other.map(n=>`${n} ${MONTHS_GEN[new Date(state.day).getMonth()]}`).join(', ');
+  const lp = `onpointerdown="lpStart(event,${i})" onpointermove="lpMove(event)" onpointerup="lpCancel()" onpointercancel="lpCancel()" oncontextmenu="return false" style="touch-action:pan-y"`;
   if(isReg && other.length && !mine){
-    return `<div class="chk done locked" data-i="${i}">
-      <button class="cbox" onclick="toast('Уже выполнено ${dates}. Чтобы отменить, откройте тот день')"><span class="box"></span></button>
-      <button class="cbody" onclick="toast('Уже выполнено ${dates}. Чтобы отменить, откройте тот день')"><span class="txt">${disp}<small>выполнено ${dates}</small></span></button>
-    </div>`;
+    return `<div class="chk done locked objlp" data-i="${i}" ${lp}><span class="box"></span><span class="cbody2"><span class="txt">${disp}<small>выполнено ${dates}</small></span></span></div>`;
   }
   let hint = other.length ? `<small>${isReg?'также отмечено':'уже было'}: ${dates}</small>` : '';
   const kp = key.split('|');
@@ -655,10 +710,7 @@ function itemRow(key, text){
     if(rc.n) parts.push('наряд '+rc.n);
     hint += `<small class="metahint">${parts.join(' · ')}</small>`;
   }
-  return `<div class="chk${mine?' done':''}" data-i="${i}">
-    <button class="cbox" onclick="toggle(${i})" aria-label="Отметить"><span class="box"></span></button>
-    <button class="cbody" onclick="openItem(${i})"><span class="txt">${disp}${hint}</span><span class="chv">›</span></button>
-  </div>`;
+  return `<div class="chk${mine?' done':''} objlp" data-i="${i}" ${lp}><span class="box"></span><span class="cbody2"><span class="txt">${disp}${hint}</span></span></div>`;
 }
 function listBlock(prefix, items){
   const start = KEYS.length;
@@ -674,7 +726,7 @@ function cameraBlock(prefix, items){
     const inThis = o.nums.filter(n=>nums.includes(n));
     if(!inThis.length) return;
     inThis.forEach(n=>used.add(n));
-    rows += `<div class="objhead">${o.name}</div>`;
+    rows += `<div class="objhead" ${lpGAttr(o.name)}>${grpName(o.name)}</div>`;
     inThis.forEach(n=> rows += itemRow(prefix+'Камера № '+n, 'Камера № '+n));
   });
   const rest = nums.filter(n=>!used.has(n));
@@ -784,12 +836,12 @@ function renderSub(){
   if(mode==='zay'){
     const set = checkSet();
     ZAY[state.sub].forEach((sec,si)=>{
-      html += `<div class="sys">${sec.name}</div><div class="menu" style="margin-bottom:16px">`;
+      html += `<div class="sys" ${lpGAttr(sec.name)}>${grpName(sec.name)}</div><div class="menu" style="margin-bottom:16px">`;
       sec.subs.forEach((sb,bi)=>{
         const done = sb.items.filter(x=>set.has(zkey(state.sub,sec,sb,x))).length;
         const full = done===sb.items.length;
-        html += `<button class="mbtn" onclick="openZSub(${si},${bi})"><span class="ic">${sb.icon}</span>
-          <span class="t">${sb.name}<span class="s">${sb.note?sb.note+' · ':''}${sb.items.length} шт.${done?` · ${full?'✅ все отмечены':'✓ '+done}`:''}</span></span><span class="arrow">›</span></button>`;
+        html += `<button class="mbtn" onclick="if(!_lpFired)openZSub(${si},${bi})" onpointerdown="lpStartG(event,'${sq(sb.name)}')" onpointermove="lpMove(event)" onpointerup="lpCancel()" onpointercancel="lpCancel()" oncontextmenu="return false"><span class="ic">${sb.icon}</span>
+          <span class="t">${grpName(sb.name)}<span class="s">${sb.note?sb.note+' · ':''}${sb.items.length} шт.${done?` · ${full?'✅ все отмечены':'✓ '+done}`:''}</span></span><span class="arrow">›</span></button>`;
       });
       html += `</div>`;
     });
@@ -801,7 +853,7 @@ function renderSub(){
   else html += `<div class="note" style="color:var(--muted);font-size:13px;margin:-8px 2px 12px">Объекты по графику на ${MONTHS[m].toLowerCase()}</div>`;
   r.systems.forEach(sys=>{
     const groups = sys.groups.map((g,i)=>({...g,n:i+1})).filter(g=>(mode==='reg' && state.allYear) || g.months.includes(m));
-    if(r.systems.length>1) html += `<div class="sys">${sys.name}</div>`;
+    if(r.systems.length>1) html += `<div class="sys" ${lpGAttr(sys.name)}>${grpName(sys.name)}</div>`;
     if(!groups.length){ html += `<div class="empty">В этом месяце по графику работ нет</div>`; return; }
     groups.forEach(g=>{
       const now = g.months.includes(m);
@@ -946,12 +998,11 @@ function renderZSub(){
   app.innerHTML = `<div class="view">
     <header>
       <button class="icon-btn" onclick="history.back()" aria-label="Назад">←</button>
-      <h1>${sb.name}<div class="sub">${MENU[state.mode].title} · ${r.title}${ZAY[state.sub].length>1?' · '+sec.name:''} · ${dayTitle()}</div></h1>
+      <h1><span ${lpGAttr(sb.name)}>${grpName(sb.name)}</span><div class="sub">${MENU[state.mode].title} · ${r.title}${ZAY[state.sub].length>1?' · '+sec.name:''} · ${dayTitle()}</div></h1>
     </header>
     ${sb.note?`<div class="note" style="color:var(--muted);font-size:13px;margin:-8px 2px 12px">${sb.note}</div>`:''}
     ${groupsHtml}
     <div class="grp"><h3><span>Объекты</span><small class="cnt" data-count="${ids.join(',')}"></small></h3>${rows}</div>
-    <div class="seg"><button onclick="zAll(true)">Отметить все</button><button onclick="zAll(false)">Снять все</button></div>
     ${manage}
   </div>`;
   updateCounters();
@@ -1378,7 +1429,6 @@ async function saveNotif(){
   const time = (tEl && tEl.value) || NOTIF.time || '08:00';
   NOTIF = { on, time };
   try{ localStorage.setItem('notif', JSON.stringify(NOTIF)); }catch(e){}
-  // таймер-напоминание — только для инженера (у сотрудника времени нет)
   try{ if(tEl && window.Android && window.Android.setReminder){ const pp=time.split(':'); window.Android.setReminder(on, parseInt(pp[0])||0, parseInt(pp[1])||0); } }catch(e){}
   await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('notify').set(NOTIF); }catch(e){} }
   toast('Сохранено');
@@ -1596,7 +1646,6 @@ function resolveProfile(){
   let base = NLOGIN ? ACCOUNTS.find(x=>x.login && x.login.toLowerCase()===NLOGIN.toLowerCase()) : null;
   if(!base){ base = { id:'me', name:(NLOGIN||'Пользователь'), login:(NLOGIN||''), roles:[NROLE||'Сотрудник'], pass:'' }; }
   else if(NROLE && (!base.roles || !base.roles.length)){ base.roles = [NROLE]; }
-  // админ может просматривать приложение как другой пользователь без повторного входа
   let pv=''; try{ pv=localStorage.getItem('previewLogin')||''; }catch(e){}
   if(pv && rolesOf(base).includes('Администратор')){ const a=ACCOUNTS.find(x=>x.login && x.login.toLowerCase()===pv.toLowerCase()); if(a){ PROFILE=a; return; } }
   PROFILE = base;
@@ -1658,6 +1707,115 @@ loadTasks();
 loadZayx();
 loadZsec();
 loadZgrp();
+loadPctv(); loadPctvRemote();
+// --- Переименование объектов и групп (удержание) ---
+let OBJNAME={}, GRPNAME={}, CAMLAB={};
+try{ const a=localStorage.getItem('objname'); if(a) OBJNAME=JSON.parse(a); }catch(e){}
+try{ const b=localStorage.getItem('grpname'); if(b) GRPNAME=JSON.parse(b); }catch(e){}
+try{ const c=localStorage.getItem('camlab'); if(c){ CAMLAB=JSON.parse(c); Object.keys(CAMLAB).forEach(k=>{ CAM_LABELS[+k]=CAMLAB[k]; }); } }catch(e){}
+let _clT=null;
+function saveCamlab(){ try{localStorage.setItem('camlab',JSON.stringify(CAMLAB));}catch(e){} clearTimeout(_clT); _clT=setTimeout(async()=>{ await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('camlab').set({map:CAMLAB}); }catch(e){} } },600); }
+function grpName(n){ return (GRPNAME && GRPNAME[n]) ? GRPNAME[n] : n; }
+function sq(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function lpGAttr(name){ return `onpointerdown="lpStartG(event,'${sq(name)}')" onpointermove="lpMove(event)" onpointerup="lpCancel()" onpointercancel="lpCancel()" oncontextmenu="return false" style="-webkit-user-select:none;user-select:none;touch-action:pan-y"`; }
+let _onT=null,_gnT=null;
+function saveObjName(){ try{localStorage.setItem('objname',JSON.stringify(OBJNAME));}catch(e){} clearTimeout(_onT); _onT=setTimeout(async()=>{ await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('objname').set({map:OBJNAME}); }catch(e){} } },600); }
+function saveGrpName(){ try{localStorage.setItem('grpname',JSON.stringify(GRPNAME));}catch(e){} clearTimeout(_gnT); _gnT=setTimeout(async()=>{ await dbReady; if(DB){ try{ await DB.collection('data/users/'+UID).doc('grpname').set({map:GRPNAME}); }catch(e){} } },600); }
+async function loadNamesRemote(){ await dbReady; if(!DB) return;
+  try{ const a=await DB.collection('data/users/'+UID).doc('objname').get(); const da=a&&typeof a.data==='function'?a.data():a; if(da&&da.map&&typeof da.map==='object'){ OBJNAME={...da.map}; try{localStorage.setItem('objname',JSON.stringify(OBJNAME));}catch(e){} } }catch(e){}
+  try{ const b=await DB.collection('data/users/'+UID).doc('grpname').get(); const db2=b&&typeof b.data==='function'?b.data():b; if(db2&&db2.map&&typeof db2.map==='object'){ GRPNAME={...db2.map}; try{localStorage.setItem('grpname',JSON.stringify(GRPNAME));}catch(e){} } }catch(e){}
+  try{ const c=await DB.collection('data/users/'+UID).doc('camlab').get(); const dc=c&&typeof c.data==='function'?c.data():c; if(dc&&dc.map&&typeof dc.map==='object'){ CAMLAB={...dc.map}; Object.keys(CAMLAB).forEach(k=>{ CAM_LABELS[+k]=CAMLAB[k]; }); try{localStorage.setItem('camlab',JSON.stringify(CAMLAB));}catch(e){} } }catch(e){}
+  const h=location.hash.slice(1); if(['sub','zsub','menu'].includes(h)) route(true);
+}
+loadNamesRemote();
+let _lpT=null, _lpFired=false, _lpX=0, _lpY=0;
+function _armLP(fn){ clearTimeout(_lpT); _lpT=setTimeout(()=>{ _lpT=null; _lpFired=true; setTimeout(()=>_lpFired=false,500); fn(); },450); }
+function lpStart(e,i){ if(e){ _lpX=e.clientX||0; _lpY=e.clientY||0; } const key=KEYS[i]; _armLP(()=>openObjEdit(key)); }
+function lpStartG(e,name){ if(e){ _lpX=e.clientX||0; _lpY=e.clientY||0; } _armLP(()=>openGrpEdit(name)); }
+function lpMove(e){ if(_lpT && e && (Math.abs((e.clientX||0)-_lpX)>14 || Math.abs((e.clientY||0)-_lpY)>14)) lpCancel(); }
+function lpCancel(){ clearTimeout(_lpT); _lpT=null; }
+function openObjEdit(key){ const o=parseKey(key); state.oeKey=key; state.oeObj=o.obj; location.hash='objedit'; }
+function renderObjEdit(){
+  const o=parseKey(state.oeKey); const cur=(OBJNAME[o.obj]||o.obj);
+  const cmatch = o.obj.match(/^Камера № (\d+)$/);
+  const curSub = cmatch ? (CAM_LABELS[+cmatch[1]]||'') : ((typeof PCTV_IP!=='undefined' && PCTV_IP[o.obj]!==undefined) ? PCTV_IP[o.obj] : null);
+  let html = `<div class="view"><header><button class="icon-btn" onclick="history.back()">←</button><h1>Изменить объект<div class="sub">${o.sys}</div></h1></header>`;
+  html += `<div class="sys">Название объекта</div><div class="addrow"><input id="oeName" value="${cur.replace(/"/g,'&quot;')}"><button onclick="saveObjEdit()">💾</button></div>`;
+  if(curSub!==null){
+    const subLbl = cmatch ? 'Подпись (под названием)' : 'IP';
+    html += `<div class="sys" style="margin-top:14px">${subLbl}</div><div class="addrow"><input id="oeSub" value="${String(curSub).replace(/"/g,'&quot;')}" placeholder="${cmatch?'например: ЗДУ-1, проход':'IP'}"><button onclick="saveObjSub()">💾</button></div>`;
+  }
+  if(OBJNAME[o.obj]) html += `<button class="mbtn" style="margin-top:12px" onclick="resetObjEdit()"><span class="ic">↩</span><span class="t">Вернуть исходное название<span class="s">${state.oeObj}</span></span><span class="arrow">›</span></button>`;
+  html += `<div class="foot">Можно изменить название объекта${curSub!==null?(cmatch?' и подпись под ним':' и IP'):''}. Удержание на заголовке группы переименует группу.</div></div>`;
+  app.innerHTML = html;
+}
+function saveObjEdit(){ const el=document.getElementById('oeName'); const v=((el&&el.value)||'').trim(); const o=parseKey(state.oeKey); if(!v){ toast('Название пустое'); return; } if(v===state.oeObj) delete OBJNAME[o.obj]; else OBJNAME[o.obj]=v; saveObjName(); toast('Сохранено'); history.back(); }
+function resetObjEdit(){ const o=parseKey(state.oeKey); delete OBJNAME[o.obj]; saveObjName(); toast('Возвращено'); history.back(); }
+function saveObjSub(){
+  const el=document.getElementById('oeSub'); const v=((el&&el.value)||'').trim(); const o=parseKey(state.oeKey);
+  const cm=o.obj.match(/^Камера № (\d+)$/);
+  if(cm){ const n=+cm[1]; if(v){ CAM_LABELS[n]=v; CAMLAB[n]=v; } else { delete CAM_LABELS[n]; CAMLAB[n]=''; } saveCamlab(); toast('Сохранено'); history.back(); return; }
+  if(typeof PCTV!=='undefined' && PCTV){
+    for(const inst of PCTV){ const c=(inst.cams||[]).find(x=>x.t===o.obj); if(c){ c.ip=v; savePctv(); toast('Сохранено'); history.back(); return; } }
+  }
+  toast('Нечего сохранять');
+}
+function openGrpEdit(name){ state.geName=name; location.hash='grpedit'; }
+function renderGrpEdit(){
+  const cur=(GRPNAME[state.geName]||state.geName);
+  let html = `<div class="view"><header><button class="icon-btn" onclick="history.back()">←</button><h1>Изменить группу</h1></header>`;
+  html += `<div class="sys">Название группы</div><div class="addrow"><input id="geName" value="${cur.replace(/"/g,'&quot;')}"><button onclick="saveGrpEdit()">💾</button></div>`;
+  if(GRPNAME[state.geName]) html += `<button class="mbtn" style="margin-top:12px" onclick="resetGrpEdit()"><span class="ic">↩</span><span class="t">Вернуть исходное<span class="s">${state.geName}</span></span><span class="arrow">›</span></button>`;
+  html += `<div class="foot">Переименование меняет отображение группы в регламенте и заявках.</div></div>`;
+  app.innerHTML = html;
+}
+function saveGrpEdit(){ const el=document.getElementById('geName'); const v=((el&&el.value)||'').trim(); if(!v){ toast('Название пустое'); return; } if(v===state.geName) delete GRPNAME[state.geName]; else GRPNAME[state.geName]=v; saveGrpName(); toast('Сохранено'); history.back(); }
+function resetGrpEdit(){ delete GRPNAME[state.geName]; saveGrpName(); toast('Возвращено'); history.back(); }
+// --- Редактор камер ПКОП ---
+function renderPctv(){
+  let html = `<div class="view"><header><button class="icon-btn" onclick="location.hash='profile'">←</button><h1>Камеры ПКОП<div class="sub">${PCTV.length} установок</div></h1></header>`;
+  html += `<div class="addrow"><input id="pctvNew" placeholder="Название установки" onkeydown="if(event.key==='Enter')addPctvInst()"><button onclick="addPctvInst()">＋</button></div><div class="menu">`;
+  PCTV.forEach((inst,i)=>{ html += `<button class="mbtn" onclick="openPctvInst(${i})"><span class="ic">🎥</span><span class="t">${inst.name}<span class="s">${(inst.cams||[]).length} камер</span></span><span class="arrow">›</span></button>`; });
+  html += `</div><div class="foot">Нажми на установку, чтобы изменить название, камеры и их IP.</div></div>`;
+  app.innerHTML = html;
+}
+function openPctvInst(i){ state.pIdx=i; location.hash='pctv-inst'; }
+function renderPctvInst(){
+  const i=state.pIdx; const inst=PCTV[i]; if(!inst){ location.hash='pctv'; return; }
+  let html = `<div class="view"><header><button class="icon-btn" onclick="location.hash='pctv'">←</button><h1>Установка<div class="sub">${(inst.cams||[]).length} камер</div></h1></header>`;
+  html += `<div class="sys">Название установки</div><div class="addrow"><input id="pctvName" value="${(inst.name||'').replace(/"/g,'&quot;')}"><button onclick="savePctvName(${i})">💾</button></div>`;
+  html += `<div class="sys" style="margin-top:14px">Камеры и IP</div><div class="menu">`;
+  (inst.cams||[]).forEach((c,j)=>{
+    html += `<div class="camedit"><input value="${(c.t||'').replace(/"/g,'&quot;')}" id="pt_${j}" placeholder="Имя камеры"><input value="${(c.ip||'').replace(/"/g,'&quot;')}" id="pi_${j}" placeholder="IP" inputmode="decimal"><button class="tbtn" onclick="savePctvCam(${i},${j})">💾</button><button class="tbtn del" onclick="delPctvCam(${i},${j})">✕</button></div>`;
+  });
+  html += `</div><div class="sys" style="margin-top:12px">Добавить камеру</div><div class="camedit"><input id="pctvCamT" placeholder="Имя камеры"><input id="pctvCamIp" placeholder="IP" inputmode="decimal"><button class="tbtn" onclick="addPctvCam(${i})">＋</button></div>`;
+  html += `<button class="mbtn" style="margin-top:18px" onclick="delPctvInst(${i})"><span class="ic">🗑</span><span class="t">Удалить установку<span class="s">Вместе со всеми камерами</span></span><span class="arrow">›</span></button></div>`;
+  app.innerHTML = html;
+}
+function addPctvInst(){ const el=document.getElementById('pctvNew'); const n=(el&&el.value||'').trim(); if(!n){ toast('Введите название'); return; } PCTV.push({name:n, cams:[]}); savePctv(); state.pIdx=PCTV.length-1; location.hash='pctv-inst'; }
+function savePctvName(i){ const el=document.getElementById('pctvName'); const n=(el&&el.value||'').trim(); if(!n){ toast('Название не может быть пустым'); return; } PCTV[i].name=n; savePctv(); toast('Сохранено'); }
+function delPctvInst(i){ PCTV.splice(i,1); savePctv(); location.hash='pctv'; toast('Установка удалена'); }
+function addPctvCam(i){ const t=(document.getElementById('pctvCamT')||{}).value||''; const ip=(document.getElementById('pctvCamIp')||{}).value||''; if(!t.trim()){ toast('Введите имя камеры'); return; } PCTV[i].cams.push({t:t.trim(), ip:ip.trim()}); savePctv(); renderPctvInst(); toast('Камера добавлена'); }
+function savePctvCam(i,j){ const t=(document.getElementById('pt_'+j)||{}).value||''; const ip=(document.getElementById('pi_'+j)||{}).value||''; if(!t.trim()){ toast('Имя камеры не может быть пустым'); return; } PCTV[i].cams[j]={t:t.trim(), ip:ip.trim()}; savePctv(); toast('Сохранено'); }
+function delPctvCam(i,j){ PCTV[i].cams.splice(j,1); savePctv(); renderPctvInst(); toast('Камера удалена'); }
+// --- Присутствие: кто сейчас в сети ---
+let PRESENCE = {};
+const PRES_TTL = 120000; // 2 минуты
+function presLogin(){ return (PROFILE && PROFILE.login) ? PROFILE.login.toLowerCase() : ''; }
+function isOnline(login){ if(!login) return false; const t=PRESENCE[login.toLowerCase()]; return !!t && (Date.now()-t < PRES_TTL); }
+function lastSeen(login){ return login ? (PRESENCE[login.toLowerCase()]||0) : 0; }
+async function touchPresence(){ await dbReady; if(!DB) return; const lg=presLogin();
+  try{ const s=await DB.collection('data/users/'+UID).doc('presence').get(); const d=s&&typeof s.data==='function'?s.data():s;
+    const m=fresh((d&&(d.map||d))||{})||{}; if(lg) m[lg]=Date.now(); PRESENCE=m;
+    await DB.collection('data/users/'+UID).doc('presence').set({map:m});
+  }catch(e){}
+}
+function startPresence(){
+  touchPresence().then(()=>{ if(location.hash.slice(1)==='profile-users') renderUsers(); });
+  setInterval(()=>{ touchPresence().then(()=>{ if(location.hash.slice(1)==='profile-users') renderUsers(); }); }, 45000);
+  try{ document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) touchPresence().then(()=>{ if(location.hash.slice(1)==='profile-users') renderUsers(); }); }); }catch(e){}
+}
+startPresence();
 function statusOf(t, a){ return (t.status && t.status[acctKey(a)]) || 'new'; }
 
 /* ---------- Нижняя навигация ---------- */
@@ -1716,7 +1874,7 @@ function isPlanned(t){ if(!t.from||!/^\d{4}-\d{2}-\d{2}$/.test(t.from)) return f
 async function refreshData(){ toast('Обновляю…'); try{ const ps=[]; if(typeof loadTasks==='function')ps.push(loadTasks()); if(typeof loadAccounts==='function')ps.push(loadAccounts()); if(typeof loadStaff==='function')ps.push(loadStaff()); if(typeof loadZayx==='function')ps.push(loadZayx()); if(typeof loadZsec==='function')ps.push(loadZsec()); if(typeof loadZgrp==='function')ps.push(loadZgrp()); await Promise.all(ps); }catch(e){} route(true); toast('Обновлено'); }
 function taskObjs(t){ return (t.objects&&t.objects.length)?t.objects:(t.object?[t.object]:[]); }
 function objLine(t){ const o=taskObjs(t); const sk=SYS_KEY[t.system];
-  const lbl = x => { const g=(t.kind==='zay')?groupForObj(sk,x):''; return g?`${x} · ${g}`:x; };
+  const lbl = x => { const m=(x||'').match(/^Камера № (\d+)$/); let c=(m&&CAM_LABELS[+m[1]])?` (${CAM_LABELS[+m[1]]})`:''; if(!c && typeof PCTV_IP!=='undefined' && PCTV_IP[x]) c=` · ${PCTV_IP[x]}`; const g=(t.kind==='zay')?groupForObj(sk,x):''; return `${x}${c}${g?` · ${g}`:''}`; };
   return `<div class="taskmeta">Объект${o.length>1?'ы ('+o.length+')':''}: <b>${o.map(lbl).join(', ')||'—'}</b></div>`; }
 function fmtDate(iso){ if(!iso) return ''; const p=iso.split('-'); return p.length===3 ? `${p[2]}.${p[1]}.${p[0]}` : iso; }
 function taskNote(t){ let a=[]; if(t.from||t.to) a.push('Срок: '+(t.from?fmtDate(t.from):'…')+' — '+(t.to?fmtDate(t.to):'…')); if(t.extendedTo) a.push('продлено до '+fmtDate(t.extendedTo)); return a.join('; '); }
@@ -1804,6 +1962,22 @@ function objectsForTask(sysName, kind, m, y){
   const out=[];
   (REG[key]?REG[key].systems:[]).forEach(sys=>sys.groups.forEach(g=>{ if(g.months.includes(m)) g.items.forEach(x=>{ if(!out.includes(x) && !regDoneInMonth(key, x, y, m)) out.push(x); }); }));
   return out;
+}
+// Объекты, сгруппированные по разделам — для выпадающего списка в задаче
+function objectsGrouped(sysName, kind, m, y){
+  const key = SYS_KEY[sysName]; if(!key) return [];
+  if(typeof m!=='number') m = today.getMonth();
+  if(typeof y!=='number') y = today.getFullYear();
+  const groups=[]; const seen=new Set();
+  const push=(gname,obj)=>{ if(seen.has(obj)) return; seen.add(obj); let g=groups.find(x=>x.group===gname); if(!g){ g={group:gname,items:[]}; groups.push(g); } g.items.push(obj); };
+  if(kind==='zay'||kind==='pn'||kind==='on'){
+    (ZAY[key]||[]).forEach(sec=>sec.subs.forEach(sb=>sb.items.forEach(x=>push(sb.name, x))));
+    if(typeof ZAYX!=='undefined') Object.keys(ZAYX).forEach(k=>{ const p=k.split('|'); if(p[0]===key) (ZAYX[k]||[]).forEach(x=>push((p[2]||'Свои объекты'), x)); });
+    if(typeof ZSEC!=='undefined') Object.keys(ZSEC).forEach(k=>{ const p=k.split('|'); if(p[0]===key){ const mm=ZSEC[k]||{}; Object.keys(mm).forEach(parent=>{ (mm[parent]||[]).forEach(s=>push('Секторы', parent+' · '+s)); }); } });
+    return groups;
+  }
+  (REG[key]?REG[key].systems:[]).forEach(sys=>sys.groups.forEach(g=>{ if(g.months.includes(m)) g.items.forEach(x=>{ if(!regDoneInMonth(key,x,y,m)) push(sys.name, x); }); }));
+  return groups;
 }
 function findRegKey(sysKey, obj){ let r=null; (REG[sysKey]?REG[sysKey].systems:[]).forEach(sys=>sys.groups.forEach(g=>{ if(!r && g.items.includes(obj)) r=`reg|${sysKey}|${sys.name}|${obj}`; })); return r; }
 function findZayKey(sysKey, obj){ let r=null; (ZAY[sysKey]||[]).forEach(sec=>sec.subs.forEach(sb=>{ if(!r && sb.items.includes(obj)) r=`zay|${sysKey}|${sec.name}|${sb.name}|${obj}`; }));
@@ -1927,6 +2101,7 @@ function renderNewTask(){
   const objs = objectsForTask(newTask.system, newTask.kind, mIdx, yIdx);
   const sysKey = SYS_KEY[newTask.system];
   const grpLbl = o => { const g = (newTask.kind==='zay') ? groupForObj(sysKey, o) : ''; return g ? ` · ${g}` : ''; };
+  const camLbl = o => { const m=(o||'').match(/^Камера № (\d+)$/); if(m && CAM_LABELS[+m[1]]) return ` (${CAM_LABELS[+m[1]]})`; if(typeof PCTV_IP!=='undefined' && PCTV_IP[o]) return ` · ${PCTV_IP[o]}`; return ''; };
   app.innerHTML = `<div class="view">
     <header><button class="icon-btn" onclick="history.back()">←</button><h1>Новая задача<div class="sub">${kindLabel(newTask.kind)}</div></h1></header>
     <div class="seg" style="margin-bottom:12px"><button class="${newTask.kind==='reg'?'on':''}" onclick="ntKind('reg')">Регламент</button><button class="${newTask.kind==='zay'?'on':''}" onclick="ntKind('zay')">Заявка</button></div>
@@ -1939,11 +2114,11 @@ function renderNewTask(){
     <div class="objrow">
       <select id="ntObjSel" class="naryad" style="flex:1" onchange="ntObj(this.value)">
         <option value="">— выберите объект —</option>
-        ${objs.filter(o=>!(newTask.objects||[]).includes(o)).map(o=>`<option value="${o.replace(/"/g,'&quot;')}">${o}${grpLbl(o)}</option>`).join('')}
+        ${objectsGrouped(newTask.system, newTask.kind, mIdx, yIdx).map(gr=>{ const opts=gr.items.filter(o=>!(newTask.objects||[]).includes(o)).map(o=>`<option value="${o.replace(/"/g,'&quot;')}">${o}${camLbl(o)}${grpLbl(o)}</option>`).join(''); return opts?`<optgroup label="${(gr.group||'').replace(/"/g,'&quot;')}">${opts}</optgroup>`:''; }).join('')}
       </select>
       <button class="tbtn" type="button" onclick="ntAddObj()" style="white-space:nowrap">➕ Добавить</button>
     </div>
-    ${(newTask.objects&&newTask.objects.length)?`<div class="chips">${newTask.objects.map((o,i)=>`<span class="chip">${o}${grpLbl(o)}<button type="button" onclick="ntDelObj(${i})">×</button></span>`).join('')}</div><div class="foot" style="margin-top:4px">Добавлено ${newTask.objects.length}/6</div>`:'<div class="foot" style="margin-top:4px">Выберите объект и нажмите «Добавить». Можно до 6.</div>'}
+    ${(newTask.objects&&newTask.objects.length)?`<div class="chips">${newTask.objects.map((o,i)=>`<span class="chip">${o}${camLbl(o)}${grpLbl(o)}<button type="button" onclick="ntDelObj(${i})">×</button></span>`).join('')}</div><div class="foot" style="margin-top:4px">Добавлено ${newTask.objects.length}/6</div>`:'<div class="foot" style="margin-top:4px">Выберите объект и нажмите «Добавить». Можно до 6.</div>'}
     ${objs.length?'':'<div class="foot" style="margin-top:6px">На этот месяц по этой системе объектов нет (или все уже проведены).</div>'}
     <div class="sys" style="margin-top:14px">Вид наряда</div>
     <select class="naryad" onchange="ntNarType(this.value)">
@@ -1970,12 +2145,12 @@ function renderProfile(){
       <div class="taskmeta">Роль: <b>${rolesText(a)}</b></div></div>`;
   if(isAdmin()) html += `<button class="mbtn" onclick="location.hash='profile-users'"><span class="ic">👥</span><span class="t">Пользователи<span class="s">Аккаунты, роли, кто в сети</span></span><span class="arrow">›</span></button>`;
   if(canAssign()) html += `<button class="mbtn" onclick="exportNaryads()"><span class="ic">📋</span><span class="t">Сохранить все наряды<span class="s">Выгрузить таблицу нарядов в Excel</span></span><span class="arrow">›</span></button>`;
+  if(canAssign()) html += `<button class="mbtn" onclick="location.hash='pctv'"><span class="ic">🎥</span><span class="t">Камеры ПКОП<span class="s">Изменить установки, камеры и IP</span></span><span class="arrow">›</span></button>`;
   if(isAdmin()) html += `<button class="mbtn" onclick="resetDiaryData()"><span class="ic">🗑</span><span class="t">Сбросить данные ежедневника<span class="s">Стереть отметки, наряды и задачи (ростер останется)</span></span><span class="arrow">›</span></button>`;
-  // переключение «просмотр как пользователь» — только для администратора
+  if(isEmployeeOnly()) html += `<button class="mbtn" onclick="openNotif()"><span class="ic">🔔</span><span class="t">Уведомления<span class="s">О новых задачах</span></span><span class="arrow">›</span></button>`;
   if(isAdmin()) html += `<div class="sys" style="margin-top:18px">Просмотр как пользователь</div>
     <select class="naryad" onchange="switchProfile(this.value)">${ACCOUNTS.map(x=>`<option value="${x.id}"${x.id===a.id?' selected':''}>${x.name} · ${rolesText(x)}</option>`).join('')}</select>
     <div class="foot">Администратор может смотреть приложение глазами любого сотрудника без повторного входа. Выбор сохраняется.</div>`;
-  if(isEmployeeOnly()) html += `<button class="mbtn" onclick="openNotif()"><span class="ic">🔔</span><span class="t">Уведомления<span class="s">О новых задачах</span></span><span class="arrow">›</span></button>`;
   html += `<button class="mbtn" style="margin-top:18px" onclick="doLogout()"><span class="ic">🚪</span><span class="t">Выйти<span class="s">Сменить учётную запись</span></span><span class="arrow">›</span></button>`;
   app.innerHTML = html;
 }
@@ -1992,16 +2167,20 @@ function doLogout(){
 }
 
 /* Админ: список пользователей */
+async function refreshUsers(){ toast('Обновляю…'); try{ const ps=[]; if(typeof loadAccounts==='function') ps.push(loadAccounts()); ps.push(touchPresence()); await Promise.all(ps); }catch(e){} renderUsers(); toast('Обновлено'); }
 function renderUsers(){
-  let html = `<div class="view"><header><button class="icon-btn" onclick="location.hash='profile'">←</button><h1>Пользователи<div class="sub">${ACCOUNTS.length} аккаунтов</div></h1></header><div class="menu">`;
+  let html = `<div class="view"><header><button class="icon-btn" onclick="location.hash='profile'">←</button><h1>Пользователи<div class="sub">${ACCOUNTS.length} аккаунтов</div></h1></header>`;
+  html += `<button class="tbtn" style="margin-bottom:10px;width:100%" onclick="refreshUsers()">🔄 Обновить</button><div class="menu">`;
   ACCOUNTS.forEach(a=>{
-    const online = isMe(a);
-    html += `<button class="mbtn" onclick="editUser('${a.id}')"><span class="ic">${online?'🟢':'👤'}</span><span class="t">${a.name}<span class="s">${a.login?'@'+a.login:'логин не задан'} · ${rolesText(a)}${online?' · в сети':''}</span></span><span class="arrow">›</span></button>`;
+    const online = isOnline(a.login) || isMe(a);
+    const ls = lastSeen(a.login);
+    const lsTxt = (!online && ls) ? ' · был(а) '+new Date(ls).toLocaleString('ru',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+    html += `<button class="mbtn" onclick="editUser('${a.id}')"><span class="ic">${online?'🟢':'👤'}</span><span class="t">${a.name}<span class="s">${a.login?'@'+a.login:'логин не задан'} · ${rolesText(a)}${online?' · в сети':lsTxt}</span></span><span class="arrow">›</span></button>`;
   });
   html += `</div>
     <div class="sys" style="margin-top:16px">Добавить аккаунт</div>
     <div class="addrow"><input id="newAcc" placeholder="Имя сотрудника" onkeydown="if(event.key==='Enter')addUser()"><button onclick="addUser()">＋</button></div>
-    <div class="foot">🟢 — кто сейчас авторизован. Нажми на аккаунт, чтобы задать логин, роль, пароль или удалить.</div>
+    <div class="foot">🟢 — кто сейчас в сети (приложение открыто за последние 2 минуты). Нажми на аккаунт, чтобы задать логин, роль, пароль или удалить.</div>
   </div>`;
   app.innerHTML = html;
 }
@@ -2035,7 +2214,7 @@ function toggleRole(r){ const a=ACCOUNTS.find(x=>x.id===state.editId); if(!a) re
   if(!a.roles.length) a.roles=['Сотрудник'];
   if(a.id===PROFILE.id){ PROFILE=a; try{localStorage.setItem('previewProfile',JSON.stringify(a));}catch(e){} }
   saveAccounts(); renderEditUser(); }
-function delUser(id){ ACCOUNTS=ACCOUNTS.filter(x=>x.id!==id); saveAccounts(); if(PROFILE.id===id) PROFILE=ACCOUNTS[0]; location.hash='profile-users'; toast('Аккаунт удалён'); }
+function delUser(id){ ACCOUNTS=ACCOUNTS.filter(x=>x.id!==id); saveAccounts(); if(PROFILE.id===id) resolveProfile(); location.hash='profile-users'; toast('Аккаунт удалён'); }
 
 let tt;
 function toast(msg){
@@ -2051,6 +2230,10 @@ function route(keep){
   if(h==='profile'){ renderProfile(); if(!keep) window.scrollTo(0,0); return; }
   if(h==='profile-users'){ renderUsers(); if(!keep) window.scrollTo(0,0); return; }
   if(h==='profile-user'){ renderEditUser(); if(!keep) window.scrollTo(0,0); return; }
+  if(h==='pctv'){ renderPctv(); if(!keep) window.scrollTo(0,0); return; }
+  if(h==='pctv-inst'){ renderPctvInst(); if(!keep) window.scrollTo(0,0); return; }
+  if(h==='objedit' && state.oeKey){ renderObjEdit(); if(!keep) window.scrollTo(0,0); return; }
+  if(h==='grpedit' && state.geName){ renderGrpEdit(); if(!keep) window.scrollTo(0,0); return; }
   if(h==='zsub' && state.zs && state.day) renderZSub();
   else if(h==='zsec' && state.zs && state.day && state.secObj) renderSectors();
   else if(h==='zgroup' && state.zs && state.day && state.grpId) renderGroup();
